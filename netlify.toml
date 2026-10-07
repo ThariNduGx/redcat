@@ -1,0 +1,7 @@
+# Netlify detects Next.js automatically (OpenNext adapter); this just pins the basics.
+[build]
+  command = "npm run build"   # also runs scripts/copy-map-worker.mjs via "prebuild"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
