@@ -1,46 +1,30 @@
-# REDCAT marketing site — roadmap
-
-Repo: `Redcat-Landing-Page` (Next.js 16, static export). Infra: this repo, `modules/static-site`.
-Hostnames: `redcat.lk` and `www.redcat.lk` (`www` redirects to apex).
-Account: `redcat-dev` for now (decision 2026-10-09); moves to prod/shared later (see "Later").
-
-## Architecture
-
-```
-browser → Route 53 (redcat.lk, management account) ALIAS
-        → CloudFront (us-east-1 cert, HTTPS only, CloudFront Function: URL rewrite + www redirect)
-            default behavior  → S3 bucket (private, OAC)        static HTML/JS/CSS
-            /api/*            → Lambda function URL (ARM64)     enquiry form → SES e-mail
-```
-
-Why static: every page renders without cookies/headers/searchParams; the only server code is
-`app/api/enquiry`, which today just logs. It becomes a Lambda. Cost < $2/month, no scheduler.
-
-## Phase L1 — S3 side of the module
-- [ ] `modules/static-site/` skeleton: `main.tf`, `variables.tf`, `outputs.tf`, `versions.tf`, `README.md`
-- [ ] `aws_s3_bucket` `redcat-dev-landing-<account-id>`; public access block (all four `true`);
+## Phase L1 — S3 side of the module ✅
+- [x] `modules/static-site/` skeleton: `main.tf`, `variables.tf`, `outputs.tf`, `versions.tf`, `README.md`
+- [x] `aws_s3_bucket` `redcat-dev-landing-<account-id>`; public access block (all four `true`);
       versioning enabled; SSE-S3
-- [ ] `aws_cloudfront_origin_access_control` (s3, always, sigv4)
-- [ ] Bucket policy: `cloudfront.amazonaws.com`, `s3:GetObject` on `bucket/*` only,
+- [x] `aws_cloudfront_origin_access_control` (s3, always, sigv4)
+- [x] Bucket policy: `cloudfront.amazonaws.com`, `s3:GetObject` on `bucket/*` only,
       condition `AWS:SourceArn` = this distribution (no `ListBucket`)
 
-## Phase L2 — CloudFront
-- [ ] CloudFront Function (`viewer-request`): `/about` → `/about.html`, `/x/` → `/x/index.html`,
-      `www.redcat.lk` → 301 `https://redcat.lk`
-- [ ] `aws_cloudfront_distribution`: S3 origin with OAC, `redirect-to-https`, HTTP/2 + HTTP/3,
-      `PriceClass_200`, compression on, managed cache policy `CachingOptimized`,
+## Phase L2 — CloudFront ✅
+- [x] CloudFront Function (`viewer-request`): `/about` → `/about.html`, `/x/` → `/x/index.html`,
+      `www.<domain>` → 301 `https://<domain>` (path and query string kept)
+- [x] `aws_cloudfront_distribution`: S3 origin with OAC, `redirect-to-https`, HTTP/2 + HTTP/3,
+      `PriceClass_All` (Australian edges), compression on, managed cache policy `CachingOptimized`,
       custom error 404 → `/404.html`, (403 from S3 → 404 page too)
-- [ ] Outputs: `bucket_name`, `bucket_arn`, `distribution_id`, `distribution_arn`,
+- [x] Outputs: `bucket_name`, `bucket_arn`, `distribution_id`, `distribution_arn`,
       `distribution_domain_name`, `hosted_zone_id`
-- [ ] `envs/dev/main.tf`: `module "landing"`; `terraform fmt`, `validate`, `plan` clean;
-      apply through the pipeline; test with the `*.cloudfront.net` name
+- [x] `envs/dev/main.tf`: `module "landing"`; applied through the pipeline; tested with the
+      `*.cloudfront.net` name (200, rewrite 200, missing 404, HTTP 301, direct S3 403)
 
-## Phase L3 — Domain
-- [ ] `module "cert_landing"` (`acm-certificate`, provider `aws.us_east_1`): `redcat.lk` +
-      SAN `www.redcat.lk`; validation CNAMEs added by hand in the management zone
-- [ ] `aliases` + `certificate_arn` on the distribution (`certificates_validated` toggle like Phase 7)
-- [ ] ALIAS A + AAAA for `redcat.lk` and `www.redcat.lk` in the management zone → distribution
-- [ ] Test: `curl -I https://redcat.lk/about`, `https://www.redcat.lk` → 301, HTTP → HTTPS
+## Phase L3 — Domain ✅
+- [x] `module "cert_landing"` (`acm-certificate`, provider `aws.us_east_1`): `redcat.lk` +
+      SAN `www.redcat.lk`; validation CNAMEs added by hand in the management zone (keep them: renewals)
+- [x] `aliases` + `certificate_arn` on the distribution; own toggle `landing_certificate_validated`
+      (the shared `certificates_validated` was already `true`)
+- [x] ALIAS A + AAAA for `redcat.lk` and `www.redcat.lk` in the management zone → distribution
+- [x] Test: `https://redcat.lk/about` 200, `https://www.redcat.lk` → 301 `https://redcat.lk/`
+- ⚠️ The bucket holds three test pages until L4 deploys the real build. Don't share the URL yet.
 
 ## Phase L4 — Pipeline (landing repo)
 - [ ] `ci_oidc`: new repo entry `redcat-landing-page` with a deploy role; policy limited to
