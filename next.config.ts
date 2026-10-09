@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Static HTML/JS/CSS in out/, served from S3 + CloudFront (no Node server)
+  output: "export",
+  // The default image optimizer needs a server; images are served as-is
+  images: { unoptimized: true },
+  // No cacheComponents / partialPrefetching: both turn on Partial Prerendering,
+  // which needs a server ("PPR cannot be enabled in export mode")
   turbopack: {
     rules: {
       "*.css": {
