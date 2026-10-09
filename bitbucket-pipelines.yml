@@ -1,0 +1,54 @@
+image: node:22
+
+options:
+  max-time: 15
+
+definitions:
+  steps:
+    - step: &build
+        name: Lint and build (static export)
+        caches:
+          - node
+        script:
+          - npm ci
+          - npm run lint
+          - npm run build
+        artifacts:
+          - out/**
+
+    # Assets first, HTML last: a page never points at a file that is not uploaded yet
+    - step: &deploy-prod
+        name: Deploy to S3 + CloudFront
+        deployment: production             # SITE_DEPLOY_ROLE_ARN, S3_BUCKET, CLOUDFRONT_ID
+        image: amazon/aws-cli:2.37.10
+        oidc: true                         # token sub = {repo}:{production env}:{step}
+        script:
+          - export AWS_DEFAULT_REGION=ap-south-1
+          - export AWS_ROLE_ARN=$SITE_DEPLOY_ROLE_ARN
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$BITBUCKET_CLONE_DIR/web-identity-token
+          - echo "$BITBUCKET_STEP_OIDC_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
+          # 1. Hashed build files never change: cache for a year. No --delete, so pages
+          #    still open in someone's browser keep finding their old files.
+          - >-
+            aws s3 sync out/_next/static "s3://$S3_BUCKET/_next/static"
+            --cache-control "public,max-age=31536000,immutable"
+          # 2. Everything else: browsers and CloudFront check for a new version every time
+          - >-
+            aws s3 sync out "s3://$S3_BUCKET" --delete --exclude "_next/static/*"
+            --cache-control "public,max-age=0,must-revalidate"
+          # 3. The map worker is an ES module: browsers refuse it without a JavaScript type
+          - >-
+            aws s3 cp out/vendor "s3://$S3_BUCKET/vendor" --recursive
+            --exclude "*" --include "*.mjs"
+            --content-type "text/javascript" --cache-control "public,max-age=0,must-revalidate"
+          - aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_ID" --paths "/*"
+
+pipelines:
+  pull-requests:
+    '**':
+      - step: *build
+
+  branches:
+    main:
+      - step: *build
+      - step: *deploy-prod

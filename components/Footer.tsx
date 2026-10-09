@@ -1,15 +1,14 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { cacheLife } from "next/cache";
 import { Logo } from "./Logo";
 import FooterTrack from "./FooterTrack";
 import { CONTACT, NAV } from "@/lib/site";
 
-async function Year() {
-  "use cache";
-  cacheLife("days");
+// Rendered at build time: the static export bakes in the year it was built
+function Year() {
   return <>{new Date().getFullYear()}</>;
 }
+
 
 export default function Footer() {
   const hasContact = CONTACT.phone || CONTACT.email || CONTACT.address || CONTACT.whatsapp;
