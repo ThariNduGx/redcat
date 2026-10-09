@@ -69,10 +69,14 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
     setStatus("sending");
     setServerError("");
     try {
+      const body = JSON.stringify({ ...data, kind, topic: kind === "contact" ? topic : undefined, role: kind === "dealer" ? role : undefined });
+      // CloudFront signs the request to the form Lambda (OAC); for a POST it needs the body's SHA-256
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(body));
+      const hash = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
       const res = await fetch("/api/enquiry", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, kind, topic: kind === "contact" ? topic : undefined, role: kind === "dealer" ? role : undefined }),
+        headers: { "Content-Type": "application/json", "x-amz-content-sha256": hash },
+        body,
       });
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || "Something went wrong.");
