@@ -67,7 +67,7 @@ export default function Footer() {
 
       <div className="relative border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-sm text-white/50">
-          <span>© <Year /> RedCat. All rights reserved.</span>
+          <span>© <Year /> RedCat. All rights reserved. A product of Idea Innovations (Pvt) Limited.</span>
           <span>Next day delivery · Sri Lanka</span>
         </div>
       </div>
