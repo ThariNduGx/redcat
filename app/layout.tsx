@@ -15,6 +15,10 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://redcat.lk"),
+  alternates: {
+    canonical: "https://redcat.lk",
+  },
   title: {
     default: "RedCat | Next Day Delivery across Sri Lanka",
     template: "%s | RedCat",
@@ -22,6 +26,21 @@ export const metadata: Metadata = {
   description:
     "RedCat is Sri Lanka's next day delivery network: 4 zones, 57 regional hubs and 930+ express points covering the island.",
   icons: { icon: "/brand/mascot-peek.svg" },
+  openGraph: {
+    type: "website",
+    locale: "en_LK",
+    url: "https://redcat.lk",
+    siteName: "RedCat",
+    title: "RedCat | Next Day Delivery across Sri Lanka",
+    description:
+      "RedCat is Sri Lanka's next day delivery network: 4 zones, 57 regional hubs and 930+ express points covering the island.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "RedCat | Next Day Delivery across Sri Lanka",
+    description:
+      "RedCat is Sri Lanka's next day delivery network: 4 zones, 57 regional hubs and 930+ express points covering the island.",
+  },
 };
 
 export const viewport: Viewport = {

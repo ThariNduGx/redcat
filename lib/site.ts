@@ -1,3 +1,5 @@
+export const SITE_URL = "https://redcat.lk";
+
 // Public email from the investor proposal. Add verified phone/address details when available.
 export const CONTACT = {
   phone: null as string | null,

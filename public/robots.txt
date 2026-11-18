@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://redcat.lk/sitemap.xml
+Host: https://redcat.lk
