@@ -5,6 +5,7 @@ import ArrowLink from "@/components/ui/ArrowLink";
 import CountUp from "@/components/ui/CountUp";
 import Mascot from "@/components/ui/Mascot";
 import SocialImpact from "@/components/SocialImpact";
+import { Check, Sparkles, Target } from "lucide-react";
 import { VISION, MISSION, CORE_VALUES, CUSTOMER_BENEFITS } from "@/lib/company";
 
 export const metadata: Metadata = {
@@ -13,87 +14,212 @@ export const metadata: Metadata = {
 };
 
 const tiers = [
-  { n: 1, suffix: "", label: "Mix Center", note: "Coordinated overnight sorting across the network", width: "w-[58%]" },
-  { n: 4, suffix: "", label: "Zones", note: "Four connected operating zones", width: "w-[70%]" },
-  { n: 57, suffix: "", label: "Regional hubs", note: "In every district, Jaffna to Monaragala", width: "w-[84%]" },
-  { n: 930, suffix: "+", label: "Express points", note: "Where you send and collect parcels", width: "w-full" },
+  { n: 930, suffix: "+", label: "Express points", note: "Local parcel drop-off and collection in your neighbourhood", tag: "Islandwide" },
+  { n: 57, suffix: "", label: "Regional hubs", note: "Located in every district from Jaffna to Hambantota", tag: "Every district" },
+  { n: 4, suffix: "", label: "Operating zones", note: "Regional coordination across Northern, Central, Western & Southern sectors", tag: "4 Zones" },
+  { n: 1, suffix: "", label: "Mixing point", note: "Central overnight sorting facility connecting every line-haul route", tag: "Central Hub" },
 ];
 
 export default function AboutPage() {
   return (
     <>
-      <section className="bg-paper">
-        <div className="mx-auto max-w-7xl px-5 pb-20 pt-12 sm:pt-16">
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-deep">About RedCat</p>
-          <h1 className="mt-3 max-w-5xl text-[clamp(2.75rem,7.5vw,6.5rem)] font-extrabold leading-[0.92] tracking-[-0.045em]">
-            Sri Lanka is becoming a delivery economy.
-          </h1>
-          <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-end">
-            <p className="max-w-xl text-xl text-ink/70">
-              RedCat is building a technology-driven national parcel delivery network in Sri Lanka. Our franchise model brings local entrepreneurs, connected digital systems and <strong className="text-ink">next-day delivery</strong> together, making parcel services more accessible for people and businesses.
+      {/* ---------- HERO ---------- */}
+      <section className="rc-grain relative isolate overflow-clip bg-brand pb-24 pt-12 text-white sm:pb-32 sm:pt-16 lg:pb-36">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full bg-ink py-1.5 pl-3 pr-4 text-[12px] font-bold tracking-[0.14em] uppercase text-white shadow-md">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75 motion-reduce:animate-none" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+              </span>
+              About RedCat
+            </span>
+            <h1 className="mt-6 text-[clamp(2.5rem,6.5vw,5rem)] font-extrabold leading-[0.96] tracking-[-0.04em]">
+              Sri Lanka is becoming a delivery economy.
+            </h1>
+            <p className="mt-7 max-w-xl text-lg font-medium leading-relaxed text-white/90 sm:text-xl">
+              We are building the nation&apos;s fastest, most accessible parcel network — uniting local franchise entrepreneurs, smart digital tracking, and a steadfast promise of next-day delivery.
             </p>
-            <div className="overflow-hidden rounded-3xl">
-              <Image src="/img/points/storefront.webp" alt="A RedCat Express Point storefront" width={1400} height={790} preload sizes="(min-width: 1024px) 640px, 100vw" className="block h-auto w-full" />
+            <div className="mt-9 flex flex-wrap gap-3">
+              <ArrowLink href="/network" variant="light">Explore network</ArrowLink>
+              <ArrowLink href="/dealers" variant="outline" className="text-white hover:bg-white hover:text-ink">
+                Become a dealer
+              </ArrowLink>
+            </div>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
+            <div className="overflow-hidden rounded-3xl border-4 border-white/20 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.5)]">
+              <Image
+                src="/img/points/storefront.webp"
+                alt="A RedCat Express Point storefront ready to serve local communities"
+                width={1400}
+                height={790}
+                preload
+                sizes="(min-width: 1024px) 560px, 100vw"
+                className="block h-auto w-full object-cover"
+              />
             </div>
           </div>
         </div>
+
+        <div aria-hidden className="absolute inset-x-0 -bottom-px h-12 bg-white sm:h-20" style={{ borderRadius: "50% 50% 0 0 / 100% 100% 0 0" }} />
       </section>
 
-      <section aria-label="Our vision and mission" className="bg-ink text-white">
-        <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:py-28 lg:grid-cols-2 lg:gap-20">
-          <Reveal>
-            <h2 className="text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">Our vision</h2>
-            <p className="mt-7 max-w-xl text-xl leading-relaxed text-white/90">{VISION}</p>
+      {/* ---------- VISION & MISSION ---------- */}
+      <section aria-label="Our vision and mission" className="mx-auto max-w-7xl px-5 py-16 sm:py-24">
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Vision Card - Bold Red */}
+          <Reveal className="relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-brand via-[#d11b1b] to-[#b81414] p-8 text-white shadow-xl shadow-brand/15 sm:p-12">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur">
+                <Target className="h-4 w-4" />
+                Our Vision
+              </div>
+              <h2 className="mt-6 text-3xl font-extrabold leading-tight tracking-[-0.03em] sm:text-4xl">
+                The nation&apos;s most trusted delivery network.
+              </h2>
+              <p className="mt-5 text-lg leading-relaxed text-white/95 sm:text-xl font-medium">
+                {VISION}
+              </p>
+            </div>
+            <div className="mt-8 border-t border-white/20 pt-6">
+              <span className="text-xs font-bold uppercase tracking-widest text-white/70">RedCat Standard · 100% Islandwide</span>
+            </div>
           </Reveal>
-          <Reveal delay={100}>
-            <h2 className="text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">Our mission</h2>
-            <p className="mt-7 max-w-xl text-xl leading-relaxed text-white/90">{MISSION}</p>
+
+          {/* Mission Card - Ink with Red Accents */}
+          <Reveal delay={100} className="relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border-2 border-brand/20 bg-ink p-8 text-white shadow-xl sm:p-12">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-sm">
+                <Sparkles className="h-4 w-4" />
+                Our Mission
+              </div>
+              <h2 className="mt-6 text-3xl font-extrabold leading-tight tracking-[-0.03em] sm:text-4xl">
+                Fast, reliable, and accessible everywhere.
+              </h2>
+              <p className="mt-5 text-lg leading-relaxed text-white/85 sm:text-xl font-medium">
+                {MISSION}
+              </p>
+            </div>
+            <div className="mt-8 border-t border-white/10 pt-6">
+              <span className="text-xs font-bold uppercase tracking-widest text-brand">Next-Day Delivery · Empowering Communities</span>
+            </div>
           </Reveal>
         </div>
       </section>
 
-      <section aria-labelledby="values-heading" className="mx-auto max-w-7xl px-5 py-20 sm:py-28">
-        <Reveal><h2 id="values-heading" className="text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">Our core values</h2></Reveal>
-        <dl className="mt-12 grid gap-x-16 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          {CORE_VALUES.map((value, index) => (
-            <Reveal key={value.title} delay={index * 60}>
-              <dt className="text-2xl font-extrabold tracking-tight">{value.title}</dt>
-              <dd className="mt-3 max-w-sm text-lg leading-relaxed text-ink/80">{value.body}</dd>
-            </Reveal>
-          ))}
-        </dl>
-      </section>
+      {/* ---------- CORE VALUES ---------- */}
+      <section aria-labelledby="values-heading" className="bg-mist/70 py-20 sm:py-28">
+        <div className="mx-auto max-w-7xl px-5">
+          <Reveal>
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand">What drives us</p>
+            <h2 id="values-heading" className="mt-2 text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
+              Our core values.
+            </h2>
+            <p className="mt-4 max-w-2xl text-lg text-ink/75">
+              The foundational commitments that guide every parcel, rider, and franchise partner across our network.
+            </p>
+          </Reveal>
 
-      <section aria-labelledby="advantage-heading" className="bg-mist">
-        <div className="mx-auto max-w-7xl px-5 py-20 sm:py-28">
-          <Reveal><h2 id="advantage-heading" className="max-w-3xl text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">The RedCat advantage</h2></Reveal>
-          <dl className="mt-12 grid gap-x-16 gap-y-10 lg:grid-cols-2">
-            {CUSTOMER_BENEFITS.map((benefit, index) => (
-              <Reveal key={benefit.title} delay={index * 80}>
-                <dt className="max-w-lg text-2xl font-extrabold tracking-tight">{benefit.title}</dt>
-                <dd className="mt-3 max-w-xl text-lg leading-relaxed text-ink/80">{benefit.body}</dd>
+          <dl className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {CORE_VALUES.map((value, index) => (
+              <Reveal key={value.title} delay={index * 60}>
+                <div className="group h-full rounded-[2rem] border-2 border-black/5 bg-white p-8 transition duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-xl hover:shadow-brand/5">
+                  <div className="flex items-center justify-between">
+                    <span className="grid h-10 w-10 place-items-center rounded-2xl bg-brand-soft text-sm font-extrabold text-brand transition duration-300 group-hover:bg-brand group-hover:text-white">
+                      0{index + 1}
+                    </span>
+                    <span className="h-2 w-2 rounded-full bg-brand/30 transition duration-300 group-hover:bg-brand group-hover:scale-125" />
+                  </div>
+                  <dt className="mt-6 text-2xl font-extrabold tracking-tight text-ink transition-colors group-hover:text-brand">
+                    {value.title}
+                  </dt>
+                  <dd className="mt-3 text-base leading-relaxed text-ink/75">
+                    {value.body}
+                  </dd>
+                </div>
               </Reveal>
             ))}
           </dl>
         </div>
       </section>
 
-      <section aria-labelledby="how" className="mx-auto max-w-5xl px-5 py-20 sm:py-28">
-        <Reveal>
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-deep">The network</p>
-          <h2 id="how" className="mt-3 text-5xl font-extrabold leading-[0.95] tracking-[-0.035em]">Built in four layers.</h2>
+      {/* ---------- THE REDCAT ADVANTAGE ---------- */}
+      <section aria-labelledby="advantage-heading" className="mx-auto max-w-7xl px-5 py-20 sm:py-28">
+        <div className="rounded-[3rem] border border-brand/15 bg-gradient-to-b from-brand-soft/70 via-mist/50 to-white p-8 sm:p-14 lg:p-16">
+          <Reveal>
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand">Why RedCat</p>
+            <h2 id="advantage-heading" className="mt-2 max-w-3xl text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
+              The RedCat advantage.
+            </h2>
+            <p className="mt-4 max-w-2xl text-lg text-ink/75">
+              Engineered specifically for Sri Lanka&apos;s geography, commerce, and growing digital economy.
+            </p>
+          </Reveal>
+
+          <dl className="mt-12 grid gap-8 lg:grid-cols-2">
+            {CUSTOMER_BENEFITS.map((benefit, index) => (
+              <Reveal key={benefit.title} delay={index * 80}>
+                <div className="flex items-start gap-5 rounded-2xl bg-white p-6 shadow-sm border border-black/5">
+                  <span className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-md shadow-brand/20">
+                    <Check className="h-5 w-5 stroke-[2.5]" />
+                  </span>
+                  <div>
+                    <dt className="text-xl font-extrabold tracking-tight text-ink">
+                      {benefit.title}
+                    </dt>
+                    <dd className="mt-2 text-base leading-relaxed text-ink/75">
+                      {benefit.body}
+                    </dd>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      {/* ---------- THE NETWORK HIERARCHY ---------- */}
+      <section aria-labelledby="network-hierarchy" className="mx-auto max-w-5xl px-5 py-20 sm:py-28">
+        <Reveal className="text-center">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand">Nationwide Infrastructure</p>
+          <h2 id="network-hierarchy" className="mt-2 text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
+            Built in four connected tiers.
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-ink/75">
+            Connecting every corner of the island through synchronized line-haul logistics and local community touchpoints.
+          </p>
         </Reveal>
-        <ol className="mt-12 flex flex-col items-center">
+
+        <ol className="mt-16 flex flex-col items-center">
           {tiers.map((t, i) => (
             <li key={t.label} className="flex w-full flex-col items-center">
-              {i > 0 && <span aria-hidden className="my-1 h-8 border-l-[3px] border-dotted border-brand" />}
-              <Reveal delay={i * 120} className={`${t.width} min-w-[min(100%,20rem)]`}>
-                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-full border-[3px] border-ink bg-white px-6 py-4 text-center transition hover:bg-ink hover:text-white">
-                  <span className="text-4xl font-extrabold tracking-tight text-brand">
-                    <CountUp to={t.n} suffix={t.suffix} />
-                  </span>
-                  <span className="text-xl font-extrabold">{t.label}</span>
-                  <span className="hidden text-ink/60 md:inline [li:hover_&]:text-white/70">· {t.note}</span>
+              {i > 0 && (
+                <div aria-hidden className="flex flex-col items-center my-1.5">
+                  <span className="h-8 w-0.5 border-l-2 border-dashed border-brand" />
+                </div>
+              )}
+              <Reveal delay={i * 90} className="w-full max-w-3xl">
+                <div className="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border-2 border-black/10 bg-white p-6 transition duration-300 hover:border-brand hover:shadow-xl hover:shadow-brand/5">
+                  <div className="flex items-center gap-5">
+                    <span className="flex h-16 w-24 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-3xl font-extrabold text-brand transition duration-300 group-hover:bg-brand group-hover:text-white sm:text-4xl">
+                      <CountUp to={t.n} suffix={t.suffix} />
+                    </span>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl font-extrabold tracking-tight text-ink group-hover:text-brand transition-colors">
+                          {t.label}
+                        </span>
+                        <span className="rounded-full bg-mist px-3 py-0.5 text-xs font-bold text-ink/70">
+                          {t.tag}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm leading-relaxed text-ink/65 sm:text-base">
+                        {t.note}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </Reveal>
             </li>
@@ -101,15 +227,22 @@ export default function AboutPage() {
         </ol>
       </section>
 
+      {/* ---------- SOCIAL IMPACT PREVIEW ---------- */}
       <SocialImpact id="community-impact" />
 
+      {/* ---------- CALL TO ACTION WITH MASCOT ---------- */}
       <section className="rc-grain relative overflow-clip bg-brand text-white">
         <div className="mx-auto max-w-7xl px-5 pb-20 pt-32 text-center sm:pb-28">
           <div className="relative mx-auto max-w-2xl">
             <Mascot className="absolute bottom-[calc(100%-4px)] left-1/2 w-48 -translate-x-1/2 [&_svg]:h-auto [&_svg]:w-full" />
             <div className="relative rounded-[2.5rem] border-[3px] border-ink bg-white px-6 py-12 text-ink shadow-2xl sm:px-12">
-              <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-deep">Our promise</p>
-              <p className="mt-3 text-5xl font-extrabold leading-[0.95] tracking-[-0.04em] sm:text-6xl">Next day delivery.</p>
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand">Our promise</p>
+              <p className="mt-3 text-4xl font-extrabold leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+                Next day delivery.
+              </p>
+              <p className="mt-4 text-base text-ink/70 sm:text-lg">
+                Wherever your parcel needs to go, RedCat delivers across Sri Lanka.
+              </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <ArrowLink href="/network">See the network</ArrowLink>
                 <ArrowLink href="/dealers" variant="brand">Become a dealer</ArrowLink>
