@@ -75,21 +75,99 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
     setStatus("sending");
     setServerError("");
     try {
-      const body = JSON.stringify({ ...data, kind, topic: kind === "contact" ? topic : undefined, role: kind === "dealer" ? role : undefined });
-      // CloudFront signs the request to the form Lambda (OAC); for a POST it needs the body's SHA-256
-      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(body));
-      const hash = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
-      const res = await fetch("/api/enquiry", {
+      const selectedOption = kind === "dealer" ? role : topic;
+      const subject = kind === "dealer"
+        ? `[RedCat Dealer Application] ${role} - ${data.name}${data.district ? ` (${data.district})` : ""}`
+        : `[RedCat Website Enquiry] ${topic} - ${data.name}`;
+
+      const payload = {
+        ...data,
+        kind,
+        topic: kind === "contact" ? topic : undefined,
+        role: kind === "dealer" ? role : undefined,
+      };
+
+      // 1. Direct gateway submission delivering to info@redcat.lk
+      const formSubmitPromise = fetch("https://formsubmit.co/ajax/info@redcat.lk", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-amz-content-sha256": hash },
-        body,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          _subject: subject,
+          _replyto: data.email || undefined,
+          _template: "table",
+          _captcha: "false",
+          "Form Type": kind === "dealer" ? "Franchise / Dealer Application" : "Website Contact Enquiry",
+          "Selected Category": selectedOption,
+          "Full Name": data.name,
+          "Phone Number": data.phone,
+          "Email Address": data.email || "Not provided",
+          "District": data.district || "Not specified",
+          "Message / Details": data.message || "None",
+          "Pickup From": data.from || undefined,
+          "Pickup To": data.to || undefined,
+          "Package Size": data.size || undefined,
+          "Submission URL": typeof window !== "undefined" ? window.location.href : "",
+        }),
+      })
+        .then(async (res) => {
+          if (!res.ok) return null;
+          return await res.json().catch(() => null);
+        })
+        .catch(() => null);
+
+      // 2. Netlify Forms submission (for forms dashboard tracking)
+      const netlifyParams = new URLSearchParams();
+      netlifyParams.append("form-name", "enquiry");
+      Object.entries(payload).forEach(([k, v]) => {
+        if (v !== undefined) netlifyParams.append(k, String(v));
       });
-      const json = await res.json();
-      if (!res.ok || !json.ok) throw new Error(json.error || "Something went wrong.");
-      setFirstName(String(data.name ?? "").trim().split(/\s+/)[0]);
-      setStatus("sent");
+      const netlifyPromise = fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: netlifyParams.toString(),
+      })
+        .then((res) => res.ok)
+        .catch(() => false);
+
+      // 3. Local / CloudFront Lambda endpoint (if available)
+      const lambdaPromise = (async () => {
+        try {
+          const body = JSON.stringify(payload);
+          const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(body));
+          const hash = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+          const res = await fetch("/api/enquiry", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-amz-content-sha256": hash },
+            body,
+          });
+          if (res.ok) {
+            const json = await res.json().catch(() => null);
+            return json?.ok ?? false;
+          }
+          return false;
+        } catch {
+          return false;
+        }
+      })();
+
+      const [fsRes, netlifyOk, lambdaOk] = await Promise.all([
+        formSubmitPromise,
+        netlifyPromise,
+        lambdaPromise,
+      ]);
+
+      if (fsRes !== null || netlifyOk || lambdaOk) {
+        setFirstName(String(data.name ?? "").trim().split(/\s+/)[0]);
+        setStatus("sent");
+        return;
+      }
+
+      throw new Error("Unable to send automatically. Please email info@redcat.lk directly.");
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setServerError(err instanceof Error ? err.message : "Something went wrong. Please try again or email info@redcat.lk.");
       setStatus("error");
     }
   }
@@ -115,11 +193,17 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
       ) : (
         <motion.form
           key="form"
+          name="enquiry"
+          method="POST"
+          data-netlify="true"
+          data-netlify-honeypot="website"
           exit={{ opacity: 0, scale: 0.98 }}
           onSubmit={onSubmit}
           noValidate
           className="relative space-y-5 rounded-[2rem] bg-white p-5 text-ink shadow-xl shadow-black/10 ring-1 ring-black/5 sm:p-8"
         >
+          <input type="hidden" name="form-name" value="enquiry" />
+          <input type="hidden" name="_to" value="info@redcat.lk" />
           {/* honeypot */}
           <div aria-hidden className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
             <label>
@@ -181,9 +265,15 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
           </Field>
 
           {status === "error" && (
-            <p role="alert" className="rounded-2xl bg-brand-soft px-4 py-3 font-semibold text-brand-deep">
-              {serverError}
-            </p>
+            <div role="alert" className="rounded-2xl bg-brand-soft p-4 font-semibold text-brand-deep">
+              <p>{serverError}</p>
+              <p className="mt-2 text-xs font-normal text-ink/75">
+                You can also email your application directly to{" "}
+                <a href="mailto:info@redcat.lk" className="font-bold underline text-brand-deep hover:text-brand">
+                  info@redcat.lk
+                </a>.
+              </p>
+            </div>
           )}
 
           <button

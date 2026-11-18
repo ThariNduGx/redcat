@@ -44,6 +44,22 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main id="main" className="flex-1">
           {children}
         </main>
+        {/* Hidden form definition for Netlify Forms indexing on static export */}
+        <form name="enquiry" data-netlify="true" data-netlify-honeypot="website" hidden>
+          <input type="hidden" name="form-name" value="enquiry" />
+          <input type="hidden" name="_to" value="info@redcat.lk" />
+          <input type="text" name="name" />
+          <input type="tel" name="phone" />
+          <input type="email" name="email" />
+          <input type="text" name="district" />
+          <input type="text" name="kind" />
+          <input type="text" name="role" />
+          <input type="text" name="topic" />
+          <input type="text" name="from" />
+          <input type="text" name="to" />
+          <input type="text" name="size" />
+          <textarea name="message"></textarea>
+        </form>
         <Footer />
         <CommandPalette />
         <Toaster />
