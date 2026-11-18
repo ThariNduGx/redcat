@@ -21,8 +21,22 @@ const benefits = [
 ];
 
 const roles = [
-  { key: "hub", title: "Regional hub distributor", count: "57 hubs", body: "Run the regional hub for your district: the link between local express points and the zone." },
-  { key: "point", title: "Express point", count: "930+ points", body: "Be the neighbourhood drop-off and collection point, right inside your shop." },
+  {
+    key: "hub",
+    title: "Regional hub distributor",
+    count: "57 hubs",
+    body: "Run the regional hub for your district: the link between local express points and the zone.",
+    href: "/dealers?role=hub#apply",
+    action: "Apply for this",
+  },
+  {
+    key: "point",
+    title: "REDCAT Point Franchise",
+    count: "930+ points",
+    body: "Own a dedicated RedCat Point franchise in your town. Turnkey setup with LKR 1.5Mn – 2.0Mn investment, complete IT automation, and dedicated sales territory.",
+    href: "/dealers/point-franchise",
+    action: "Explore Point Franchise",
+  },
 ];
 
 export default function DealersPage() {
@@ -39,8 +53,9 @@ export default function DealersPage() {
               Bring RedCat&rsquo;s next day delivery to your town, and grow your own business with it.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <ArrowLink href="#apply" variant="light">Apply now</ArrowLink>
-              <ArrowLink href="#roles" variant="outline" className="text-white">Ways to join</ArrowLink>
+              <ArrowLink href="/dealers/point-franchise" variant="light">Point Franchise</ArrowLink>
+              <ArrowLink href="#apply" variant="outline" className="text-white hover:bg-white hover:text-ink">Apply now</ArrowLink>
+              <ArrowLink href="#roles" variant="outline" className="text-white hover:bg-white hover:text-ink">Ways to join</ArrowLink>
             </div>
           </div>
           <div className="overflow-hidden rounded-3xl">
@@ -83,7 +98,14 @@ export default function DealersPage() {
                   <span className="self-start rounded-full bg-ink px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-white">{r.count}</span>
                   <h3 className="mt-5 text-3xl font-extrabold tracking-tight">{r.title}</h3>
                   <p className="mt-3 flex-1 text-lg text-ink/70">{r.body}</p>
-                  <ArrowLink href={`/dealers?role=${r.key}#apply`} className="mt-8 self-start">Apply for this</ArrowLink>
+                  <div className="mt-8 flex flex-wrap items-center gap-3">
+                    <ArrowLink href={r.href} className="self-start">{r.action}</ArrowLink>
+                    {r.key === "point" && (
+                      <ArrowLink href="/dealers?role=point#apply" variant="outline" className="self-start text-ink">
+                        Apply now
+                      </ArrowLink>
+                    )}
+                  </div>
                 </Reveal>
               </li>
             ))}
