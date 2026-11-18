@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Logo } from "./Logo";
 import FooterTrack from "./FooterTrack";
-import { CONTACT, NAV } from "@/lib/site";
+import { CONTACT, FEATURES, NAV } from "@/lib/site";
 
 // Rendered at build time: the static export bakes in the year it was built
 function Year() {
@@ -21,9 +21,11 @@ export default function Footer() {
               <Logo className="h-14 w-auto" />
             </div>
             <p className="mt-6 max-w-sm text-2xl font-extrabold leading-tight tracking-tight">Next day delivery, everywhere in Sri Lanka.</p>
-            <div className="mt-6 max-w-sm">
-              <FooterTrack />
-            </div>
+            {FEATURES.tracking && (
+              <div className="mt-6 max-w-sm">
+                <FooterTrack />
+              </div>
+            )}
           </div>
 
           <nav aria-label="Footer">

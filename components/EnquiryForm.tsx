@@ -14,7 +14,7 @@ const field =
   "w-full rounded-2xl border-2 bg-white px-4 py-3.5 text-base font-semibold outline-none transition placeholder:font-medium placeholder:text-ink/40 hover:border-black/20 focus:border-ink";
 const lbl = "mb-1.5 block text-[13px] font-semibold text-ink/70";
 
-const TOPICS = ["Pickup request", "A parcel I sent or am expecting", "Business account", "Something else"] as const;
+const TOPICS = ["Pickup request", "A parcel I sent or am expecting", "Business account", "Careers", "Something else"] as const;
 const ROLES = [
   { value: "Regional hub distributor", hint: "Run a hub for your district" },
   { value: "Express point", hint: "Drop-off and collection in your shop" },
@@ -41,7 +41,13 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
   const [serverError, setServerError] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [firstName, setFirstName] = useState("");
-  const [topic, setTopic] = useState<string>(TOPICS[0]);
+  const initialTopic = TOPICS.find((topic) => topic === params.get("topic")) ?? TOPICS[0];
+  const [topic, setTopic] = useState<string>(initialTopic);
+  const [seenTopicParam, setSeenTopicParam] = useState(initialTopic);
+  if (initialTopic !== seenTopicParam) {
+    setSeenTopicParam(initialTopic);
+    setTopic(initialTopic);
+  }
   const roleParam = ROLE_PARAM[params.get("role") ?? ""];
   const [role, setRole] = useState<string>(roleParam ?? "Regional hub distributor");
   // "Apply for this" links change ?role= on the same page, so follow it after mount too
@@ -171,7 +177,7 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
           )}
 
           <Field id={`${uid}-msg`} label={kind === "dealer" ? "Tell us about your business" : "Message"} optional>
-            <textarea id={`${uid}-msg`} name="message" rows={4} maxLength={2000} className={`${field} resize-y border-black/10`} />
+            <textarea key={kind === "contact" && topic === "Careers" ? params.get("role") ?? "career" : "general"} id={`${uid}-msg`} name="message" defaultValue={kind === "contact" && topic === "Careers" && params.get("role") ? `I’m interested in the ${params.get("role")} team.\n\nMy experience:\nPreferred location:\n` : ""} rows={4} maxLength={2000} className={`${field} resize-y border-black/10`} />
           </Field>
 
           {status === "error" && (

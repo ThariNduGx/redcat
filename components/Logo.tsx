@@ -1,15 +1,9 @@
-import Image from "next/image";
+import Mascot from "./ui/Mascot";
 
 export function Logo({ className = "h-12 w-auto" }: { className?: string }) {
   return (
-    <Image
-      src="/brand/logo.svg"
-      alt="RedCat Next Day Delivery"
-      width={488}
-      height={358}
-      unoptimized
-      priority
-      className={className}
-    />
+    <div role="img" aria-label="RedCat Next Day Delivery" className={`inline-block aspect-[488/358] ${className}`}>
+      <Mascot variant="logo" className="h-full w-full [&_svg]:h-full [&_svg]:w-full" />
+    </div>
   );
 }

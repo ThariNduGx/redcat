@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand: #ff4d4d;
-  --color-brand-deep: #d62f2f; /* AA-contrast red for small text on white */
+  --color-brand: #e12222;
+  --color-brand-deep: #e12222; /* AA-contrast red for small text on white */
   --color-brand-soft: #ffe9e7;
   --color-ink: #090908;
   --color-mist: #f4f1ee;

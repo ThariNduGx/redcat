@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { CornerDownLeft, MapPin, Package, Search } from "lucide-react";
 import { searchHubs } from "@/lib/geo";
 import { zoneById } from "@/data/hubs";
-import { NAV } from "@/lib/site";
+import { FEATURES, NAV } from "@/lib/site";
 
 export const openPalette = () => window.dispatchEvent(new Event("rc:palette"));
 
@@ -46,7 +46,7 @@ export default function CommandPalette() {
   const items = useMemo<Item[]>(() => {
     const query = q.trim();
     const out: Item[] = [];
-    if (query && looksLikeTracking(query)) {
+    if (FEATURES.tracking && query && looksLikeTracking(query)) {
       out.push({ key: "track", label: `Track ${query.toUpperCase()}`, hint: "Tracking", icon: "track", href: `/track?id=${encodeURIComponent(query)}` });
     }
     for (const h of searchHubs(query, 6)) {

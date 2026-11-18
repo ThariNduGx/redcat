@@ -19,7 +19,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { HUBS, MIX_CENTER, ZONES, hubById, hubsInZone, zoneById, type Hub, type ZoneId } from "@/data/hubs";
+import { HUBS, ZONES, hubById, hubsInZone, zoneById, type Hub, type ZoneId } from "@/data/hubs";
 import { arc, nearestHubs, searchHubs } from "@/lib/geo";
 import { toast } from "@/components/ui/Toaster";
 import CatLoader from "@/components/ui/CatLoader";
@@ -75,7 +75,9 @@ const spokesFC: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
   }),
 };
 
-const trunks = ZONES.filter((z) => z.id !== "A").map((z) => arc([MIX_CENTER.lng, MIX_CENTER.lat], [z.lng, z.lat], 0.22, 80));
+// Illustrative connections between zone centers; no unconfirmed sorting site is pinned.
+const westernZone = zoneById("A");
+const trunks = ZONES.filter((z) => z.id !== "A").map((z) => arc([westernZone.lng, westernZone.lat], [z.lng, z.lat], 0.22, 80));
 const trunksFC: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
   type: "FeatureCollection",
   features: trunks.map((coords) => ({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: coords } })),
@@ -93,7 +95,7 @@ function selectionRoute(h: Hub): GeoJSON.FeatureCollection<GeoJSON.LineString> {
   const z = zoneById(h.zone);
   const lines: [number, number][][] = [];
   if (h.km > 0) lines.push(arc([h.lng, h.lat], [z.lng, z.lat], 0.1, 32));
-  if (z.id !== "A") lines.push(arc([z.lng, z.lat], [MIX_CENTER.lng, MIX_CENTER.lat], -0.22, 64));
+  if (z.id !== "A") lines.push(arc([z.lng, z.lat], [westernZone.lng, westernZone.lat], -0.22, 64));
   return {
     type: "FeatureCollection",
     features: lines.map((coordinates) => ({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates } })),
@@ -267,14 +269,6 @@ export default function NetworkExplorer({
         },
         paint: { "text-color": INK, "text-halo-color": "#fff", "text-halo-width": 2 },
       });
-
-      // the Mix Center gets a custom HTML marker with the cat
-      const el = document.createElement("div");
-      el.className = "rc-mix";
-      // a tiny cat face drawn for 40px, since the full logo doesn't survive at this size
-      el.innerHTML = `<span class="rc-mix-pulse"></span><span class="rc-mix-core"><svg viewBox="0 0 40 40" width="40" height="40"><path d="M8 19 L9.5 4 L19 12Z" fill="#090908"/><path d="M21 12 L30.5 4 L32 19Z" fill="#090908"/><path d="M11 13.5 L11.8 8 L16 11.8Z" fill="#ff4d4d"/><path d="M24 11.8 L28.2 8 L29 13.5Z" fill="#ff4d4d"/><circle cx="20" cy="24" r="13" fill="#090908"/><circle cx="15" cy="22.5" r="4" fill="#fff"/><circle cx="25" cy="22.5" r="4" fill="#fff"/><circle cx="15.6" cy="22.8" r="2" fill="#090908"/><circle cx="25.6" cy="22.8" r="2" fill="#090908"/><rect x="18.3" y="28" width="3.4" height="2.4" rx="1" fill="#fff"/></svg></span><span class="rc-mix-label">Mix Center</span>`;
-      el.setAttribute("aria-hidden", "true");
-      new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([MIX_CENTER.lng, MIX_CENTER.lat]).addTo(map);
 
       popupRef.current = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 14, className: "rc-popup" });
 
@@ -776,7 +770,7 @@ function HubCard({ hub, onBack, onCopy }: { hub: Hub; onBack: () => void; onCopy
   const steps = [
     `${hub.name} hub`,
     ...(hub.km > 0 ? [`${z.center} zone`] : []),
-    ...(z.id !== "A" ? ["Peliyagoda Mix Center"] : []),
+    "Overnight delivery network",
   ];
   return (
     <div>

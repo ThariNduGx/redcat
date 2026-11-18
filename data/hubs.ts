@@ -31,8 +31,6 @@ export const ZONES: Zone[] = [
   { id: "D", name: "Zone D", center: "Galle", color: "#14a37f", lat: 6.0328, lng: 80.215 },
 ];
 
-export const MIX_CENTER = { name: "Peliyagoda Mix Center", lat: 6.9634, lng: 79.8819 };
-
 // [district, hub, km, lat, lng]
 type Row = [string, string, number, number, number];
 

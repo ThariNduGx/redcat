@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   output: "export",
   // The default image optimizer needs a server; images are served as-is
   images: { unoptimized: true },
+  experimental: {
+    agentUpgrade: "security",
+  },
   // No cacheComponents / partialPrefetching: both turn on Partial Prerendering,
   // which needs a server ("PPR cannot be enabled in export mode")
   turbopack: {

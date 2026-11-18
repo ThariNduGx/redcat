@@ -2,13 +2,13 @@
 
 import { motion, useReducedMotion } from "motion/react";
 
-const LINES = [["Sent", "today."], ["At", "the", "door"], ["tomorrow."]];
+const LINES = [["Next-Day", "Delivery,"], ["Anywhere"]];
 
 export default function HeroHeadline() {
   const reduce = useReducedMotion();
   let n = 0;
   return (
-    <h1 className="text-[clamp(3rem,8.4vw,7.25rem)] font-extrabold leading-[0.9] tracking-[-0.045em]">
+    <h1 className="text-[clamp(2rem,4.3vw,4rem)] font-extrabold leading-[0.9] tracking-[-0.045em]">
       {LINES.map((line, li) => (
         <span key={li} className="block overflow-hidden pb-[0.06em]">
           {line.map((w) => {

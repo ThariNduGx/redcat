@@ -1,6 +1,5 @@
 import Image from "next/image";
 import HeroHeadline from "@/components/HeroHeadline";
-import HeroWidget from "@/components/HeroWidget";
 import Journey from "@/components/Journey";
 import Reveal from "@/components/Reveal";
 import NetworkExplorer from "@/components/map/NetworkExplorer";
@@ -8,7 +7,9 @@ import ArrowLink from "@/components/ui/ArrowLink";
 import CountUp from "@/components/ui/CountUp";
 import Magnetic from "@/components/ui/Magnetic";
 import Marquee from "@/components/ui/Marquee";
-import Parallax from "@/components/ui/Parallax";
+import Mascot from "@/components/ui/Mascot";
+import Services from "@/components/Services";
+import SocialImpact from "@/components/SocialImpact";
 import { HUBS } from "@/data/hubs";
 
 const stats = [
@@ -19,9 +20,9 @@ const stats = [
 ];
 
 const tech = [
-  { img: "/img/app.jpg", tag: "App", title: "Book in a few taps", body: "Route, package and next-day delivery, from your phone.", alt: "A customer booking a delivery in the RedCat app" },
-  { img: "/img/dashboard.jpg", tag: "Ops", title: "The island on one screen", body: "Every hub, vehicle and parcel, watched from a single dashboard.", alt: "A RedCat operator looking at the network dashboard" },
-  { img: "/img/rider.jpg", tag: "People", title: "A friendly face at the door", body: "Uniformed RedCat riders hand your parcel over, on time.", alt: "A smiling RedCat rider holding a parcel" },
+  { img: "/img/technology/customer-app.webp", mediaClass: "object-contain object-right-bottom", title: "Unique Customer App", body: "The RedCat customer app sets the standard for an exceptional courier user experience.", alt: "RedCat customer app displayed on a phone" },
+  { img: "/img/technology/point-management.webp", mediaClass: "object-contain p-5", title: "Fully Automated Point Management System", body: "An advanced system that automates parcel delivery, overseeing every stage from pickup to transit and courier management.", alt: "RedCat point management system displayed on a laptop" },
+  { img: "/img/technology/rider-app.webp", mediaClass: "object-contain object-bottom", title: "Rider & Driver Apps", body: "Easy-to-use rider and driver apps to plan pickups and deliveries.", alt: "RedCat rider app displayed on a phone" },
 ];
 
 const towns = [...new Set(HUBS.map((h) => h.name.replace(/ (Central|North|South)$/, "")))];
@@ -30,12 +31,7 @@ export default function Home() {
   return (
     <>
       {/* ---------- HERO ---------- */}
-      <section className="rc-grain relative isolate overflow-clip bg-brand pb-28 pt-10 text-white sm:pb-36 sm:pt-14 lg:pb-44">
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-          <div className="rc-blob rc-drift-a left-[-10%] top-[-20%] h-[60%] w-[55%] bg-[#ff7a6b] opacity-70" />
-          <div className="rc-blob rc-drift-b bottom-[-25%] right-[-10%] h-[70%] w-[60%] bg-[#e23a3a] opacity-80" />
-        </div>
-
+      <section className="relative isolate overflow-clip bg-brand pb-28 pt-10 text-white sm:pb-36 sm:pt-14 lg:pb-44">
         <div className="mx-auto grid max-w-7xl items-center gap-6 px-5 lg:grid-cols-[1.15fr_1fr] lg:gap-12">
           <div>
             <p className="inline-flex items-center gap-2 rounded-full bg-ink py-1.5 pl-2 pr-4 text-[13px] font-bold tracking-[0.12em] text-white">
@@ -49,16 +45,18 @@ export default function Home() {
               <HeroHeadline />
             </div>
             <p className="mt-7 max-w-xl text-xl font-bold leading-snug sm:text-[22px]">
-              RedCat moves parcels from Jaffna to Galle overnight, through 57 regional hubs and 930+ express points.
+              We are building the fastest and largest courier network in Sri Lanka.
             </p>
-            <div className="mt-9 hidden flex-wrap gap-3 sm:flex">
-              <ArrowLink href="/network" variant="light">Explore the network</ArrowLink>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <ArrowLink href="/careers" variant="light">Careers</ArrowLink>
               <ArrowLink href="/dealers" variant="outline" className="text-white">Become a dealer</ArrowLink>
             </div>
           </div>
 
-          <div className="mx-auto w-full max-w-[460px] pt-20 lg:pt-16">
-            <HeroWidget />
+          <div className="mx-auto w-full max-w-[400px] pt-6 lg:pt-0">
+            <div role="img" aria-label="The RedCat cat mascot with eyes that follow your cursor, above the RedCat wordmark">
+              <Mascot variant="logo" className="w-full [&_svg]:h-auto [&_svg]:w-full" />
+            </div>
           </div>
         </div>
 
@@ -99,6 +97,9 @@ export default function Home() {
         </dl>
       </section>
 
+      {/* ---------- SERVICES ---------- */}
+      <Services />
+
       {/* ---------- HOW IT WORKS ---------- */}
       <Journey />
 
@@ -125,11 +126,8 @@ export default function Home() {
 
       {/* ---------- FLEET ---------- */}
       <section className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-20 sm:py-28 lg:grid-cols-[1.25fr_1fr]">
-        <div className="rc-grain relative aspect-[4/3] overflow-clip rounded-[2.5rem] bg-brand sm:rounded-[3.5rem]">
-          <div aria-hidden className="absolute inset-x-[-10%] bottom-[-38%] h-[70%] rounded-[50%] bg-ink" />
-          <Parallax amount={5} className="absolute inset-x-[4%] bottom-[2%] top-[10%]">
-            <Image src="/img/fleet.png" alt="RedCat trucks, vans and scooter riders lined up" fill sizes="(min-width: 1024px) 680px, 100vw" className="object-contain object-bottom drop-shadow-[0_30px_30px_rgba(0,0,0,0.35)]" />
-          </Parallax>
+        <div className="overflow-hidden rounded-3xl">
+          <Image src="/img/points/truck.webp" alt="A RedCat truck travelling across Sri Lanka" width={1400} height={700} sizes="(min-width: 1024px) 680px, 100vw" className="block h-auto w-full" />
         </div>
         <Reveal delay={100}>
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-deep">The fleet</p>
@@ -146,18 +144,17 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5">
           <Reveal>
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-deep">Technology</p>
-            <h2 className="mt-3 max-w-2xl text-5xl font-extrabold leading-[0.95] tracking-[-0.035em]">Built to keep up with you.</h2>
+            <h2 className="mt-3 max-w-4xl text-4xl font-extrabold leading-[1.05] tracking-[-0.035em] sm:text-5xl">Unmatched technology.</h2>
           </Reveal>
-          <ul className="mt-12 grid gap-5 md:grid-cols-3">
+          <ul className="mt-12 grid gap-5 lg:grid-cols-3">
             {tech.map((t, i) => (
               <li key={t.title}>
                 <Reveal delay={i * 100} className="group h-full overflow-hidden rounded-[2rem] bg-white shadow-[0_1px_0_rgba(0,0,0,0.04)] transition duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/10">
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <Image src={t.img} alt={t.alt} fill sizes="(min-width: 768px) 400px, 100vw" className="object-cover transition duration-700 ease-out group-hover:scale-[1.05]" />
-                    <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-extrabold uppercase tracking-wider backdrop-blur">{t.tag}</span>
+                  <div className="relative aspect-[4/3] overflow-hidden bg-brand-soft">
+                    <Image src={t.img} alt={t.alt} fill sizes="(min-width: 1024px) 400px, 100vw" className={t.mediaClass} />
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-extrabold tracking-tight">{t.title}</h3>
+                    <h3 className="text-xl font-extrabold leading-snug tracking-tight">{t.title}</h3>
                     <p className="mt-2 text-ink/70">{t.body}</p>
                   </div>
                 </Reveal>
@@ -166,6 +163,8 @@ export default function Home() {
           </ul>
         </div>
       </section>
+
+      <SocialImpact />
 
       {/* ---------- DEALER CTA ---------- */}
       <section className="relative overflow-clip bg-ink text-white">

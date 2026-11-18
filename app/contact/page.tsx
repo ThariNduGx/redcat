@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { ArrowUpRight, MapPin, Package, Store } from "lucide-react";
 import EnquiryForm from "@/components/EnquiryForm";
 import CatLoader from "@/components/ui/CatLoader";
-import { CONTACT } from "@/lib/site";
+import { CONTACT, FEATURES } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 const shortcuts = [
-  { href: "/track", icon: Package, title: "Track a parcel", body: "Live status and route" },
+  ...(FEATURES.tracking ? [{ href: "/track", icon: Package, title: "Track a parcel", body: "Live status and route" }] : []),
   { href: "/network", icon: MapPin, title: "Find a hub", body: "57 hubs on the map" },
   { href: "/dealers", icon: Store, title: "Become a dealer", body: "Run RedCat in your town" },
 ];

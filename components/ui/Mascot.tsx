@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { MASCOT_HEAD_SVG } from "@/lib/mascotSvg";
 
 /**
@@ -10,11 +10,18 @@ import { MASCOT_HEAD_SVG } from "@/lib/mascotSvg";
 export default function Mascot({
   className = "",
   watch,
+  variant = "head",
 }: {
   className?: string;
+  variant?: "head" | "logo";
   watch?: React.RefObject<HTMLElement | null>;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const clipId = `rc-mascot-${useId().replace(/:/g, "")}`;
+  const svg = MASCOT_HEAD_SVG.replaceAll("rc-mascot-clip", clipId).replace(
+    'viewBox="476 226 488 177"',
+    variant === "logo" ? 'viewBox="476 226 488 358"' : 'viewBox="476 226 488 177"',
+  );
 
   useEffect(() => {
     const root = ref.current;
@@ -44,7 +51,7 @@ export default function Mascot({
       if (!target) return;
       const box = root.getBoundingClientRect();
       const cx = box.left + box.width / 2;
-      const cy = box.top + box.height * 0.62;
+      const cy = box.top + box.height * (variant === "logo" ? 0.35 : 0.62);
       const dx = target.x - cx;
       const dy = target.y - cy;
       const d = Math.hypot(dx, dy) || 1;
@@ -63,10 +70,11 @@ export default function Mascot({
       lookAt(r.left + Math.min(r.width, 160), r.top + r.height / 2);
     };
 
-    let blinkTimer: ReturnType<typeof setTimeout>;
+    let blinkTimer: ReturnType<typeof setTimeout> | undefined;
+    let blinkEndTimer: ReturnType<typeof setTimeout> | undefined;
     const blink = () => {
       eyes.forEach((e) => (e.style.transform = "scaleY(0.1)"));
-      setTimeout(() => eyes.forEach((e) => (e.style.transform = "")), 130);
+      blinkEndTimer = setTimeout(() => eyes.forEach((e) => (e.style.transform = "")), 130);
       blinkTimer = setTimeout(blink, 2800 + Math.random() * 3500);
     };
 
@@ -79,9 +87,10 @@ export default function Mascot({
       window.removeEventListener("pointermove", onMove);
       document.removeEventListener("focusin", onFocus);
       clearTimeout(blinkTimer);
+      clearTimeout(blinkEndTimer);
       cancelAnimationFrame(raf);
     };
-  }, [watch]);
+  }, [watch, variant]);
 
-  return <div ref={ref} aria-hidden className={className} dangerouslySetInnerHTML={{ __html: MASCOT_HEAD_SVG }} />;
+  return <div ref={ref} data-mascot={variant} aria-hidden className={className} dangerouslySetInnerHTML={{ __html: svg }} />;
 }

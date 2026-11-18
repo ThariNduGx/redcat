@@ -43,8 +43,8 @@ export default function DealersPage() {
               <ArrowLink href="#roles" variant="outline" className="text-white">Ways to join</ArrowLink>
             </div>
           </div>
-          <div className="relative aspect-[16/10] overflow-clip rounded-[2.5rem] border-[3px] border-ink shadow-[0_30px_80px_-20px_rgba(0,0,0,0.45)]">
-            <Image src="/img/distributor.jpg" alt="A RedCat truck outside a lit RedCat distribution center at dusk" fill priority sizes="(min-width: 1024px) 600px, 100vw" className="object-cover" />
+          <div className="overflow-hidden rounded-3xl">
+            <Image src="/img/points/storefront.webp" alt="A RedCat Express Point storefront" width={1400} height={790} preload sizes="(min-width: 1024px) 600px, 100vw" className="block h-auto w-full" />
           </div>
         </div>
         <div aria-hidden className="absolute inset-x-0 -bottom-px h-14 bg-white sm:h-20" style={{ borderRadius: "50% 50% 0 0 / 100% 100% 0 0" }} />

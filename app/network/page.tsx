@@ -21,7 +21,7 @@ export default function NetworkPage() {
               <h1 className="mt-3 text-5xl font-extrabold leading-[0.95] tracking-[-0.04em] sm:text-7xl">Every district. Next day.</h1>
             </div>
             <p className="max-w-md text-lg text-ink/70">
-              57 regional hubs in 4 zones feed 930+ express points, all linked overnight through the Peliyagoda Mix Center.
+              57 regional hubs in 4 zones feed 930+ express points, all connected through our overnight delivery network.
             </p>
           </div>
           <div className="mt-10">

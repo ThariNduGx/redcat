@@ -4,18 +4,10 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from "motion/react";
 
-type Step = { title: string; body: string; img: string; alt: string; cutout?: boolean };
+type Step = { title: string; body: string; img: string; alt: string; width: number; height: number };
 
-/** Photos fill the frame; the fleet cut-out sits on brand red like in the deck. */
+/** Every frame matches its photograph’s proportions, with no inset or letterboxing. */
 function StepImage({ step, sizes }: { step: Step; sizes: string }) {
-  if (step.cutout) {
-    return (
-      <div className="absolute inset-0 bg-brand">
-        <div aria-hidden className="absolute inset-x-[-10%] bottom-[-40%] h-[70%] rounded-[50%] bg-ink" />
-        <Image src={step.img} alt={step.alt} fill sizes={sizes} className="object-contain object-bottom p-6 pb-3" />
-      </div>
-    );
-  }
   return <Image src={step.img} alt={step.alt} fill sizes={sizes} className="object-cover" />;
 }
 
@@ -23,27 +15,30 @@ const STEPS: Step[] = [
   {
     title: "Book in a minute",
     body: "Tell us where from, where to and how big. Book online or in the app.",
-    img: "/img/app.jpg",
+    img: "/img/process/booking.webp",
+    width: 1199, height: 1312,
     alt: "A customer booking a Colombo to Kandy delivery in the RedCat app",
   },
   {
     title: "We pick it up",
     body: "A RedCat rider collects it, or you drop it at one of 930+ express points.",
-    img: "/img/fleet.png",
-    alt: "RedCat trucks, vans and scooter riders lined up",
-    cutout: true,
+    img: "/img/process/pickup.webp",
+    width: 1400, height: 788,
+    alt: "A RedCat rider collecting parcels along a local road",
   },
   {
     title: "Overnight through the network",
-    body: "Regional hub, zone, Peliyagoda Mix Center and back out. We watch every parcel move.",
-    img: "/img/dashboard.jpg",
-    alt: "A RedCat operator watching the network dashboard",
+    body: "Your parcel travels through our extensive delivery network overnight, ready for delivery the next day.",
+    img: "/img/process/transit.webp",
+    width: 1400, height: 788,
+    alt: "A RedCat truck transporting parcels through the network",
   },
   {
     title: "At the door, next day",
     body: "A friendly RedCat rider hands it over. That's the promise.",
-    img: "/img/rider.jpg",
-    alt: "A smiling RedCat rider holding a parcel",
+    img: "/img/process/delivery.webp",
+    width: 1400, height: 933,
+    alt: "A RedCat rider handing a parcel to a customer",
   },
 ];
 
@@ -89,22 +84,26 @@ export default function Journey() {
               </div>
             </div>
 
-            <div className="relative aspect-[4/3.4] overflow-hidden rounded-[2.5rem] bg-mist shadow-2xl shadow-black/15">
-              <AnimatePresence initial={false}>
+            <div className="flex h-[72vh] items-center justify-center">
+              <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={active}
-                  initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 1.06 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6, ease: [0.2, 0.7, 0.2, 1] }}
-                  className="absolute inset-0"
+                  transition={{ duration: reduce ? 0 : 0.25 }}
+                  className="relative overflow-hidden rounded-3xl"
+                  style={{
+                    aspectRatio: `${STEPS[active].width} / ${STEPS[active].height}`,
+                    width: `min(100%, ${72 * STEPS[active].width / STEPS[active].height}vh)`,
+                  }}
                 >
                   <StepImage step={STEPS[active]} sizes="640px" />
+                  <div className="absolute bottom-5 left-5 rounded-full bg-white px-4 py-2 text-sm font-bold">
+                    Step {active + 1} of {STEPS.length}
+                  </div>
                 </motion.div>
               </AnimatePresence>
-              <div className="absolute bottom-5 left-5 rounded-full bg-white/90 px-4 py-2 text-sm font-bold shadow-lg backdrop-blur">
-                Step {active + 1} of {STEPS.length}
-              </div>
             </div>
           </div>
         </div>
@@ -117,7 +116,7 @@ export default function Journey() {
         <ol className="mt-10 space-y-10">
           {STEPS.map((s, i) => (
             <li key={s.title}>
-              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-mist">
+              <div className="relative overflow-hidden rounded-3xl" style={{ aspectRatio: `${s.width} / ${s.height}` }}>
                 <StepImage step={s} sizes="100vw" />
               </div>
               <p className="mt-4 text-sm font-extrabold text-brand-deep">0{i + 1}</p>

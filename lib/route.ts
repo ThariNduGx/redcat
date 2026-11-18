@@ -1,4 +1,4 @@
-import { MIX_CENTER, zoneById, type Hub } from "@/data/hubs";
+import { zoneById, type Hub } from "@/data/hubs";
 
 export interface Leg {
   label: string;
@@ -9,9 +9,9 @@ export interface Leg {
 
 /**
  * The typical path a parcel takes through RedCat's hierarchy
- * (express point → regional hub → zone → Mix Center → zone → regional hub → door),
+ * (regional hub → origin zone → destination zone → regional hub),
  * built from the network structure in the dealer deck. The exact routing rules
- * (e.g. whether same-zone parcels skip the Mix Center) should be confirmed by RedCat ops.
+ * and intermediate sorting locations should be confirmed by RedCat ops.
  */
 export function typicalRoute(from: Hub, to: Hub): Leg[] {
   const fz = zoneById(from.zone);
@@ -29,9 +29,8 @@ export function typicalRoute(from: Hub, to: Hub): Leg[] {
   if (from.zone === to.zone) {
     if (from.km > 0) legs.push({ label: `${fz.center} zone`, detail: `${from.km} km`, lat: fz.lat, lng: fz.lng });
   } else {
-    if (from.km > 0 && fz.id !== "A") legs.push({ label: `${fz.center} zone`, detail: `${from.km} km`, lat: fz.lat, lng: fz.lng });
-    legs.push({ label: "Peliyagoda Mix Center", detail: "Sorted overnight", lat: MIX_CENTER.lat, lng: MIX_CENTER.lng });
-    if (to.km > 0 && tz.id !== "A") legs.push({ label: `${tz.center} zone`, detail: `${to.km} km to ${to.name}`, lat: tz.lat, lng: tz.lng });
+    if (from.km > 0) legs.push({ label: `${fz.center} zone`, detail: "Through the overnight network", lat: fz.lat, lng: fz.lng });
+    if (to.km > 0) legs.push({ label: `${tz.center} zone`, detail: `On the way to ${to.name}`, lat: tz.lat, lng: tz.lng });
   }
 
   legs.push({ label: `${to.name} hub`, detail: "Out for delivery", lat: to.lat, lng: to.lng });

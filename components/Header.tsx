@@ -44,7 +44,7 @@ export default function Header() {
           <Logo className={`w-auto transition-[height] duration-300 ${scrolled ? "h-10" : "h-12"}`} />
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-0.5 lg:flex">
+        <nav aria-label="Main" className="hidden items-center gap-0.5 xl:flex">
           {NAV.filter((n) => n.href !== "/dealers").map((item) => {
             const active = pathname === item.href;
             return (
@@ -84,7 +84,7 @@ export default function Header() {
           </Link>
           <button
             type="button"
-            className="press grid h-11 w-11 place-items-center rounded-full border border-black/10 lg:hidden"
+            className="press grid h-11 w-11 place-items-center rounded-full border border-black/10 xl:hidden"
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -110,7 +110,7 @@ export default function Header() {
             animate={{ opacity: 1, height: "calc(100dvh - 64px)" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.2, 0.7, 0.2, 1] }}
-            className="overflow-hidden bg-white lg:hidden"
+            className="overflow-hidden bg-white xl:hidden"
           >
             <ul className="flex flex-col px-5 pt-4">
               {NAV.map((item, i) => (

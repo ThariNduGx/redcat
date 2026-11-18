@@ -13,7 +13,7 @@ export const SRI_LANKA_BOUNDS: [[number, number], [number, number]] = [
 ];
 
 export const INK = "#090908";
-export const BRAND = "#ff4d4d";
+export const BRAND = "#e12222";
 
 /** Recolour the neutral basemap so it reads as RedCat's: warm paper land, soft blue water. */
 function restyle(style: StyleSpecification): StyleSpecification {

@@ -38,15 +38,14 @@ export function mockShipment(rawId: string): MockShipment {
 
   const stage = h % 6;
   const route = typicalRoute(from, to);
-  const mixIdx = route.findIndex((l) => l.label.includes("Mix Center"));
-  const mid = mixIdx >= 0 ? mixIdx : Math.floor(route.length / 2);
+  const mid = Math.floor(route.length / 2);
   const last = route.length - 1;
   const position = [0, 0, mid, (mid + last - 1) / 2 + 0.5, last - 0.15, last][stage];
 
   const steps: Omit<TrackEvent, "done">[] = [
     { title: "Booked", where: `${from.name}, ${from.district}`, when: "Day 1 · 09:12" },
     { title: "Collected by RedCat", where: `${from.name} hub`, when: "Day 1 · 15:40" },
-    { title: "Sorted at the Mix Center", where: "Peliyagoda", when: "Day 1 · 22:05" },
+    { title: "Sorted within the network", where: "Overnight delivery network", when: "Day 1 · 22:05" },
     {
       title: to.zone === "A" ? `On the way to ${to.name}` : "On the way to the destination zone",
       where: route[Math.min(last, mid + 1)].label,

@@ -42,7 +42,7 @@ export default function CatLoader({
 
           {/* the parcel */}
           <g className="rc-cat-box">
-            <rect x="80" y="28" width="40" height="30" rx="4" fill="#ff4d4d" stroke="#090908" strokeWidth="3.5" />
+            <rect x="80" y="28" width="40" height="30" rx="4" fill="#e12222" stroke="#090908" strokeWidth="3.5" />
             <line x1="100" y1="29" x2="100" y2="57" stroke="#090908" strokeOpacity="0.35" strokeWidth="3" />
             <rect x="105" y="45" width="10" height="7" rx="1.5" fill="#fff" />
           </g>
@@ -51,8 +51,8 @@ export default function CatLoader({
           <g className="rc-cat-head">
             <path d="M134 44 L137 20 L152 36 Z" fill="#090908" />
             <path d="M150 36 L167 20 L168 46 Z" fill="#090908" />
-            <path d="M138 38 L139.5 27 L147 35 Z" fill="#ff4d4d" />
-            <path d="M156 35 L164 27 L164.5 40 Z" fill="#ff4d4d" />
+            <path d="M138 38 L139.5 27 L147 35 Z" fill="#e12222" />
+            <path d="M156 35 L164 27 L164.5 40 Z" fill="#e12222" />
             <circle cx="151" cy="52" r="19" fill="#090908" />
             <circle cx="144" cy="50" r="6" fill="#fff" />
             <circle cx="159" cy="50" r="6" fill="#fff" />
