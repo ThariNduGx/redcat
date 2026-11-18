@@ -6,7 +6,7 @@ const variants = {
   dark: "bg-ink text-white hover:bg-brand-deep",
   light: "bg-white text-ink hover:bg-ink hover:text-white",
   outline: "border-2 border-current hover:bg-white hover:text-ink",
-  brand: "bg-brand text-ink hover:bg-white",
+  brand: "bg-brand text-white hover:bg-ink hover:text-white",
 } as const;
 
 /** Pill link with an arrow that slides on hover and a small press-in on click. */
