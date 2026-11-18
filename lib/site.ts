@@ -7,10 +7,10 @@ export const CONTACT = {
 };
 
 export const STATS = {
-  zones: 4,
-  regionalHubs: 57,
   expressPoints: "930+",
-  mixCenters: 1,
+  regionalHubs: 57,
+  zones: 4,
+  mixingPoints: 1,
 };
 
 // Switch on when the customer tracking system is ready.

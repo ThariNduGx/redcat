@@ -13,10 +13,10 @@ import SocialImpact from "@/components/SocialImpact";
 import { HUBS } from "@/data/hubs";
 
 const stats = [
-  { to: 57, suffix: "", label: "Regional hubs", note: "in every district" },
   { to: 930, suffix: "+", label: "Express points", note: "to send and collect" },
-  { to: 25, suffix: "", label: "Districts covered", note: "all of Sri Lanka" },
-  { to: 4, suffix: "", label: "Zones", note: "one Mix Center" },
+  { to: 57, suffix: "", label: "Regional hubs", note: "in every district" },
+  { to: 4, suffix: "", label: "Zones", note: "operating zones" },
+  { to: 1, suffix: "", label: "Mixing point", note: "central sorting hub" },
 ];
 
 const tech = [
