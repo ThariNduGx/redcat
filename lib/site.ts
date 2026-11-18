@@ -25,6 +25,6 @@ export const NAV = [
   { href: "/dealers", label: "Become a dealer" },
   { href: "/about", label: "About" },
   { href: "/social-impact", label: "Social impact" },
-  { href: "/careers", label: "Careers" },
+  { href: "/hr", label: "Careers" },
   { href: "/contact", label: "Contact" },
 ];
