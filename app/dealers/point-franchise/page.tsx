@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Suspense } from "react";
 import {
+  ArrowRight,
   Banknote,
   BarChart3,
   Boxes,
+  CheckCircle2,
   Clock,
   Cpu,
   GraduationCap,
@@ -15,7 +17,10 @@ import {
   ScanBarcode,
   ShieldCheck,
   Sparkles,
+  Store,
   TrendingUp,
+  Truck,
+  Wallet,
 } from "lucide-react";
 import EnquiryForm from "@/components/EnquiryForm";
 import Reveal from "@/components/Reveal";
@@ -29,79 +34,138 @@ export const metadata: Metadata = {
     "Own a RedCat Point franchise business. Complete turnkey setup with IT system, equipment, branding, exclusive sales territory, and LKR 1.5Mn - 2.0Mn investment.",
 };
 
-const advantages = [
+const metrics = [
   {
-    icon: TrendingUp,
-    title: "Day-by-Day Growing Business",
-    body: "Rapid growth in islandwide e-commerce and retail parcel delivery drives continuous customer footfall and compounding business value.",
-  },
-  {
-    icon: Monitor,
-    title: "100% IT System Operation",
-    body: "Automated cloud-based point management system coordinates every parcel, label, and tracking milestone—eliminating manual paperwork and minimizing errors.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Fraud-Resistant & Secure",
-    body: "Strict digital barcode verification, customer OTP release authentication, and encrypted audit trails ensure all packages and transactions remain fully protected.",
-  },
-  {
-    icon: Banknote,
-    title: "100% Cash-Based Business",
-    body: "Immediate fee settlement and seamless Cash on Delivery (COD) processing with zero credit risk, no receivables, and dependable daily liquidity.",
-  },
-  {
-    icon: BarChart3,
-    title: "Real-Time Profit Visibility",
-    body: "Live analytics dashboard displays your parcel throughput, fee commissions, and exact net profit updated in real-time.",
-  },
-  {
-    icon: Sparkles,
-    title: "High Profit Potential",
-    body: "Attractive commission tiers earned on parcel drop-offs, doorstep pickups, and collection handovers with minimal fixed recurring costs.",
+    icon: Wallet,
+    title: "Capital Outlay",
+    value: "1.5 – 2.0 Mn",
+    unit: "LKR Total Investment",
+    detail: "Complete turnkey package covering IT, hardware, racking, branding, and training.",
   },
   {
     icon: Clock,
-    title: "Convenient Operating Hours",
-    body: "Standard 9:00 AM – 5:00 PM retail schedule offers a balanced business lifestyle, running standalone or alongside your existing shop.",
+    title: "Operating Hours",
+    value: "9 AM – 5 PM",
+    unit: "Daytime Schedule",
+    detail: "Convenient standard retail hours offering steady daily routine and great work-life balance.",
+  },
+  {
+    icon: Banknote,
+    title: "Revenue Model",
+    value: "100% Cash Flow",
+    unit: "Zero Debtor Risk",
+    detail: "Instant commission settlement on drop-offs & collections with no delayed credit terms.",
   },
   {
     icon: MapPin,
+    title: "Territory Protection",
+    value: "Exclusive Area",
+    unit: "Protected Radius",
+    detail: "Guaranteed territorial allocation with zero internal competition from other RedCat points.",
+  },
+];
+
+const advantages = [
+  {
+    icon: TrendingUp,
+    num: "01",
+    title: "Day-by-Day Growing Business",
+    subtitle: "Compounding parcel volume",
+    body: "Rapid growth in islandwide e-commerce and retail parcel delivery drives continuous customer footfall and compounding business value every single month.",
+  },
+  {
+    icon: Monitor,
+    num: "02",
+    title: "100% IT System Operation",
+    subtitle: "Automated & error-free",
+    body: "Our cloud-based Point Management System automates waybills, tracking updates, and financial reconciliation—eliminating manual paperwork entirely.",
+  },
+  {
+    icon: ShieldCheck,
+    num: "03",
+    title: "Fraud-Resistant & Secure",
+    subtitle: "End-to-end digital audit",
+    body: "Strict digital barcode verification, OTP-authenticated package handovers, and tamper-proof logs ensure every parcel and payment is 100% secure.",
+  },
+  {
+    icon: Wallet,
+    num: "04",
+    title: "100% Cash-Based Business",
+    subtitle: "Zero debtor risk",
+    body: "Immediate fee collections and automated Cash on Delivery (COD) processing mean no receivables, no delayed credit terms, and reliable daily liquidity.",
+  },
+  {
+    icon: BarChart3,
+    num: "05",
+    title: "Real-Time Profit Visibility",
+    subtitle: "Instant daily ledger",
+    body: "Track every rupee of commission live. Your digital merchant dashboard displays package throughput, commission earnings, and net profit in real time.",
+  },
+  {
+    icon: Sparkles,
+    num: "06",
+    title: "High Profit Potential",
+    subtitle: "Multi-stream commissions",
+    body: "Earn attractive commission margins on parcel drop-offs, doorstep pickups, and collection handovers with minimal recurring overhead.",
+  },
+  {
+    icon: Clock,
+    num: "07",
+    title: "Convenient Operating Hours",
+    subtitle: "9:00 AM – 5:00 PM",
+    body: "Standard daylight retail hours make it easy to run standalone with a single staff member or seamlessly integrate inside your existing shop.",
+  },
+  {
+    icon: MapPin,
+    num: "08",
     title: "Dedicated Exclusive Territory",
-    body: "Guaranteed territorial allocation ensures you operate as the sole authorized RedCat Point with zero internal network competition.",
+    subtitle: "Protected market boundary",
+    body: "Guaranteed territorial allocation ensures you are the sole authorized RedCat Point in your designated area, with zero internal network competition.",
   },
 ];
 
 const turnkeyItems = [
   {
     icon: Cpu,
+    category: "Software & Cloud",
     title: "IT System & Software",
-    desc: "Complete point management software, merchant portal access, automated label printing, and real-time islandwide tracking integration.",
+    desc: "Complete Point Management software license, merchant portal, automated label generation, and real-time islandwide tracking synchronization.",
+    highlights: ["Cloud POS Terminal", "Live Tracking Sync", "Automated Waybills"],
   },
   {
     icon: ScanBarcode,
+    category: "Hardware Suite",
     title: "Operational Devices",
-    desc: "Industrial commercial barcode scanner, receipt and shipping label printer, and precision digital parcel weighing scale.",
+    desc: "Commercial 2D high-speed barcode scanner, high-output thermal shipping label and receipt printer, and certified digital parcel weighing scale.",
+    highlights: ["2D Barcode Scanner", "Thermal Label Printer", "Digital Weighing Scale"],
   },
   {
     icon: Boxes,
+    category: "Logistics Containers",
     title: "Plastic Containers",
-    desc: "Heavy-duty stackable RedCat red parcel crates and secure handling containers to safeguard customer goods.",
+    desc: "Heavy-duty stackable RedCat red parcel crates and tamper-evident transit containers built to protect customer items throughout transport.",
+    highlights: ["Heavy-Duty Crates", "Stackable Modular Fit", "Secure Transit Seals"],
   },
   {
     icon: Layers,
+    category: "Store Fixtures",
     title: "Racking Systems",
-    desc: "Modular, space-efficient parcel storage shelving and organizing bays customized for your specific storefront floor plan.",
+    desc: "Industrial modular steel parcel storage shelving and organized sorting bays customized to fit your storefront dimensions perfectly.",
+    highlights: ["Steel Racking Bays", "Destination Bins", "Space-Optimized Layout"],
   },
   {
     icon: Printer,
+    category: "Brand Assets",
     title: "Branding & Signage",
-    desc: "Exterior illuminated 3D RedCat storefront sign, interior wall graphics, branded front counter wraps, and promotional signage.",
+    desc: "Exterior illuminated 3D RedCat storefront sign, interior wall graphics, branded front counter wrap, and official window marketing decals.",
+    highlights: ["3D Illuminated Sign", "Branded Counter Wrap", "Official Window Decals"],
   },
   {
     icon: GraduationCap,
-    title: "Training & Operational Support",
-    desc: "Comprehensive staff training on software and standard SOPs, marketing launch support, and ongoing franchisee advisory.",
+    category: "Operational Readiness",
+    title: "Training & Ongoing Support",
+    desc: "Comprehensive onboarding for owners and staff covering software operations, parcel safety, customer service SOPs, and dedicated helpline.",
+    highlights: ["Hands-On SOP Training", "Dedicated Area Helpline", "Launch Marketing Kit"],
   },
 ];
 
@@ -109,27 +173,32 @@ const dailySteps = [
   {
     step: "01",
     title: "Accept Parcels",
-    desc: "Receive parcels from walk-in retail customers, online merchants, and local commercial senders.",
+    desc: "Receive packages from walk-in retail senders, local online merchants, and corporate clients at your counter.",
+    icon: Store,
   },
   {
     step: "02",
     title: "Scan & Register",
-    desc: "Quick barcode scan registers the waybill, confirms destination, and auto-calculates weight in seconds.",
+    desc: "Scan the barcode with the 2D scanner. Weight and tariff calculate instantly; print waybill and label in seconds.",
+    icon: ScanBarcode,
   },
   {
     step: "03",
     title: "Sort & Store",
-    desc: "Place packages into designated destination zone bins on organized RedCat racking shelves.",
+    desc: "Place packages into designated destination crates on your organized RedCat modular racking shelving.",
+    icon: Boxes,
   },
   {
     step: "04",
     title: "Hand Over",
-    desc: "Hand over outgoing parcels to the RedCat line-haul collection vehicle, or deliver incoming parcels to customers via OTP.",
+    desc: "Transfer outgoing crates to the daily RedCat line-haul truck, or release customer arrivals using secure OTP.",
+    icon: Truck,
   },
   {
     step: "05",
     title: "See Your Profit",
-    desc: "Commission credits post directly to your digital ledger with instant visibility on your dashboard.",
+    desc: "Commissions credit automatically to your digital account ledger with real-time balance updates.",
+    icon: TrendingUp,
   },
 ];
 
@@ -137,133 +206,205 @@ export default function PointFranchisePage() {
   return (
     <>
       {/* ---------- HERO SECTION ---------- */}
-      <section className="rc-grain relative isolate overflow-clip bg-brand pb-24 pt-12 text-white sm:pb-32 sm:pt-16 lg:pb-36">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-ink py-1.5 pl-3 pr-4 text-xs font-bold tracking-[0.14em] uppercase text-white shadow-md">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75 motion-reduce:animate-none" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
-              </span>
-              Point Franchise Opportunity
-            </div>
+      <section className="rc-grain relative isolate overflow-clip bg-brand pb-20 pt-12 text-white sm:pb-28 sm:pt-16">
+        <div className="mx-auto max-w-7xl px-5">
+          <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
+            
+            {/* Left Content Column */}
+            <div className="lg:col-span-7">
+              <div className="inline-flex items-center gap-2 rounded-full bg-ink/90 border border-white/20 py-1.5 pl-3.5 pr-4 text-xs font-bold tracking-[0.14em] uppercase text-white shadow-lg">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75 motion-reduce:animate-none" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+                </span>
+                Point Franchise Opportunity
+              </div>
 
-            <h1 className="mt-5 text-[clamp(2.5rem,6vw,5.25rem)] font-extrabold leading-[0.96] tracking-[-0.04em]">
-              Own a REDCAT Point Franchise Business
-            </h1>
+              <h1 className="mt-5 text-[clamp(2.5rem,5.5vw,4.75rem)] font-extrabold leading-[0.96] tracking-[-0.04em] text-white">
+                Own a REDCAT Point
+                <span className="block text-brand-soft">Franchise Business</span>
+              </h1>
 
-            <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-white/90 sm:text-xl">
-              Step into Sri Lanka&apos;s fastest-growing delivery network. Open a dedicated RedCat Point in your town with full IT automation, zero credit risk, guaranteed territorial exclusivity, and dependable daily cash flow.
-            </p>
+              <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-white/90 sm:text-xl">
+                Step into Sri Lanka&apos;s fastest-expanding delivery network. Open a dedicated RedCat Point in your town with full IT automation, zero credit risk, guaranteed territorial exclusivity, and dependable daily cash flow.
+              </p>
 
-            {/* Investment Highlight Pill */}
-            <div className="mt-8 inline-flex flex-wrap items-center gap-5 rounded-2xl bg-ink p-4 sm:p-5 shadow-2xl border border-white/10">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-white/70">
-                  Total Franchise Investment
-                </p>
-                <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-1">
-                  LKR 1.5 Mn – 2.0 Mn
+              {/* Franchise Investment Callout Card */}
+              <div className="mt-8 rounded-3xl border-2 border-white/20 bg-white p-5 text-ink shadow-2xl sm:p-7">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 pb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-3 w-3 rounded-full bg-brand animate-pulse" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-ink/70">
+                      Turnkey Franchise Investment
+                    </span>
+                  </div>
+                  <span className="rounded-full bg-brand-soft px-3 py-1 text-xs font-extrabold text-brand uppercase tracking-wider">
+                    All-Inclusive Setup
+                  </span>
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-baseline gap-3">
+                  <span className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-brand">
+                    LKR 1.5 Mn – 2.0 Mn
+                  </span>
+                  <span className="text-sm font-semibold text-ink/60">
+                    total capital outlay
+                  </span>
+                </div>
+
+                <p className="mt-3 text-sm font-medium leading-relaxed text-ink/80">
+                  Includes complete IT system & software, commercial barcode scanner, thermal printer, digital scale, racking, crates, 3D illuminated exterior signage, and full staff training.
                 </p>
               </div>
-              <div className="border-l border-white/20 pl-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-brand">Complete Turnkey Package</p>
-                <p className="text-sm font-semibold text-white/90">IT, Equipment, Signage & Training Included</p>
+
+              {/* CTA Buttons */}
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <ArrowLink href="#apply" variant="light" className="text-base font-bold shadow-xl">
+                  Apply for Franchise
+                </ArrowLink>
+                <ArrowLink
+                  href="#turnkey"
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white hover:text-ink text-base font-semibold"
+                >
+                  What&apos;s Included
+                </ArrowLink>
+                <ArrowLink
+                  href="#advantages"
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white hover:text-ink text-base font-semibold"
+                >
+                  Franchisee Advantages
+                </ArrowLink>
               </div>
             </div>
 
-            <div className="mt-9 flex flex-wrap gap-3">
-              <ArrowLink href="#apply" variant="light">
-                Apply for Point Franchise
-              </ArrowLink>
-              <ArrowLink href="#advantages" variant="outline" className="text-white hover:bg-white hover:text-ink">
-                Franchisee Advantages
-              </ArrowLink>
-            </div>
-          </div>
+            {/* Right Storefront Showcase Column */}
+            <div className="lg:col-span-5">
+              <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
+                <div className="group relative overflow-hidden rounded-[2.5rem] border-4 border-white/25 bg-black/10 shadow-[0_30px_80px_-15px_rgba(0,0,0,0.6)]">
+                  <Image
+                    src="/img/points/storefront.webp"
+                    alt="Modern RedCat Point Express Storefront serving customers and merchants"
+                    width={1400}
+                    height={790}
+                    preload
+                    sizes="(min-width: 1024px) 520px, 100vw"
+                    className="block h-auto w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  
+                  {/* Floating Tag */}
+                  <div className="absolute top-5 right-5 rounded-full bg-ink/85 border border-white/20 px-3.5 py-1.5 text-xs font-bold text-white shadow-lg backdrop-blur-md flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                    Express Storefront Format
+                  </div>
 
-          {/* Hero Storefront Image */}
-          <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
-            <div className="overflow-hidden rounded-3xl border-4 border-white/20 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.5)]">
-              <Image
-                src="/img/points/storefront.webp"
-                alt="Modern RedCat Point Express Storefront serving customers and merchants"
-                width={1400}
-                height={790}
-                preload
-                sizes="(min-width: 1024px) 560px, 100vw"
-                className="block h-auto w-full object-cover"
-              />
+                  {/* Bottom Text Overlay */}
+                  <div className="absolute bottom-0 inset-x-0 p-6 text-white">
+                    <p className="text-xs font-bold uppercase tracking-widest text-brand-soft">
+                      SEND TODAY. RECEIVE TOMORROW.
+                    </p>
+                    <p className="mt-1 text-lg font-extrabold leading-snug">
+                      Engineered for high-volume parcel intake and instant customer service.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Sub-badge strip */}
+                <div className="mt-4 flex items-center justify-between px-2 text-xs font-bold tracking-wider uppercase text-white/90">
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle2 size={15} className="text-white" />
+                    Turnkey Equipment
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle2 size={15} className="text-white" />
+                    Protected Area
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle2 size={15} className="text-white" />
+                    930+ Points
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="mt-4 flex items-center justify-between px-2 text-xs font-bold tracking-wide uppercase text-white/80">
-              <span>Send Today. Receive Tomorrow.</span>
-              <span>930+ Planned Express Points</span>
-            </div>
+
           </div>
         </div>
-
-        <div
-          aria-hidden
-          className="absolute inset-x-0 -bottom-px h-12 bg-white sm:h-20"
-          style={{ borderRadius: "50% 50% 0 0 / 100% 100% 0 0" }}
-        />
       </section>
 
       {/* ---------- AT A GLANCE INVESTMENT METRICS ---------- */}
-      <section className="mx-auto max-w-7xl px-5 py-12 sm:py-16">
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <div className="rounded-2xl border-2 border-black/5 bg-mist p-6 transition duration-300 hover:border-brand hover:shadow-lg">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand">Capital Outlay</p>
-            <p className="mt-2 text-2xl font-extrabold text-ink sm:text-3xl">1.5 - 2.0 Mn</p>
-            <p className="mt-1 text-xs font-medium text-ink/70">LKR total turnkey investment</p>
-          </div>
-          <div className="rounded-2xl border-2 border-black/5 bg-mist p-6 transition duration-300 hover:border-brand hover:shadow-lg">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand">Working Hours</p>
-            <p className="mt-2 text-2xl font-extrabold text-ink sm:text-3xl">9 AM – 5 PM</p>
-            <p className="mt-1 text-xs font-medium text-ink/70">Convenient daytime retail schedule</p>
-          </div>
-          <div className="rounded-2xl border-2 border-black/5 bg-mist p-6 transition duration-300 hover:border-brand hover:shadow-lg">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand">Revenue Model</p>
-            <p className="mt-2 text-2xl font-extrabold text-ink sm:text-3xl">100% Cash</p>
-            <p className="mt-1 text-xs font-medium text-ink/70">Immediate commission & zero credit risk</p>
-          </div>
-          <div className="rounded-2xl border-2 border-black/5 bg-mist p-6 transition duration-300 hover:border-brand hover:shadow-lg">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand">Territory</p>
-            <p className="mt-2 text-2xl font-extrabold text-ink sm:text-3xl">Exclusive Area</p>
-            <p className="mt-1 text-xs font-medium text-ink/70">No internal RedCat competition</p>
-          </div>
+      <section className="relative z-10 -mt-8 sm:-mt-12 mx-auto max-w-7xl px-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {metrics.map((m) => (
+            <div
+              key={m.title}
+              className="group flex flex-col justify-between rounded-3xl border-2 border-black/5 bg-white p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-brand hover:shadow-2xl hover:shadow-brand/10"
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-soft text-brand transition-colors duration-300 group-hover:bg-brand group-hover:text-white">
+                    <m.icon size={22} strokeWidth={2.4} />
+                  </span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-brand">
+                    {m.title}
+                  </span>
+                </div>
+                <p className="mt-5 text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
+                  {m.value}
+                </p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-wider text-ink/60">
+                  {m.unit}
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-ink/75">
+                  {m.detail}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* ---------- FRANCHISEE ADVANTAGES ---------- */}
-      <section id="advantages" className="scroll-mt-24 bg-mist/60 py-20 sm:py-28">
+      <section id="advantages" className="scroll-mt-20 bg-paper py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-5">
           <Reveal>
-            <span className="text-sm font-bold uppercase tracking-[0.18em] text-brand">Partner Benefits</span>
-            <h2 className="mt-2 text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
-              Franchisee Advantages
-            </h2>
-            <p className="mt-4 max-w-2xl text-lg text-ink/75">
-              Engineered to provide independent entrepreneurs with a recession-resilient, technology-powered business model offering complete operational safety and high daily returns.
-            </p>
+            <div className="flex flex-wrap items-end justify-between gap-6 border-b border-black/10 pb-8">
+              <div>
+                <span className="text-sm font-bold uppercase tracking-[0.18em] text-brand">
+                  Franchise Benefits
+                </span>
+                <h2 className="mt-3 text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
+                  8 Powerful Franchisee Advantages
+                </h2>
+              </div>
+              <p className="max-w-xl text-lg text-ink/75">
+                Designed to provide independent business owners with consistent daily cash flow, zero credit exposure, and full operational automation.
+              </p>
+            </div>
           </Reveal>
 
-          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {advantages.map((adv, i) => (
-              <Reveal key={adv.title} delay={i * 60}>
-                <div className="group flex h-full flex-col justify-between rounded-3xl border-2 border-black/5 bg-white p-7 transition duration-300 hover:-translate-y-1.5 hover:border-brand hover:shadow-xl hover:shadow-brand/5">
+              <Reveal key={adv.title} delay={i * 50}>
+                <div className="group flex h-full flex-col justify-between rounded-3xl border border-black/10 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-brand hover:shadow-xl hover:shadow-brand/5">
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-soft text-brand transition duration-300 group-hover:bg-brand group-hover:text-white">
+                      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand text-white shadow-md shadow-brand/20 transition-transform duration-300 group-hover:scale-110">
                         <adv.icon size={22} strokeWidth={2.4} />
                       </span>
-                      <span className="text-xs font-extrabold text-ink/30">0{i + 1}</span>
+                      <span className="rounded-full bg-mist px-2.5 py-1 text-xs font-black tracking-wider text-ink/40">
+                        {adv.num}
+                      </span>
                     </div>
 
                     <h3 className="mt-6 text-xl font-extrabold tracking-tight text-ink group-hover:text-brand transition-colors">
                       {adv.title}
                     </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-ink/70">
+                    <p className="mt-1 text-xs font-bold uppercase tracking-wider text-brand">
+                      {adv.subtitle}
+                    </p>
+                    <p className="mt-3.5 text-sm leading-relaxed text-ink/75">
                       {adv.body}
                     </p>
                   </div>
@@ -274,88 +415,141 @@ export default function PointFranchisePage() {
         </div>
       </section>
 
-      {/* ---------- WHAT REDCAT PROVIDES ---------- */}
-      <section className="mx-auto max-w-7xl px-5 py-20 sm:py-28">
-        <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <div>
-            <Reveal>
-              <span className="text-sm font-bold uppercase tracking-[0.18em] text-brand">Turnkey Franchise Package</span>
-              <h2 className="mt-2 text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
-                What REDCAT Provides
-              </h2>
-              <p className="mt-4 max-w-xl text-lg text-ink/75">
-                From hardware and software to custom racking and physical signage, everything you need to open and run your store successfully is supplied and installed by RedCat.
-              </p>
-            </Reveal>
-
-            <div className="mt-10 grid gap-5 sm:grid-cols-2">
-              {turnkeyItems.map((item, i) => (
-                <Reveal key={item.title} delay={i * 60}>
-                  <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm transition duration-300 hover:border-brand">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand">
-                        <item.icon size={20} strokeWidth={2.4} />
-                      </span>
-                      <h3 className="text-base font-extrabold text-ink">{item.title}</h3>
-                    </div>
-                    <p className="mt-2.5 text-xs leading-relaxed text-ink/70">{item.desc}</p>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
+      {/* ---------- WHAT REDCAT PROVIDES (TURNKEY PACKAGE) ---------- */}
+      <section id="turnkey" className="scroll-mt-20 mx-auto max-w-7xl px-5 py-20 sm:py-28">
+        <Reveal>
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-sm font-bold uppercase tracking-[0.18em] text-brand">
+              Turnkey Franchise Setup
+            </span>
+            <h2 className="mt-3 text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
+              What REDCAT Provides
+            </h2>
+            <p className="mt-4 text-lg text-ink/75">
+              Everything required to open and operate your RedCat Point is supplied, installed, and configured directly by our logistics engineering team.
+            </p>
           </div>
+        </Reveal>
 
-          {/* Automated System Showcase Visual */}
-          <Reveal delay={100} className="relative">
-            <div className="overflow-hidden rounded-3xl border-2 border-black/10 bg-brand-soft p-4 shadow-xl">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-white">
-                <Image
-                  src="/img/technology/point-management.webp"
-                  alt="RedCat Point Management System display terminal"
-                  fill
-                  sizes="(min-width: 1024px) 500px, 100vw"
-                  className="object-contain p-4"
-                />
+        {/* 6 Comprehensive Turnkey Deliverable Cards */}
+        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {turnkeyItems.map((item, i) => (
+            <Reveal key={item.title} delay={i * 60}>
+              <div className="flex h-full flex-col justify-between rounded-3xl border-2 border-black/5 bg-white p-7 shadow-sm transition-all duration-300 hover:border-brand hover:shadow-xl">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-soft text-brand">
+                      <item.icon size={22} strokeWidth={2.4} />
+                    </span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-ink/50">
+                      {item.category}
+                    </span>
+                  </div>
+
+                  <h3 className="mt-6 text-2xl font-extrabold tracking-tight text-ink">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-ink/75">
+                    {item.desc}
+                  </p>
+                </div>
+
+                <div className="mt-6 border-t border-black/5 pt-4">
+                  <div className="flex flex-wrap gap-2">
+                    {item.highlights.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-mist px-2.5 py-1 text-xs font-bold text-ink/80"
+                      >
+                        <CheckCircle2 size={13} className="text-brand shrink-0" />
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="mt-4 rounded-xl bg-white p-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-brand">Automated Point System</p>
-                <p className="mt-1 text-sm font-bold text-ink">
-                  Every parcel, barcode scan, weight calculation, and commission is tracked in real-time.
+            </Reveal>
+          ))}
+        </div>
+
+        {/* Turnkey Deployment Operational Banner */}
+        <Reveal delay={200} className="mt-12">
+          <div className="relative overflow-hidden rounded-3xl bg-ink p-8 sm:p-12 text-white">
+            <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
+              <div className="lg:col-span-8">
+                <span className="inline-flex items-center gap-2 rounded-full bg-brand px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-white">
+                  Fast 14-Day Launch
+                </span>
+                <h3 className="mt-4 text-3xl sm:text-4xl font-extrabold tracking-tight">
+                  From Lease Signing to Opening Day in 2 Weeks
+                </h3>
+                <p className="mt-3 max-w-2xl text-base sm:text-lg text-white/80 leading-relaxed">
+                  Our team delivers your illuminated 3D signage, installs industrial shelving, sets up your barcode hardware and POS terminal, and conducts complete staff training on site.
                 </p>
               </div>
+              <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
+                <ArrowLink href="#apply" variant="light" className="text-center font-bold">
+                  Apply for Your Location
+                </ArrowLink>
+                <ArrowLink href="/dealers" variant="outline" className="border-white/30 text-white hover:bg-white hover:text-ink text-center">
+                  Explore Hub Options
+                </ArrowLink>
+              </div>
             </div>
-          </Reveal>
-        </div>
+          </div>
+        </Reveal>
       </section>
 
       {/* ---------- SIMPLE DAILY OPERATION ---------- */}
-      <section className="bg-ink py-20 sm:py-28 text-white">
+      <section className="bg-mist/80 py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-5">
-          <Reveal className="text-center">
-            <span className="text-sm font-bold uppercase tracking-[0.18em] text-brand">Effortless Workflow</span>
-            <h2 className="mt-2 text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
+          <Reveal className="text-center max-w-3xl mx-auto">
+            <span className="text-sm font-bold uppercase tracking-[0.18em] text-brand">
+              Effortless Routine
+            </span>
+            <h2 className="mt-3 text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
               Simple Daily Operation
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-white/75">
-              Running a RedCat Point is intuitive and fully assisted by our digital software. No prior courier experience is necessary.
+            <p className="mt-4 text-lg text-ink/75">
+              Operating a RedCat Point is straightforward and fully assisted by our digital system. No prior courier background is required.
             </p>
           </Reveal>
 
-          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+          {/* 5-Step Process Flow Cards */}
+          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
             {dailySteps.map((step, i) => (
               <Reveal key={step.step} delay={i * 80}>
-                <div className="relative flex h-full flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-6 transition duration-300 hover:border-brand hover:bg-white/10">
+                <div className="relative flex h-full flex-col justify-between rounded-3xl border-2 border-black/5 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-brand hover:shadow-xl">
                   <div>
-                    <span className="text-3xl font-extrabold text-brand sm:text-4xl">
-                      {step.step}
-                    </span>
-                    <h3 className="mt-4 text-xl font-extrabold tracking-tight text-white">
+                    <div className="flex items-center justify-between">
+                      <span className="text-3xl font-black text-brand tracking-tight">
+                        {step.step}
+                      </span>
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand">
+                        <step.icon size={20} strokeWidth={2.4} />
+                      </span>
+                    </div>
+
+                    <h3 className="mt-5 text-xl font-extrabold tracking-tight text-ink">
                       {step.title}
                     </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-white/70">
+                    <p className="mt-3 text-sm leading-relaxed text-ink/75">
                       {step.desc}
                     </p>
                   </div>
+
+                  {i < dailySteps.length - 1 && (
+                    <div className="mt-5 hidden lg:flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-brand">
+                      <span>Next step</span>
+                      <ArrowRight size={14} />
+                    </div>
+                  )}
+                  {i === dailySteps.length - 1 && (
+                    <div className="mt-5 hidden lg:flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-emerald-600">
+                      <span>Repeat daily</span>
+                      <CheckCircle2 size={14} />
+                    </div>
+                  )}
                 </div>
               </Reveal>
             ))}
@@ -365,63 +559,118 @@ export default function PointFranchisePage() {
 
       {/* ---------- STOREFRONT REQUIREMENTS ---------- */}
       <section className="mx-auto max-w-7xl px-5 py-20 sm:py-28">
-        <div className="rounded-[3rem] border border-brand/20 bg-gradient-to-b from-brand-soft/60 to-white p-8 sm:p-14 lg:p-16">
-          <Reveal>
-            <span className="text-sm font-bold uppercase tracking-[0.18em] text-brand">Storefront Criteria</span>
-            <h2 className="mt-2 text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
-              Location & Space Requirements
+        <Reveal>
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-sm font-bold uppercase tracking-[0.18em] text-brand">
+              Site Selection
+            </span>
+            <h2 className="mt-3 text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
+              Storefront & Space Requirements
             </h2>
-            <p className="mt-4 max-w-2xl text-lg text-ink/75">
+            <p className="mt-4 text-lg text-ink/75">
               Ideal as a dedicated standalone parcel point, or as an integrated service counter inside an existing retail business.
             </p>
+          </div>
+        </Reveal>
+
+        <div className="mt-14 grid gap-6 sm:grid-cols-3">
+          <Reveal delay={0}>
+            <div className="h-full rounded-3xl border-2 border-black/5 bg-white p-8 shadow-sm transition duration-300 hover:border-brand hover:shadow-lg">
+              <span className="inline-block rounded-full bg-brand-soft px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-brand">
+                Floor Space
+              </span>
+              <p className="mt-4 text-3xl font-extrabold text-ink">150 – 300 Sq.Ft</p>
+              <p className="mt-3 text-sm leading-relaxed text-ink/75">
+                Ground-floor retail commercial space with room for a customer reception counter, queue area, and modular parcel storage racking.
+              </p>
+            </div>
           </Reveal>
 
-          <div className="mt-12 grid gap-6 sm:grid-cols-3">
-            <div className="rounded-2xl bg-white p-6 shadow-sm border border-black/5">
-              <span className="text-xs font-bold uppercase tracking-wider text-brand">Storefront Space</span>
-              <p className="mt-2 text-2xl font-extrabold text-ink">150 – 300 Sq.Ft</p>
-              <p className="mt-2 text-sm text-ink/70">
-                Ground-floor commercial space suitable for a customer reception counter and parcel shelving.
+          <Reveal delay={100}>
+            <div className="h-full rounded-3xl border-2 border-black/5 bg-white p-8 shadow-sm transition duration-300 hover:border-brand hover:shadow-lg">
+              <span className="inline-block rounded-full bg-brand-soft px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-brand">
+                Accessibility
+              </span>
+              <p className="mt-4 text-3xl font-extrabold text-ink">Street Frontage</p>
+              <p className="mt-3 text-sm leading-relaxed text-ink/75">
+                Prominent roadside location with high footfall, convenient pedestrian access, and temporary stopping space for customer drop-offs and collection vans.
               </p>
             </div>
-            <div className="rounded-2xl bg-white p-6 shadow-sm border border-black/5">
-              <span className="text-xs font-bold uppercase tracking-wider text-brand">Accessibility</span>
-              <p className="mt-2 text-2xl font-extrabold text-ink">Street Frontage</p>
-              <p className="mt-2 text-sm text-ink/70">
-                Convenient roadside access with easy customer parking or temporary vehicle stopping space.
+          </Reveal>
+
+          <Reveal delay={200}>
+            <div className="h-full rounded-3xl border-2 border-black/5 bg-white p-8 shadow-sm transition duration-300 hover:border-brand hover:shadow-lg">
+              <span className="inline-block rounded-full bg-brand-soft px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-brand">
+                Essential Utilities
+              </span>
+              <p className="mt-4 text-3xl font-extrabold text-ink">Power & Internet</p>
+              <p className="mt-3 text-sm leading-relaxed text-ink/75">
+                Continuous 230V electricity supply and stable 4G or Wi-Fi broadband connection for instant cloud barcode sync and receipt printing.
               </p>
             </div>
-            <div className="rounded-2xl bg-white p-6 shadow-sm border border-black/5">
-              <span className="text-xs font-bold uppercase tracking-wider text-brand">Utilities</span>
-              <p className="mt-2 text-2xl font-extrabold text-ink">Power & Internet</p>
-              <p className="mt-2 text-sm text-ink/70">
-                Continuous electricity supply and stable 4G/Wi-Fi internet connection for the POS software.
-              </p>
+          </Reveal>
+        </div>
+
+        {/* Existing Store Integration Callout */}
+        <Reveal delay={300} className="mt-8">
+          <div className="rounded-3xl border-2 border-brand/20 bg-brand-soft/50 p-8 sm:p-10">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-brand">
+                  Existing Shop Owners Special Integration
+                </p>
+                <h3 className="mt-2 text-2xl font-extrabold text-ink">
+                  Already have an existing store or commercial premises?
+                </h3>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink/80">
+                  Pharmacies, stationery shops, supermarkets, communication counters, and bookshops can integrate a RedCat Point directly into their premises—monetizing unused floor space and driving hundreds of new foot-traffic customers weekly.
+                </p>
+              </div>
+              <ArrowLink href="#apply" className="shrink-0 font-bold">
+                Apply for Your Shop
+              </ArrowLink>
             </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
-      {/* ---------- APPLICATION FORM ---------- */}
-      <section id="apply" className="rc-grain relative scroll-mt-16 overflow-clip bg-brand pb-20 pt-16 text-white sm:pb-28">
+      {/* ---------- APPLICATION FORM SECTION ---------- */}
+      <section
+        id="apply"
+        className="rc-grain relative scroll-mt-16 overflow-clip bg-brand pb-24 pt-16 text-white sm:pb-32 sm:pt-20"
+      >
         <div className="mx-auto max-w-3xl px-5">
           <div className="text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-ink bg-white/90 px-4 py-1.5 rounded-full inline-block">
+            <span className="inline-block rounded-full bg-ink px-4 py-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-white shadow-md">
               Franchise Application
-            </p>
-            <h2 className="mt-4 text-4xl font-extrabold leading-[0.98] tracking-[-0.035em] sm:text-5xl">
+            </span>
+            <h2 className="mt-5 text-4xl font-extrabold leading-[0.98] tracking-[-0.035em] sm:text-5xl lg:text-6xl text-white">
               Apply for a REDCAT Point Franchise Today
             </h2>
-            <p className="mx-auto mt-3 max-w-lg text-lg font-medium text-white/90">
+            <p className="mx-auto mt-4 max-w-lg text-lg font-medium text-white/90">
               Submit your preferred location and business details. Our franchise recruitment team will review your area and get in touch within 24 hours.
             </p>
           </div>
 
-          <div className="relative mt-12 rounded-[2.5rem] border-[3px] border-ink bg-white p-6 text-ink shadow-2xl sm:p-12">
-            <Mascot className="absolute -top-16 left-1/2 w-32 -translate-x-1/2 sm:-top-20 sm:w-40 [&_svg]:h-auto [&_svg]:w-full" />
-            <Suspense fallback={<div className="grid min-h-[300px] place-items-center"><CatLoader label="Loading application form…" /></div>}>
+          <div className="relative mt-16 rounded-[2.5rem] border-[3px] border-ink bg-white p-6 text-ink shadow-2xl sm:p-12">
+            <Mascot className="absolute -top-14 sm:-top-16 left-1/2 w-28 -translate-x-1/2 sm:w-36 [&_svg]:h-auto [&_svg]:w-full drop-shadow-lg z-10" />
+            <Suspense
+              fallback={
+                <div className="grid min-h-[300px] place-items-center">
+                  <CatLoader label="Loading application form…" />
+                </div>
+              }
+            >
               <EnquiryForm kind="dealer" />
             </Suspense>
+          </div>
+
+          {/* Trust Guarantees */}
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-center text-xs font-bold uppercase tracking-wider text-white/80">
+            <span>✓ 930+ Planned Express Points</span>
+            <span>✓ 100% Cash Model · Zero Debtors</span>
+            <span>✓ Full Turnkey Package</span>
+            <span>✓ Protected Exclusive Territory</span>
           </div>
         </div>
       </section>
