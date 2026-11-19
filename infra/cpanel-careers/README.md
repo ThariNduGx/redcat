@@ -15,14 +15,14 @@ submissions. It provides no public way to list applications or download CVs.
    the handler. Grant **SELECT** and **INSERT** on this database only. Use
    **phpMyAdmin** with your account's administrative access to select that
    database and import `schema.sql`.
-3. Upload `apply.php`, `.htaccess`, and `index.html` to the hostname's document root
+3. Upload `apply.php`, `admin.php`, `.htaccess`, and `index.html` to the hostname's document root
    (`/home/bestprod/apply.bestproducts.lk/`). The `.htaccess` and `index.html` files
    disable directory browsing and redirect root visitors to `https://redcat.lk/hr`.
    Create `redcat-careers-config.php` one directory above that root using
    `config.example.php`. This location must be outside every website document
    root. Use the full cPanel database and user names, add the password directly
-   on the server, and list the exact production website origins that will submit
-   applications. If you use both the apex domain and `www`, add both explicitly.
+   on the server, and add the `admin` array with your chosen administrator
+   credentials for `https://apply.bestproducts.lk/admin.php`.
    Limit config file permissions to the PHP execution account.
 4. Enable PHP 8.2 or newer with PDO MySQL, mbstring and fileinfo. Allow requests
    of at least 7 MiB through the web server and PHP, including PHP's
@@ -42,6 +42,17 @@ Submit a synthetic application with a harmless PDF and confirm that its receipt
 matches a row in `career_applications`. Retry the same request to confirm it
 doesn't create a duplicate. Confirm that a GET request to `apply.php` cannot
 retrieve applicant data. Limit cPanel/phpMyAdmin database access to authorised
-reviewers or administrators. The PDF is stored in the `cv` column. A dedicated HR
-review dashboard is a separate feature. Review existing Tally submissions
-separately. They are not copied by deploying this handler.
+reviewers or administrators. The PDF is stored in the `cv` column.
+
+## Admin Portal (Submissions & CV Download)
+
+The admin dashboard is available at:
+`https://apply.bestproducts.lk/admin.php`
+
+Features:
+- **Secure Authentication**: Authenticates against private credentials in `/home/bestprod/redcat-careers-config.php`.
+- **Live Metrics**: Total applicants, BDM count, ZOM count, General pool, and daily influx.
+- **Search & Filter**: Filter by role (BDM / ZOM / General) or search by name, phone, area, and experience text.
+- **One-Click WhatsApp**: Instant WhatsApp link pre-filled with candidate name and role for rapid HR outreach.
+- **CV Viewing & Downloading**: Streamed directly from the binary `LONGBLOB` in MySQL without saving unencrypted files to public disk.
+- **Spreadsheet Export**: 1-click **Export CSV** download for HR reviews.
