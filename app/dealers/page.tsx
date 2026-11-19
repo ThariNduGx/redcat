@@ -25,7 +25,7 @@ const roles = [
     key: "hub",
     title: "Regional hub distributor",
     count: "57 hubs",
-    body: "Run the regional hub for your district: the link between local express points and the zone.",
+    body: "Run a regional hub and connect local express points to our overnight delivery network.",
     href: "/dealers?role=hub#apply",
     action: "Apply for this",
   },
@@ -33,9 +33,9 @@ const roles = [
     key: "point",
     title: "REDCAT Point Franchise",
     count: "930+ points",
-    body: "Own a dedicated RedCat Point franchise in your town. Turnkey setup with LKR 1.5Mn – 2.0Mn investment, complete IT automation, and dedicated sales territory.",
-    href: "/dealers/point-franchise",
-    action: "Explore Point Franchise",
+    body: "Run a local RedCat parcel drop-off and collection point.",
+    href: "/dealers?role=point#apply",
+    action: "Apply for this",
   },
 ];
 
@@ -53,7 +53,6 @@ export default function DealersPage() {
               Bring RedCat&rsquo;s next day delivery to your town, and grow your own business with it.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <ArrowLink href="/dealers/point-franchise" variant="light">Point Franchise</ArrowLink>
               <ArrowLink href="#apply" variant="outline" className="text-white hover:bg-white hover:text-ink">Apply now</ArrowLink>
               <ArrowLink href="#roles" variant="outline" className="text-white hover:bg-white hover:text-ink">Ways to join</ArrowLink>
             </div>

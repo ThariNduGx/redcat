@@ -1,835 +1,389 @@
 "use client";
 
 import "maplibre-gl/dist/maplibre-gl.css";
+import { useCallback, useEffect, useId, useRef, useState, type RefObject } from "react";
+import type { FeatureCollection, MultiPolygon, Point, Polygon } from "geojson";
+import type { LngLatBoundsLike, MapMouseEvent, PaddingOptions } from "maplibre-gl";
+import { useSearchParams } from "next/navigation";
+import { ArrowLeft, ArrowRight, ChevronDown } from "lucide-react";
+import { DISTRICTS, HUBS, hubById, type Hub } from "@/data/hubs";
+import { BRAND, INK, useRedCatMap } from "./useRedCatMap";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { GeoJSONSource, LngLatBoundsLike, MapGeoJSONFeature, Popup } from "maplibre-gl";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  LocateFixed,
-  Link2,
-  Maximize2,
-  Minus,
-  Plus,
-  Search,
-  Send,
-  X,
-} from "lucide-react";
-import Link from "next/link";
-import { HUBS, ZONES, hubById, hubsInZone, zoneById, type Hub, type ZoneId } from "@/data/hubs";
-import { arc, nearestHubs, searchHubs } from "@/lib/geo";
-import { toast } from "@/components/ui/Toaster";
-import CatLoader from "@/components/ui/CatLoader";
-import { BRAND, INK, SRI_LANKA_BOUNDS, useRedCatMap } from "./useRedCatMap";
+type Position = [number, number];
+type Districts = FeatureCollection<Polygon | MultiPolygon, { district: string }>;
+type DistrictOutline = number[][][];
+type DistrictShape = { district: string; path: string };
+type MapState = { boundaries: Districts; shapes: DistrictShape[] } | { error: true };
 
-type Filter = ZoneId | "all";
-type DistrictFC = GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, { district: string; zone: ZoneId }>;
-
-const zoneColor = ["match", ["get", "zone"], ...ZONES.flatMap((z) => [z.id, z.color]), "#bbb"] as unknown as string;
-
-function fillOpacity(zone: Filter) {
-  const hover = ["boolean", ["feature-state", "hover"], false];
-  if (zone === "all") return ["case", hover, 0.4, 0.2];
-  return ["case", ["==", ["get", "zone"], zone], ["case", hover, 0.48, 0.32], 0.04];
-}
-function dimByZone(zone: Filter, on: number, off: number) {
-  return zone === "all" ? on : ["case", ["==", ["get", "zone"], zone], on, off];
-}
-
-function bboxOf(fc: DistrictFC, pred: (p: { district: string; zone: ZoneId }) => boolean): LngLatBoundsLike | null {
-  let minX = 180, minY = 90, maxX = -180, maxY = -90;
-  let found = false;
-  const visit = (c: unknown): void => {
-    if (typeof (c as number[])[0] === "number") {
-      const [x, y] = c as number[];
-      minX = Math.min(minX, x); maxX = Math.max(maxX, x);
-      minY = Math.min(minY, y); maxY = Math.max(maxY, y);
-      found = true;
-    } else (c as unknown[]).forEach(visit);
-  };
-  fc.features.filter((f) => pred(f.properties)).forEach((f) => visit(f.geometry.coordinates));
-  return found ? [[minX, minY], [maxX, maxY]] : null;
-}
-
-const hubsFC: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+const hubs = [...HUBS].sort((a, b) => a.name.localeCompare(b.name));
+const mapViewBox = "0 0 265 465";
+const islandBounds: LngLatBoundsLike = [[79.64, 5.91], [81.89, 9.85]];
+const water = "#cfe1ec";
+const hubPoints: FeatureCollection<Point, { id: string; name: string; district: string }> = {
   type: "FeatureCollection",
-  features: HUBS.map((h) => ({
+  features: hubs.map(({ id, name, district, lng, lat }) => ({
     type: "Feature",
-    properties: { id: h.id, name: h.name, zone: h.zone, district: h.district },
-    geometry: { type: "Point", coordinates: [h.lng, h.lat] },
+    properties: { id, name, district },
+    geometry: { type: "Point", coordinates: [lng, lat] },
   })),
 };
 
-const spokesFC: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
-  type: "FeatureCollection",
-  features: HUBS.filter((h) => h.km > 0).map((h) => {
-    const z = zoneById(h.zone);
-    return {
-      type: "Feature",
-      properties: { zone: h.zone },
-      geometry: { type: "LineString", coordinates: arc([z.lng, z.lat], [h.lng, h.lat], 0.08, 16) },
-    };
-  }),
-};
-
-// Illustrative connections between zone centers; no unconfirmed sorting site is pinned.
-const westernZone = zoneById("A");
-const trunks = ZONES.filter((z) => z.id !== "A").map((z) => arc([westernZone.lng, westernZone.lat], [z.lng, z.lat], 0.22, 80));
-const trunksFC: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
-  type: "FeatureCollection",
-  features: trunks.map((coords) => ({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: coords } })),
-};
-
-function pointAlong(line: [number, number][], t: number): [number, number] {
-  const i = Math.min(line.length - 2, Math.floor(t * (line.length - 1)));
-  const f = t * (line.length - 1) - i;
-  const [x1, y1] = line[i];
-  const [x2, y2] = line[i + 1];
-  return [x1 + (x2 - x1) * f, y1 + (y2 - y1) * f];
+function project([lng, lat]: number[]): Position {
+  return [6 + (lng - 79.64) * 112, 8 + (9.85 - lat) * 113];
 }
 
-function selectionRoute(h: Hub): GeoJSON.FeatureCollection<GeoJSON.LineString> {
-  const z = zoneById(h.zone);
-  const lines: [number, number][][] = [];
-  if (h.km > 0) lines.push(arc([h.lng, h.lat], [z.lng, z.lat], 0.1, 32));
-  if (z.id !== "A") lines.push(arc([z.lng, z.lat], [westernZone.lng, westernZone.lat], -0.22, 64));
-  return {
-    type: "FeatureCollection",
-    features: lines.map((coordinates) => ({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates } })),
-  };
+function outerRings(geometry: Polygon | MultiPolygon): DistrictOutline {
+  const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
+  return polygons.map(([outer]) => outer);
 }
 
-const empty: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
-
-/** Camera padding so the hub panel (an overlay on wide screens) never covers what we fly to. */
-function padding() {
-  const wide = typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
-  return wide ? { top: 60, bottom: 60, left: 440, right: 70 } : { top: 40, bottom: 40, left: 30, right: 30 };
+function outlinePath(rings: DistrictOutline, projectPoint: (point: number[]) => Position) {
+  return rings.map((ring) => {
+    const points = ring.map((point) => projectPoint(point).map((axis) => axis.toFixed(1)).join(","));
+    return `M${points.join("L")}Z`;
+  }).join("");
 }
 
-export default function NetworkExplorer({
-  initialHubId,
-  syncUrl = false,
-  cooperative = "touch",
-  className = "",
-}: {
-  initialHubId?: string;
-  syncUrl?: boolean;
-  /** Require two fingers / ctrl+scroll to move the map. "touch" turns it on for touch screens only. */
-  cooperative?: boolean | "touch";
-  className?: string;
-}) {
-  const reduce = useReducedMotion();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const coop = cooperative === "touch" ? typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches : cooperative;
-  const { map, status } = useRedCatMap(containerRef, { cooperativeGestures: coop, fitBoundsOptions: { padding: padding() } });
+function toShape({ properties, geometry }: Districts["features"][number]): DistrictShape {
+  return { district: properties.district, path: outlinePath(outerRings(geometry), project) };
+}
 
-  const initial = initialHubId ? hubById(initialHubId) : undefined;
-  const [zone, setZone] = useState<Filter>(initial?.zone ?? "all");
-  const [selectedId, setSelectedId] = useState<string | null>(initial?.id ?? null);
-  const [query, setQuery] = useState("");
-  const [nearest, setNearest] = useState<{ hub: Hub; km: number }[] | null>(null);
-  const [locating, setLocating] = useState(false);
-  const [hoverDistrict, setHoverDistrict] = useState<{ district: string; zone: ZoneId } | null>(null);
-  const [districts, setDistricts] = useState<DistrictFC | null>(null);
-  const [layersReady, setLayersReady] = useState(false);
-  const hoveredHub = useRef<string | null>(null);
-  const hoveredDistrictId = useRef<number | string | null>(null);
-  const popupRef = useRef<Popup | null>(null);
+export default function NetworkExplorer() {
+  const hubId = useSearchParams().get("hub") ?? "";
+  return <DistrictMap key={hubId} hubId={hubId} />;
+}
 
-  const selected = selectedId ? hubById(selectedId) ?? null : null;
-  const initialHubRef = useRef(initial);
-  const userMoved = useRef(false);
-  const selectedRef = useRef(selected);
+function DistrictMap({ hubId }: { hubId: string }) {
+  const initialHub = hubById(hubId);
+  const [district, setDistrict] = useState(initialHub?.district ?? "");
+  const [selectedHub, setSelectedHub] = useState(initialHub?.id ?? "");
+  const [districtData, setDistrictData] = useState<MapState | null>(null);
+  const hubList = useRef<HTMLUListElement>(null);
+  const detailsHeading = useRef<HTMLHeadingElement>(null);
+  const focusDetails = useRef(false);
+  const returnToHub = useRef("");
+  const visibleHubs = district ? hubs.filter((hub) => hub.district === district) : hubs;
+  const activeHub = visibleHubs.find((hub) => hub.id === selectedHub);
+
   useEffect(() => {
-    selectedRef.current = selected;
-  }, [selected]);
+    const request = new AbortController();
+    fetch("/geo/districts.geojson", { signal: request.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("District boundaries unavailable");
+        return response.json() as Promise<Districts>;
+      })
+      .then((boundaries) => setDistrictData({ boundaries, shapes: boundaries.features.map(toShape) }))
+      .catch(() => {
+        if (!request.signal.aborted) setDistrictData({ error: true });
+      });
+    return () => request.abort();
+  }, []);
 
-  const results = useMemo(() => {
-    const base = query ? searchHubs(query, 57) : HUBS;
-    return zone === "all" ? base : base.filter((h) => h.zone === zone);
-  }, [query, zone]);
+  useEffect(() => {
+    if (activeHub && focusDetails.current) {
+      focusDetails.current = false;
+      detailsHeading.current?.focus();
+    } else if (!activeHub && returnToHub.current) {
+      hubList.current?.querySelector<HTMLButtonElement>(`[data-hub="${CSS.escape(returnToHub.current)}"]`)?.focus();
+      returnToHub.current = "";
+    }
+  }, [activeHub]);
 
-  /* ---------- build the map layers once ---------- */
+  const chooseHub = useCallback((id: string) => {
+    if (detailsHeading.current?.dataset.hub === id) {
+      detailsHeading.current.focus();
+      return;
+    }
+    focusDetails.current = true;
+    setSelectedHub(id);
+  }, []);
+
+  function closeHub() {
+    returnToHub.current = selectedHub;
+    setSelectedHub("");
+  }
+
+  const chooseDistrict = useCallback((name: string) => {
+    setDistrict(name);
+    setSelectedHub("");
+  }, []);
+
+  return (
+    <div className="relative isolate grid overflow-hidden rounded-[1.75rem] bg-white shadow-xl shadow-ink/10 ring-1 ring-ink/10">
+      <div className="relative order-2 flex h-[clamp(27rem,142vw,38rem)] items-center justify-center overflow-hidden bg-[#cfe1ec] lg:order-none lg:h-[clamp(42rem,55vw,48rem)] lg:pl-[23rem]">
+        {districtData && "shapes" in districtData ? (
+          <svg viewBox={mapViewBox} className="h-full w-full p-3 sm:p-4" aria-hidden="true">
+            {districtData.shapes.map(({ district: name, path }) => (
+              <path
+                key={name}
+                d={path}
+                fill={name === district ? "#f8b9af" : "#fffaf3"}
+                fillRule="evenodd"
+                stroke="#817973"
+                strokeWidth="0.7"
+                className="cursor-pointer hover:fill-[#f8b9af]"
+                onClick={() => chooseDistrict(name)}
+              >
+                <title>{name} District</title>
+              </path>
+            ))}
+            {visibleHubs.map((hub) => {
+              const [cx, cy] = project([hub.lng, hub.lat]);
+              const active = selectedHub === hub.id;
+              return (
+                <circle key={hub.id} cx={cx} cy={cy} r={active ? 6 : 3.7} fill={active ? "#141210" : "#bb1c20"}
+                  stroke="white" strokeWidth="1" className="cursor-pointer hover:fill-ink"
+                  onClick={() => chooseHub(hub.id)}>
+                  <title>{hub.name} · {hub.district} District</title>
+                </circle>
+              );
+            })}
+          </svg>
+        ) : (
+          <p role="status" className="text-sm text-ink/75">{districtData ? "Map unavailable. Browse hubs in the list." : "Loading district map…"}</p>
+        )}
+        <span className="absolute bottom-2 right-3 text-xs text-ink/70">Boundaries by geoBoundaries</span>
+        {districtData && "boundaries" in districtData && (
+          <DistrictBasemap boundaries={districtData.boundaries} district={district} selectedHub={selectedHub}
+            onDistrict={chooseDistrict} onHub={chooseHub} />
+        )}
+        <span className="pointer-events-none absolute right-3 top-3 z-10 sm:right-5 sm:top-5 flex items-center gap-2 rounded-full bg-white/95 px-3 py-2 text-xs font-semibold text-ink shadow-sm">
+          <span className="h-2 w-2 rounded-full bg-brand" />
+          Regional hub
+        </span>
+      </div>
+
+      <div className="contents lg:absolute lg:inset-y-4 lg:left-4 lg:z-20 lg:flex lg:w-[22rem] lg:flex-col lg:overflow-hidden lg:rounded-[1.35rem] lg:border lg:border-white lg:bg-white/95 lg:shadow-xl">
+        <div className="order-1 p-5 lg:order-none lg:p-6">
+          <label htmlFor="hub-district" className="block text-sm font-bold">Filter by district</label>
+          <div className="relative mt-2">
+            <select id="hub-district" className="w-full appearance-none rounded-xl border border-ink/25 bg-white py-3 pl-4 pr-10 font-semibold"
+              value={district} onChange={(event) => chooseDistrict(event.target.value)}>
+              <option value="">All 25 districts</option>
+              {DISTRICTS.map((name) => <option key={name}>{name}</option>)}
+            </select>
+            <ChevronDown size={18} aria-hidden className="pointer-events-none absolute right-4 top-3.5" />
+          </div>
+          <p aria-live="polite" className="mt-3 text-sm text-ink/75">
+            {visibleHubs.length} {visibleHubs.length === 1 ? "hub" : "hubs"}{district && ` in ${district}`}
+          </p>
+        </div>
+        <div className="order-3 overflow-y-auto border-t border-ink/10 lg:order-none lg:min-h-0 lg:flex-1">
+          {activeHub ? (
+            <div className="p-4">
+              <button type="button" onClick={closeHub} className="mb-3 flex items-center gap-2 rounded-full px-2 py-1 text-sm font-semibold text-ink/70 hover:bg-mist hover:text-ink">
+                <ArrowLeft size={16} aria-hidden /> Back to hubs
+              </button>
+              <HubDetails hub={activeHub} headingRef={detailsHeading} />
+            </div>
+          ) : (
+            <ul ref={hubList} aria-label="Regional hubs" className="max-h-72 overflow-y-auto px-3 py-2 lg:max-h-none lg:overflow-visible">
+              {visibleHubs.map((hub) => (
+                <li key={hub.id}>
+                  <button type="button" data-hub={hub.id} onClick={() => chooseHub(hub.id)}
+                    className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-mist focus-visible:bg-mist">
+                    <span aria-hidden="true" className="h-8 w-1.5 shrink-0 rounded-full bg-brand/75" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-bold">{hub.name}</span>
+                      <span className="block text-sm text-ink/65">{hub.district} District</span>
+                    </span>
+                    <ArrowRight size={16} aria-hidden className="shrink-0 text-ink/40 transition group-hover:translate-x-0.5 group-hover:text-ink" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HubDetails({ hub, headingRef }: { hub: Hub; headingRef: RefObject<HTMLHeadingElement | null> }) {
+  const headingId = useId();
+  const steps = [`${hub.name} hub`, "Overnight delivery network"];
+
+  return (
+    <article aria-labelledby={headingId} className="overflow-hidden rounded-2xl border border-ink/10 bg-white">
+      <div aria-hidden="true" className="h-1.5 bg-brand" />
+      <div className="p-4">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-ink/60">Hub {hub.id}</p>
+        <h3 id={headingId} ref={headingRef} tabIndex={-1} data-hub={hub.id}
+          className="mt-1 text-[1.75rem] font-extrabold leading-tight tracking-tight focus:outline-none">
+          {hub.name}
+        </h3>
+        <p className="mt-1 text-ink/70">{hub.district} District</p>
+
+        <dl className="mt-4 rounded-xl bg-mist p-3">
+          <dt className="text-xs font-semibold text-ink/65">Delivery</dt>
+          <dd className="text-xl font-extrabold">Next day</dd>
+        </dl>
+
+        <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-ink/60">Into the network</p>
+        <ol className="mt-2 space-y-2" role="list">
+          {steps.map((step, index) => (
+            <li key={step} className="flex items-center gap-2.5 text-sm font-semibold">
+              <span aria-hidden="true" className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] font-extrabold ${index === 0 ? "bg-ink text-white" : "border-2 border-ink/20"}`}>
+                {index + 1}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </article>
+  );
+}
+
+function DistrictBasemap({ boundaries, district, selectedHub, onDistrict, onHub }: {
+  boundaries: Districts;
+  district: string;
+  selectedHub: string;
+  onDistrict: (name: string) => void;
+  onHub: (id: string) => void;
+}) {
+  const container = useRef<HTMLDivElement>(null);
+  const maskId = useId();
+  const [visible, setVisible] = useState(false);
+  const [hoverName, setHoverName] = useState("");
+  const { map } = useRedCatMap(container, {
+    bounds: islandBounds,
+    fitBoundsOptions: { padding: 18 },
+    renderWorldCopies: false,
+    boxZoom: false,
+    doubleClickZoom: false,
+    dragPan: false,
+    keyboard: false,
+    scrollZoom: false,
+    touchPitch: false,
+    touchZoomRotate: false,
+  });
+
   useEffect(() => {
     if (!map) return;
-    let cancelled = false;
-    (async () => {
-      const [maplibregl, fc] = await Promise.all([
-        import("maplibre-gl"),
-        fetch("/geo/districts.geojson").then((r) => r.json() as Promise<DistrictFC>),
-      ]);
-      if (cancelled || map.getSource("districts")) return;
-      setDistricts(fc);
-
-      const firstSymbol = map.getStyle().layers.find((l) => l.type === "symbol")?.id;
-
-      map.addSource("districts", { type: "geojson", data: fc });
-      map.addLayer({ id: "district-fill", type: "fill", source: "districts", paint: { "fill-color": zoneColor, "fill-opacity": fillOpacity("all") as never } }, firstSymbol);
-      map.addLayer({
-        id: "district-line",
-        type: "line",
-        source: "districts",
-        paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 6, 0.8, 10, 2] },
-      }, firstSymbol);
-
-      map.addSource("spokes", { type: "geojson", data: spokesFC });
-      map.addLayer({
-        id: "spokes",
-        type: "line",
-        source: "spokes",
-        layout: { "line-cap": "round" },
-        paint: { "line-color": INK, "line-opacity": 0.28, "line-width": 1, "line-dasharray": [2, 2] },
-      });
-
-      map.addSource("trunks", { type: "geojson", data: trunksFC });
-      map.addLayer({
-        id: "trunks",
-        type: "line",
-        source: "trunks",
-        layout: { "line-cap": "round" },
-        paint: { "line-color": INK, "line-opacity": 0.75, "line-width": ["interpolate", ["linear"], ["zoom"], 6, 1.6, 10, 3] },
-      });
-
-      map.addSource("selection", { type: "geojson", data: empty });
-      map.addLayer({
-        id: "selection",
-        type: "line",
-        source: "selection",
-        layout: { "line-cap": "round" },
-        paint: { "line-color": BRAND, "line-width": ["interpolate", ["linear"], ["zoom"], 6, 3, 11, 5] },
-      });
-
-      map.addSource("parcels", { type: "geojson", data: empty });
-      map.addLayer({
-        id: "parcels",
-        type: "circle",
-        source: "parcels",
-        paint: { "circle-radius": 4.5, "circle-color": BRAND, "circle-stroke-color": "#fff", "circle-stroke-width": 2 },
-      });
-
-      map.addSource("hubs", { type: "geojson", data: hubsFC, promoteId: "id" });
-      map.addLayer({
-        id: "hub-halo",
-        type: "circle",
-        source: "hubs",
-        filter: ["==", ["get", "id"], ""],
-        paint: { "circle-radius": 18, "circle-color": zoneColor, "circle-opacity": 0.28, "circle-stroke-color": INK, "circle-stroke-width": 1.5 },
-      });
-      map.addLayer({
-        id: "hubs",
-        type: "circle",
-        source: "hubs",
-        paint: {
-          "circle-color": zoneColor,
-          "circle-stroke-color": ["case", ["boolean", ["feature-state", "hover"], false], INK, "#ffffff"],
-          "circle-stroke-width": ["case", ["boolean", ["feature-state", "hover"], false], 2.5, 1.8],
-          // zoom must be the top-level input, so hover is resolved inside each stop
-          "circle-radius": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            6, ["case", ["boolean", ["feature-state", "hover"], false], 7.5, 5],
-            10, ["case", ["boolean", ["feature-state", "hover"], false], 11, 8.5],
-            13, ["case", ["boolean", ["feature-state", "hover"], false], 13, 10.5],
-          ],
-        },
-      });
-      map.addLayer({
-        id: "hub-labels",
-        type: "symbol",
-        source: "hubs",
-        minzoom: 8.3,
-        layout: {
-          "text-field": ["get", "name"],
-          "text-font": ["Noto Sans Bold"],
-          "text-size": 12,
-          "text-offset": [0, 1.1],
-          "text-anchor": "top",
-          "text-optional": true,
-        },
-        paint: { "text-color": INK, "text-halo-color": "#fff", "text-halo-width": 1.6 },
-      });
-      map.addLayer({
-        id: "hub-label-selected",
-        type: "symbol",
-        source: "hubs",
-        filter: ["==", ["get", "id"], ""],
-        layout: {
-          "text-field": ["get", "name"],
-          "text-font": ["Noto Sans Bold"],
-          "text-size": 14,
-          "text-offset": [0, 1.5],
-          "text-anchor": "top",
-          "text-allow-overlap": true,
-        },
-        paint: { "text-color": INK, "text-halo-color": "#fff", "text-halo-width": 2 },
-      });
-
-      popupRef.current = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 14, className: "rc-popup" });
-
-      // frame the whole island (or the hub we were asked to open) now that the container has its final size
-      // (a hub from the URL is flown to by the selection effect below)
-      if (!initialHubRef.current) map.fitBounds(SRI_LANKA_BOUNDS, { padding: padding(), duration: 0 });
-
-      // keep the whole island framed when the container resizes, until the visitor moves the map
-      map.on("movestart", (e: { originalEvent?: Event }) => {
-        if (e.originalEvent) userMoved.current = true;
-      });
-      map.on("resize", () => {
-        if (!userMoved.current && !selectedRef.current) map.fitBounds(SRI_LANKA_BOUNDS, { padding: padding(), duration: 0 });
-      });
-
-      setLayersReady(true);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [map]);
-
-  /* ---------- hover + click on the map ---------- */
-  useEffect(() => {
-    if (!map || !layersReady) return;
     const canvas = map.getCanvas();
-
-    const setHubHover = (id: string | null) => {
-      if (hoveredHub.current === id) return;
-      if (hoveredHub.current) map.setFeatureState({ source: "hubs", id: hoveredHub.current }, { hover: false });
-      hoveredHub.current = id;
-      if (id) map.setFeatureState({ source: "hubs", id }, { hover: true });
+    const coastline = document.getElementById(maskId);
+    const rings = boundaries.features.flatMap(({ geometry }) => outerRings(geometry));
+    const drawMask = () => {
+      coastline?.setAttribute("d", outlinePath(rings, ([lng, lat]) => {
+        const point = map.project([lng, lat]);
+        return [point.x, point.y];
+      }));
     };
-
-    const onMove = (e: { point: { x: number; y: number }; lngLat: { lng: number; lat: number } }) => {
-      const hub = map.queryRenderedFeatures([e.point.x, e.point.y], { layers: ["hubs"] })[0] as MapGeoJSONFeature | undefined;
-      if (hub) {
-        const id = String(hub.properties.id);
-        setHubHover(id);
-        canvas.style.cursor = "pointer";
-        const h = hubById(id)!;
-        popupRef.current
-          ?.setLngLat([h.lng, h.lat])
-          .setHTML(`<strong>${h.name}</strong><span>${zoneById(h.zone).name} · ${h.district}</span>`)
-          .addTo(map);
-      } else {
-        setHubHover(null);
-        popupRef.current?.remove();
-        canvas.style.cursor = "";
-      }
-
-      const d = map.queryRenderedFeatures([e.point.x, e.point.y], { layers: ["district-fill"] })[0];
-      const did = d?.id ?? null;
-      if (did !== hoveredDistrictId.current) {
-        if (hoveredDistrictId.current !== null) map.setFeatureState({ source: "districts", id: hoveredDistrictId.current }, { hover: false });
-        hoveredDistrictId.current = did;
-        if (did !== null) map.setFeatureState({ source: "districts", id: did }, { hover: true });
-        setHoverDistrict(d ? { district: String(d.properties.district), zone: d.properties.zone as ZoneId } : null);
-      }
+    const fitIsland = () => {
+      const padding: PaddingOptions = {
+        left: window.matchMedia("(min-width: 64rem)").matches ? 384 : 16,
+        right: 18,
+        top: 16,
+        bottom: 18,
+      };
+      map.fitBounds(islandBounds, { padding, duration: 0 });
+      drawMask();
     };
-    const onLeave = () => {
-      setHubHover(null);
-      popupRef.current?.remove();
-      if (hoveredDistrictId.current !== null) map.setFeatureState({ source: "districts", id: hoveredDistrictId.current }, { hover: false });
-      hoveredDistrictId.current = null;
-      setHoverDistrict(null);
+    fitIsland();
+    const labelLayer = map.getStyle().layers.find((layer) => layer.type === "symbol")?.id;
+    map.addSource("district-boundaries", { type: "geojson", data: boundaries });
+    map.addLayer({
+      id: "district-tint",
+      type: "fill",
+      source: "district-boundaries",
+      filter: ["==", ["get", "district"], ""],
+      paint: { "fill-color": BRAND, "fill-opacity": 0.24 },
+    }, labelLayer);
+    map.addLayer({
+      id: "district-hit-area",
+      type: "fill",
+      source: "district-boundaries",
+      paint: { "fill-color": "#fffaf3", "fill-opacity": 0.08 },
+    }, labelLayer);
+    map.addLayer({
+      id: "district-outline",
+      type: "line",
+      source: "district-boundaries",
+      paint: { "line-color": "#675953", "line-opacity": 0.58, "line-width": 1 },
+    }, labelLayer);
+    map.addSource("regional-hubs", { type: "geojson", data: hubPoints });
+    map.addLayer({
+      id: "selected-hub-halo",
+      type: "circle",
+      source: "regional-hubs",
+      filter: ["==", ["get", "id"], ""],
+      paint: { "circle-color": BRAND, "circle-opacity": 0.24, "circle-radius": 13, "circle-stroke-color": BRAND, "circle-stroke-width": 1 },
+    });
+    map.addLayer({
+      id: "regional-hub-pins",
+      type: "circle",
+      source: "regional-hubs",
+      paint: { "circle-color": BRAND, "circle-radius": 4.5, "circle-stroke-color": "#fff", "circle-stroke-width": 1.5 },
+    });
+
+    const reveal = () => {
+      canvas.style.maskImage = `url(#${maskId}-region)`;
+      setVisible(true);
     };
-    const onClick = (e: { point: { x: number; y: number } }) => {
-      const hub = map.queryRenderedFeatures([e.point.x, e.point.y], { layers: ["hubs"] })[0];
-      if (hub) {
-        const h = hubById(String(hub.properties.id))!;
-        setZone(h.zone);
-        setSelectedId(h.id);
+    const pinAtPoint = ({ point }: MapMouseEvent) => {
+      const options = { layers: ["regional-hub-pins"] };
+      return map.queryRenderedFeatures(point, options)[0] ?? map.queryRenderedFeatures(
+        [[point.x - 6, point.y - 6], [point.x + 6, point.y + 6]], options,
+      )[0];
+    };
+    const pick = (event: MapMouseEvent) => {
+      const pin = pinAtPoint(event);
+      if (pin) {
+        onHub(String(pin.properties.id));
         return;
       }
-      const d = map.queryRenderedFeatures([e.point.x, e.point.y], { layers: ["district-fill"] })[0];
-      if (d && districts) {
-        const z = d.properties.zone as ZoneId;
-        setSelectedId(null);
-        setZone(z);
-        const b = bboxOf(districts, (p) => p.district === d.properties.district);
-        if (b) map.fitBounds(b, { padding: padding(), maxZoom: 10, duration: reduce ? 0 : 900 });
-      }
+      const [boundary] = map.queryRenderedFeatures(event.point, { layers: ["district-hit-area"] });
+      if (boundary) onDistrict(String(boundary.properties.district));
     };
+    const pointer = (event: MapMouseEvent) => {
+      const pin = pinAtPoint(event);
+      const [boundary] = map.queryRenderedFeatures(event.point, { layers: ["district-hit-area"] });
+      canvas.style.cursor = pin || boundary ? "pointer" : "";
+      setHoverName(pin ? String(pin.properties.name) : boundary ? `${boundary.properties.district} District` : "");
+    };
+    const clearHover = () => setHoverName("");
+    map.once("idle", reveal);
+    map.on("resize", fitIsland);
+    map.on("click", pick);
+    map.on("mousemove", pointer);
+    map.on("mouseout", clearHover);
 
-    map.on("mousemove", onMove);
-    map.on("mouseout", onLeave);
-    map.on("click", onClick);
     return () => {
-      map.off("mousemove", onMove);
-      map.off("mouseout", onLeave);
-      map.off("click", onClick);
+      map.off("idle", reveal);
+      map.off("resize", fitIsland);
+      map.off("click", pick);
+      map.off("mousemove", pointer);
+      map.off("mouseout", clearHover);
     };
-  }, [map, layersReady, districts, reduce]);
+  }, [map, boundaries, maskId, onDistrict, onHub]);
 
-  /* ---------- zone filter → paint ---------- */
   useEffect(() => {
-    if (!map || !layersReady) return;
-    map.setPaintProperty("district-fill", "fill-opacity", fillOpacity(zone) as never);
-    map.setPaintProperty("hubs", "circle-opacity", dimByZone(zone, 1, 0.25) as never);
-    map.setPaintProperty("hubs", "circle-stroke-opacity", dimByZone(zone, 1, 0.25) as never);
-    map.setPaintProperty("spokes", "line-opacity", dimByZone(zone, 0.32, 0.06) as never);
-  }, [map, layersReady, zone]);
-
-  /* ---------- selection → camera, halo, route, url ---------- */
-  useEffect(() => {
-    if (!map || !layersReady) return;
-    const id = selected?.id ?? "";
-    map.setFilter("hub-halo", ["==", ["get", "id"], id]);
-    map.setFilter("hub-label-selected", ["==", ["get", "id"], id]);
-    (map.getSource("selection") as GeoJSONSource).setData(selected ? selectionRoute(selected) : empty);
-    if (selected) {
-      const p = padding();
-      map.flyTo({
-        center: [selected.lng, selected.lat],
-        zoom: Math.max(map.getZoom(), 8.6),
-        // shift the target so it lands in the visible part of the map, without persisting map padding
-        offset: [(p.left - p.right) / 2, (p.top - p.bottom) / 2],
-        speed: 0.9,
-        curve: 1.5,
-        // omit duration entirely unless we need it: an explicit `undefined` makes flyTo animate to NaN
-        ...(reduce ? { duration: 0 } : {}),
-      });
-    }
-    if (syncUrl) {
-      const url = new URL(window.location.href);
-      if (selected) url.searchParams.set("hub", selected.id);
-      else url.searchParams.delete("hub");
-      window.history.replaceState(null, "", url);
-    }
-  }, [map, layersReady, selected, syncUrl, reduce]);
-
-  /* ---------- zone chip → camera ---------- */
-  const chooseZone = useCallback(
-    (z: Filter) => {
-      setZone(z);
-      setSelectedId(null);
-      setNearest(null);
-      if (!map) return;
-      if (z === "all") {
-        map.fitBounds(SRI_LANKA_BOUNDS, { padding: padding(), duration: reduce ? 0 : 900 });
-      } else if (districts) {
-        const b = bboxOf(districts, (p) => p.zone === z);
-        if (b) map.fitBounds(b, { padding: padding(), duration: reduce ? 0 : 900 });
-      }
-    },
-    [map, districts, reduce],
-  );
-
-  /* ---------- parcels moving along the trunk routes ---------- */
-  useEffect(() => {
-    if (!map || !layersReady) return;
-    const src = map.getSource("parcels") as GeoJSONSource;
-    const frame = (t: number): GeoJSON.FeatureCollection => ({
-      type: "FeatureCollection",
-      features: trunks.flatMap((line, i) => {
-        const a = (t / 5200 + i * 0.27) % 1;
-        const b = (t / 5200 + i * 0.27 + 0.5) % 1;
-        return [
-          { type: "Feature", properties: {}, geometry: { type: "Point", coordinates: pointAlong(line, a) } },
-          { type: "Feature", properties: {}, geometry: { type: "Point", coordinates: pointAlong(line, 1 - b) } },
-        ];
-      }),
-    });
-    if (reduce) {
-      src.setData(frame(2600));
-      return;
-    }
-    let raf = 0;
-    let visible = true;
-    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
-    if (wrapperRef.current) io.observe(wrapperRef.current);
-    const tick = (t: number) => {
-      if (visible && !document.hidden) src.setData(frame(t));
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => {
-      cancelAnimationFrame(raf);
-      io.disconnect();
-    };
-  }, [map, layersReady, reduce]);
-
-  /* ---------- list hover → highlight pin ---------- */
-  const previewHub = (id: string | null) => {
-    if (!map || !layersReady) return;
-    if (hoveredHub.current) map.setFeatureState({ source: "hubs", id: hoveredHub.current }, { hover: false });
-    hoveredHub.current = id;
-    if (id) map.setFeatureState({ source: "hubs", id }, { hover: true });
-  };
-
-  const pick = (h: Hub) => {
-    setZone(h.zone);
-    setSelectedId(h.id);
-  };
-
-  /* ---------- geolocation ---------- */
-  const userMarker = useRef<{ remove: () => void } | null>(null);
-  function locate() {
-    if (!("geolocation" in navigator)) {
-      toast("Your browser can't share your location.");
-      return;
-    }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        setLocating(false);
-        const here = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        const list = nearestHubs(here, 3);
-        setNearest(list);
-        setSelectedId(null);
-        setZone("all");
-        if (list[0].km > 120) toast("You look to be outside Sri Lanka. Showing the closest hubs anyway.");
-        if (map) {
-          const maplibregl = await import("maplibre-gl");
-          userMarker.current?.remove();
-          const el = document.createElement("div");
-          el.className = "rc-me";
-          el.setAttribute("aria-hidden", "true");
-          userMarker.current = new maplibregl.Marker({ element: el }).setLngLat([here.lng, here.lat]).addTo(map);
-          const pts = [here, ...list.map((x) => x.hub)];
-          const lngs = pts.map((p) => p.lng);
-          const lats = pts.map((p) => p.lat);
-          map.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], {
-            padding: padding(),
-            maxZoom: 11,
-            duration: reduce ? 0 : 1000,
-          });
-        }
-      },
-      (err) => {
-        setLocating(false);
-        toast(err.code === err.PERMISSION_DENIED ? "Location permission was declined." : "We couldn't find your location. Try searching instead.");
-      },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
-    );
-  }
-
-  async function copyLink(h: Hub) {
-    const url = `${window.location.origin}/network?hub=${h.id}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast("Link copied");
-    } catch {
-      toast(url);
-    }
-  }
-
-  const zoom = (d: number) => {
-    userMoved.current = true;
-    map?.easeTo({ zoom: map.getZoom() + d, duration: reduce ? 0 : 300 });
-  };
-  const reset = () => {
-    userMoved.current = false;
-    setSelectedId(null);
-    setNearest(null);
-    chooseZone("all");
-  };
-  const fullscreen = () => {
-    const el = wrapperRef.current;
-    if (!el) return;
-    if (document.fullscreenElement) document.exitFullscreen();
-    else el.requestFullscreen?.().then(() => setTimeout(() => map?.resize(), 50)).catch(() => {});
-  };
+    if (!map?.getLayer("regional-hub-pins")) return;
+    map.setFilter("district-tint", ["==", ["get", "district"], district]);
+    map.setFilter("regional-hub-pins", district ? ["==", ["get", "district"], district] : null);
+    map.setFilter("selected-hub-halo", ["==", ["get", "id"], selectedHub]);
+    map.setPaintProperty("regional-hub-pins", "circle-color", ["case", ["==", ["get", "id"], selectedHub], INK, BRAND]);
+    map.setPaintProperty("regional-hub-pins", "circle-radius", ["case", ["==", ["get", "id"], selectedHub], 7, 4.5]);
+  }, [map, district, selectedHub]);
 
   return (
-    <div ref={wrapperRef} className={`relative bg-[#f5f0e8] text-ink ${className}`}>
-      {/* ---------- map ---------- */}
-      <div className="relative h-[62vh] min-h-[420px] overflow-hidden rounded-[1.75rem] border border-black/10 lg:h-[680px] lg:min-h-0 [:fullscreen_&]:h-full [:fullscreen_&]:rounded-none">
-        {/* maplibre forces position:relative on this element, so size it explicitly */}
-        <div ref={containerRef} className="h-full w-full" />
-        <p className="sr-only">
-          Interactive map of RedCat&rsquo;s network. Every hub on the map is also in the list next to it, which works with a keyboard and screen reader.
+    <>
+      <svg width="0" height="0" className="pointer-events-none absolute" aria-hidden="true">
+        <defs>
+          <mask id={`${maskId}-region`} maskUnits="objectBoundingBox" maskContentUnits="userSpaceOnUse" x="0" y="0" width="1" height="1">
+            {/* Leave room over the surrounding water for coastal labels and pin halos. */}
+            <path id={maskId} fill="white" stroke="white" strokeWidth="72" strokeLinejoin="round" />
+          </mask>
+        </defs>
+      </svg>
+      <div ref={container} aria-hidden={!visible} inert={!visible} style={{ backgroundColor: water }}
+        className={`absolute inset-0 ${visible ? "opacity-100" : "pointer-events-none opacity-0"}`} />
+      {visible && hoverName && (
+        <p aria-hidden="true" className="pointer-events-none absolute bottom-10 right-4 z-10 rounded-full bg-ink px-4 py-2 text-xs font-semibold text-white shadow-lg">
+          {hoverName}
         </p>
-
-        <AnimatePresence>
-          {status !== "ready" && status !== "error" && (
-            <motion.div
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4 }}
-              className="absolute inset-0 grid place-items-center bg-paper lg:pl-[420px]"
-            >
-              <CatLoader label="Fetching the island…" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {status === "error" && (
-          <div className="absolute inset-0 grid place-items-center p-6 text-center">
-            <div className="max-w-sm rounded-2xl bg-white p-6 shadow-lg">
-              <p className="font-bold">The map couldn&rsquo;t load.</p>
-              <p className="mt-1 text-sm text-ink/70">Your browser may not support WebGL, or you&rsquo;re offline. The hub list still works.</p>
-            </div>
-          </div>
-        )}
-
-        {/* controls */}
-        <div className="absolute right-3 top-3 z-10 flex flex-col overflow-hidden rounded-2xl border border-black/10 bg-white/90 shadow-lg shadow-black/5 backdrop-blur">
-          <MapButton label="Zoom in" onClick={() => zoom(1)}><Plus size={18} /></MapButton>
-          <MapButton label="Zoom out" onClick={() => zoom(-1)}><Minus size={18} /></MapButton>
-          <MapButton label="Show the whole island" onClick={reset}><span className="text-[11px] font-extrabold">LK</span></MapButton>
-          <MapButton label="Full screen" onClick={fullscreen}><Maximize2 size={16} /></MapButton>
-        </div>
-
-        {/* hover readout */}
-        <AnimatePresence>
-          {hoverDistrict && (
-            <motion.div
-              key={hoverDistrict.district}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 6 }}
-              transition={{ duration: 0.18 }}
-              aria-hidden
-              className="pointer-events-none absolute bottom-10 right-3 z-10 flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white shadow-lg lg:bottom-4"
-            >
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: zoneById(hoverDistrict.zone).color }} />
-              {hoverDistrict.district} District · {zoneById(hoverDistrict.zone).name}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* ---------- panel ---------- */}
-      <div className="mt-4 flex flex-col rounded-[1.5rem] border border-black/10 bg-white/95 shadow-xl shadow-black/10 backdrop-blur-xl lg:absolute lg:bottom-4 lg:left-4 lg:top-4 lg:mt-0 lg:w-[400px]">
-        <div className="border-b border-black/5 p-4">
-          <div className="flex gap-2">
-            <label className="group relative flex-1">
-              <span className="sr-only">Search hubs by town or district</span>
-              <Search size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/50 transition group-focus-within:text-ink" />
-              <input
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setNearest(null);
-                  if (selected) setSelectedId(null);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && results[0]) pick(results[0]);
-                  if (e.key === "Escape") setQuery("");
-                }}
-                placeholder="Search 57 hubs"
-                className="w-full rounded-xl border-2 border-transparent bg-mist py-3 pl-10 pr-9 text-[15px] font-medium outline-none transition placeholder:text-ink/45 focus:border-ink focus:bg-white"
-              />
-              {query && (
-                <button type="button" aria-label="Clear search" onClick={() => setQuery("")} className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-ink/60 hover:bg-black/5">
-                  <X size={16} />
-                </button>
-              )}
-            </label>
-            <button
-              type="button"
-              onClick={locate}
-              disabled={locating}
-              className="press flex shrink-0 items-center gap-2 rounded-xl bg-ink px-3.5 text-sm font-bold text-white transition hover:bg-brand-deep disabled:opacity-70"
-            >
-              <LocateFixed size={17} className={locating ? "animate-spin" : ""} />
-              <span className="hidden sm:inline">{locating ? "Locating" : "Near me"}</span>
-              <span className="sr-only sm:hidden">Find hubs near me</span>
-            </button>
-          </div>
-
-          <div role="group" aria-label="Filter by zone" className="mt-3 flex flex-wrap gap-1.5">
-            <Chip active={zone === "all"} onClick={() => chooseZone("all")}>All · {HUBS.length}</Chip>
-            {ZONES.map((z) => (
-              <Chip key={z.id} active={zone === z.id} onClick={() => chooseZone(z.id)} color={z.color}>
-                {z.center} · {hubsInZone(z.id).length}
-              </Chip>
-            ))}
-          </div>
-        </div>
-
-        <div className="relative min-h-0 flex-1 overflow-hidden">
-          <AnimatePresence mode="wait" initial={false}>
-            {selected ? (
-              <motion.div
-                key={`hub-${selected.id}`}
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -16 }}
-                transition={{ duration: 0.22, ease: [0.2, 0.7, 0.2, 1] }}
-                className="h-full overflow-y-auto p-4"
-                aria-live="polite"
-              >
-                <HubCard hub={selected} onBack={() => setSelectedId(null)} onCopy={() => copyLink(selected)} />
-              </motion.div>
-            ) : nearest ? (
-              <motion.div key="nearest" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full overflow-y-auto p-4" aria-live="polite">
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-ink/55">Closest to you</p>
-                <ul className="mt-3 space-y-2">
-                  {nearest.map(({ hub, km }, i) => (
-                    <li key={hub.id}>
-                      <HubRow hub={hub} meta={`${km < 10 ? km.toFixed(1) : Math.round(km)} km away`} badge={i === 0 ? "Nearest" : undefined} onPick={pick} onHover={previewHub} />
-                    </li>
-                  ))}
-                </ul>
-                <button type="button" onClick={() => setNearest(null)} className="mt-4 text-sm font-semibold underline underline-offset-4">
-                  Show all hubs
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex h-full flex-col">
-                <p className="px-4 pt-3 text-xs font-bold uppercase tracking-[0.14em] text-ink/55" aria-live="polite">
-                  {results.length} {results.length === 1 ? "hub" : "hubs"}
-                  {query ? ` matching “${query}”` : zone === "all" ? " island-wide" : ` in ${zoneById(zone).name}`}
-                </p>
-                <ul className="max-h-[340px] flex-1 space-y-1 overflow-y-auto p-2 lg:max-h-none">
-                  {results.map((h) => (
-                    <li key={h.id}>
-                      <HubRow hub={h} meta={`${h.district} · ${h.km === 0 ? "zone center" : `${h.km} km to ${zoneById(h.zone).center}`}`} onPick={pick} onHover={previewHub} />
-                    </li>
-                  ))}
-                  {results.length === 0 && (
-                    <li className="px-3 py-8 text-center text-ink/60">
-                      No hubs match that. Try a district name, or use <strong>Near me</strong>.
-                    </li>
-                  )}
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MapButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      onClick={onClick}
-      className="grid h-10 w-10 place-items-center border-b border-black/5 text-ink transition last:border-0 hover:bg-mist active:scale-90"
-    >
-      {children}
-    </button>
-  );
-}
-
-function Chip({ active, onClick, color, children }: { active: boolean; onClick: () => void; color?: string; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`press flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] font-semibold transition ${
-        active ? "border-ink bg-ink text-white" : "border-black/10 bg-white hover:border-ink/40"
-      }`}
-    >
-      {color && <span className="h-2.5 w-2.5 rounded-full ring-1 ring-black/20" style={{ background: color }} />}
-      {children}
-    </button>
-  );
-}
-
-function HubRow({
-  hub,
-  meta,
-  badge,
-  onPick,
-  onHover,
-}: {
-  hub: Hub;
-  meta: string;
-  badge?: string;
-  onPick: (h: Hub) => void;
-  onHover: (id: string | null) => void;
-}) {
-  const z = zoneById(hub.zone);
-  return (
-    <button
-      type="button"
-      onClick={() => onPick(hub)}
-      onMouseEnter={() => onHover(hub.id)}
-      onMouseLeave={() => onHover(null)}
-      onFocus={() => onHover(hub.id)}
-      onBlur={() => onHover(null)}
-      className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-mist focus-visible:bg-mist"
-    >
-      <span className="h-8 w-1.5 shrink-0 rounded-full transition-all group-hover:h-9" style={{ background: z.color }} />
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2 font-bold">
-          {hub.name}
-          {badge && <span className="rounded-full bg-brand px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-ink">{badge}</span>}
-        </span>
-        <span className="block truncate text-sm text-ink/60">{meta}</span>
-      </span>
-      <ArrowRight size={16} className="shrink-0 text-ink/30 transition group-hover:translate-x-0.5 group-hover:text-ink" aria-hidden />
-    </button>
-  );
-}
-
-function HubCard({ hub, onBack, onCopy }: { hub: Hub; onBack: () => void; onCopy: () => void }) {
-  const z = zoneById(hub.zone);
-  const [copied, setCopied] = useState(false);
-  const steps = [
-    `${hub.name} hub`,
-    ...(hub.km > 0 ? [`${z.center} zone`] : []),
-    "Overnight delivery network",
-  ];
-  return (
-    <div>
-      <button type="button" onClick={onBack} className="press -ml-1 flex items-center gap-1.5 rounded-full px-2 py-1 text-sm font-semibold text-ink/70 transition hover:bg-mist hover:text-ink">
-        <ArrowLeft size={16} /> All hubs
-      </button>
-
-      <div className="mt-3 overflow-hidden rounded-2xl border border-black/10">
-        <div className="h-1.5" style={{ background: z.color }} />
-        <div className="p-4">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-ink/55">
-            {hub.id} · {z.name}
-          </p>
-          <h3 className="mt-1 text-[28px] font-extrabold leading-tight tracking-tight">{hub.name}</h3>
-          <p className="text-ink/70">{hub.district} District</p>
-
-          <dl className="mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-xl bg-mist p-3">
-              <dt className="text-xs font-semibold text-ink/60">To zone center</dt>
-              <dd className="text-xl font-extrabold">{hub.km === 0 ? "On site" : `${hub.km} km`}</dd>
-            </div>
-            <div className="rounded-xl bg-mist p-3">
-              <dt className="text-xs font-semibold text-ink/60">Delivery</dt>
-              <dd className="text-xl font-extrabold">Next day</dd>
-            </div>
-          </dl>
-
-          <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-ink/55">Into the network</p>
-          <ol className="mt-2 space-y-1.5">
-            {steps.map((s, i) => (
-              <li key={s} className="flex items-center gap-2.5 text-sm font-semibold">
-                <span className={`grid h-5 w-5 place-items-center rounded-full text-[10px] font-extrabold ${i === 0 ? "bg-ink text-white" : "border-2 border-ink/20"}`}>{i + 1}</span>
-                {s}
-              </li>
-            ))}
-          </ol>
-        </div>
-      </div>
-
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <Link
-          href={`/contact?topic=pickup&from=${encodeURIComponent(hub.name)}`}
-          className="press flex items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-bold text-white transition hover:bg-brand-deep"
-        >
-          <Send size={16} /> Send from here
-        </Link>
-        <button
-          type="button"
-          onClick={() => {
-            onCopy();
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1800);
-          }}
-          className="press flex items-center justify-center gap-2 rounded-xl border-2 border-ink/15 px-4 py-3 text-sm font-bold transition hover:border-ink"
-        >
-          {copied ? <Check size={16} /> : <Link2 size={16} />} {copied ? "Copied" : "Share"}
-        </button>
-      </div>
-      <p className="mt-3 text-xs text-ink/55">The pin marks the town. Ask us for the hub&rsquo;s street address.</p>
-    </div>
+      )}
+    </>
   );
 }

@@ -1,127 +1,160 @@
 "use client";
 
-import { useId, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { MapPin } from "lucide-react";
-import { hubById, zoneById, type Hub } from "@/data/hubs";
+import { useEffect, useId, useRef, useState } from "react";
+import { Check, MapPin, X } from "lucide-react";
+import { HUBS, hubById, type Hub } from "@/data/hubs";
 import { searchHubs } from "@/lib/geo";
 
-const SUGGESTED = ["A-RH01", "C-RH01", "D-RH01", "B-RH06", "B-RH12", "C-RH10"];
+const suggestedHubs = ["A-RH01", "C-RH01", "D-RH01", "B-RH06", "B-RH12", "C-RH10"].map((id) => hubById(id)!);
+const allHubs = [...HUBS].sort((a, b) => a.district.localeCompare(b.district) || a.name.localeCompare(b.name));
 
-/** Accessible combobox for choosing a regional hub by town or district name. */
 export default function HubPicker({
   label,
   value,
   onChange,
   placeholder = "Town or district",
   autoFocus,
+  name,
+  required,
 }: {
   label: string;
   value: Hub | null;
-  onChange: (h: Hub | null) => void;
+  onChange: (hub: Hub | null) => void;
   placeholder?: string;
   autoFocus?: boolean;
+  name?: string;
+  required?: boolean;
 }) {
   const uid = useId();
-  const [text, setText] = useState(value?.name ?? "");
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(0);
+  const listId = `${uid}-list`;
   const inputRef = useRef<HTMLInputElement>(null);
-  const [synced, setSynced] = useState(value);
+  const listRef = useRef<HTMLUListElement>(null);
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(-1);
+  const [invalid, setInvalid] = useState(false);
+  const search = query.trim().replace(/\s+district$/i, "");
+  const options = search ? searchHubs(search, name ? HUBS.length : 7) : name ? allHubs : suggestedHubs;
+  const activeOption = open ? options[active] : undefined;
 
-  // keep the text in step when the parent swaps values
-  if (value !== synced) {
-    setSynced(value);
-    setText(value?.name ?? "");
+  useEffect(() => {
+    inputRef.current?.setCustomValidity(required && query && !value ? "Choose a location from the list." : "");
+  }, [query, required, value]);
+
+  useEffect(() => {
+    if (activeOption) listRef.current?.children[active]?.scrollIntoView({ block: "nearest" });
+  }, [active, activeOption]);
+
+  function selectHub(hub: Hub) {
+    onChange(hub);
+    setQuery("");
+    setActive(-1);
+    setInvalid(false);
+    setOpen(false);
   }
 
-  const options = useMemo(() => (text.trim() && text !== value?.name ? searchHubs(text, 7) : SUGGESTED.map((id) => hubById(id)!)), [text, value]);
-
-  const choose = (h: Hub) => {
-    onChange(h);
-    setText(h.name);
-    setOpen(false);
-  };
+  function clearSelection() {
+    onChange(null);
+    setQuery("");
+    setActive(-1);
+    setInvalid(false);
+    inputRef.current?.focus();
+    setOpen(true);
+  }
 
   return (
-    <div className="relative">
-      <label htmlFor={`${uid}-in`} className="mb-1.5 block text-[13px] font-semibold text-ink/70">
+    <div className="relative min-w-0">
+      <label htmlFor={uid} className={name ? "block font-semibold" : "mb-1.5 block text-[13px] font-semibold text-ink/70"}>
         {label}
       </label>
-      <div className="relative">
-        <MapPin size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/40" />
+      {name && <input type="hidden" name={name} value={value?.id ?? ""} />}
+      <div className={`relative ${name ? "mt-2" : ""}`}>
+        <MapPin size={18} aria-hidden className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/50" />
         <input
           ref={inputRef}
-          id={`${uid}-in`}
+          id={uid}
           role="combobox"
           aria-expanded={open}
-          aria-controls={`${uid}-list`}
+          aria-controls={open ? listId : undefined}
           aria-autocomplete="list"
-          aria-activedescendant={open && options[active] ? `${uid}-${options[active].id}` : undefined}
+          aria-required={required}
+          aria-invalid={invalid || undefined}
+          aria-activedescendant={activeOption ? `${uid}-${activeOption.id}` : undefined}
           autoComplete="off"
           autoFocus={autoFocus}
-          value={text}
+          required={required}
+          value={value?.name ?? query}
           placeholder={placeholder}
-          onFocus={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 120)}
-          onChange={(e) => {
-            setText(e.target.value);
+          onFocus={(event) => {
+            if (value) event.currentTarget.select();
             setOpen(true);
-            setActive(0);
-            if (value) onChange(null);
           }}
-          onKeyDown={(e) => {
-            if (e.key === "ArrowDown") {
-              e.preventDefault();
+          onClick={() => setOpen(true)}
+          onBlur={() => {
+            setOpen(false);
+            setActive(-1);
+          }}
+          onInvalid={() => {
+            setInvalid(true);
+            setOpen(true);
+          }}
+          onChange={(event) => {
+            if (value) onChange(null);
+            setQuery(event.target.value);
+            setActive(-1);
+            setInvalid(false);
+            setOpen(true);
+          }}
+          onKeyDown={(event) => {
+            if (event.nativeEvent.isComposing) return;
+            if (event.key === "ArrowDown") {
+              event.preventDefault();
               setOpen(true);
-              setActive((a) => Math.min(options.length - 1, a + 1));
-            } else if (e.key === "ArrowUp") {
-              e.preventDefault();
-              setActive((a) => Math.max(0, a - 1));
-            } else if (e.key === "Enter" && open && options[active]) {
-              e.preventDefault();
-              choose(options[active]);
-            } else if (e.key === "Escape") {
+              setActive((index) => Math.min(options.length - 1, index + 1));
+            } else if (event.key === "ArrowUp") {
+              event.preventDefault();
+              setOpen(true);
+              setActive((index) => index < 0 ? options.length - 1 : Math.max(0, index - 1));
+            } else if (event.key === "Enter" && open) {
+              event.preventDefault();
+              const option = activeOption ?? (options.length === 1 ? options[0] : undefined);
+              if (option) selectHub(option);
+            } else if (event.key === "Escape" && open) {
+              event.preventDefault();
+              event.stopPropagation();
               setOpen(false);
+              setActive(-1);
             }
           }}
-          className="w-full rounded-2xl border-2 border-black/10 bg-white py-3.5 pl-10 pr-4 text-base font-semibold outline-none transition placeholder:font-medium placeholder:text-ink/40 hover:border-black/20 focus:border-ink"
+          className={`block w-full bg-white pl-10 pr-11 text-base outline-none transition placeholder:font-normal placeholder:text-ink/55 focus:border-ink focus:ring-2 focus:ring-ink/15 ${name ? "rounded-xl border border-ink/25 py-3" : "rounded-2xl border-2 border-black/10 py-3.5 font-semibold"} ${invalid ? "border-brand-deep" : ""}`}
         />
+        {name && (query || value) && (
+          <button type="button" onClick={clearSelection} aria-label={`Clear ${label.toLowerCase()}`}
+            className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-xl text-ink/65 hover:text-ink">
+            <X size={17} aria-hidden />
+          </button>
+        )}
       </div>
-      <AnimatePresence>
-        {open && options.length > 0 && (
-          <motion.ul
-            id={`${uid}-list`}
-            role="listbox"
-            aria-label={label}
-            initial={{ opacity: 0, y: -4, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.98 }}
-            transition={{ duration: 0.14 }}
-            className="absolute inset-x-0 top-full z-30 mt-1.5 max-h-72 origin-top overflow-y-auto rounded-2xl border border-black/10 bg-white p-1.5 shadow-2xl shadow-black/15"
-          >
-            {!text.trim() && <li className="px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-ink/45">Popular</li>}
-            {options.map((h, i) => (
-              <li
-                key={h.id}
-                id={`${uid}-${h.id}`}
-                role="option"
-                aria-selected={i === active}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  choose(h);
-                }}
-                onMouseEnter={() => setActive(i)}
-                className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 ${i === active ? "bg-mist" : ""}`}
-              >
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: zoneById(h.zone).color }} />
-                <span className="flex-1 font-semibold">{h.name}</span>
-                <span className="text-sm text-ink/50">{h.district}</span>
+      {open && (
+        <div className={`z-30 mt-1.5 overflow-hidden rounded-xl border border-ink/15 bg-white shadow-xl shadow-ink/10 ${name ? "relative sm:absolute sm:inset-x-0 sm:top-full" : "absolute inset-x-0 top-full"}`}>
+          <ul ref={listRef} id={listId} role="listbox" aria-label={label} className="max-h-56 overflow-y-auto overscroll-contain p-1 sm:max-h-64">
+            {options.map((hub, index) => (
+              <li key={hub.id} id={`${uid}-${hub.id}`} role="option"
+                aria-selected={active < 0 ? value?.id === hub.id : active === index}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => selectHub(hub)}
+                className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-mist ${index === active ? "bg-mist" : ""}`}>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold">{hub.name}</span>
+                  <span className="block text-xs text-ink/65">{hub.district} District</span>
+                </span>
+                {value?.id === hub.id && <Check size={16} aria-hidden className="shrink-0 text-brand-deep" />}
               </li>
             ))}
-          </motion.ul>
-        )}
-      </AnimatePresence>
+          </ul>
+          {options.length === 0 && <p role="status" className="px-3 pb-4 pt-2 text-sm text-ink/70">No matches. Try a nearby town or district.</p>}
+        </div>
+      )}
     </div>
   );
 }

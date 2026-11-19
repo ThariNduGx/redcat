@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s | RedCat",
   },
   description:
-    "RedCat is Sri Lanka's next day delivery network: 4 zones, 57 regional hubs and 930+ express points covering the island.",
+    "RedCat is Sri Lanka's next day delivery network: 57 regional hubs across 25 districts and 930+ express points.",
   icons: { icon: "/brand/mascot-peek.svg" },
   openGraph: {
     type: "website",
@@ -33,13 +33,13 @@ export const metadata: Metadata = {
     siteName: "RedCat",
     title: "RedCat | Next Day Delivery across Sri Lanka",
     description:
-      "RedCat is Sri Lanka's next day delivery network: 4 zones, 57 regional hubs and 930+ express points covering the island.",
+      "RedCat is Sri Lanka's next day delivery network: 57 regional hubs across 25 districts and 930+ express points.",
   },
   twitter: {
     card: "summary_large_image",
     title: "RedCat | Next Day Delivery across Sri Lanka",
     description:
-      "RedCat is Sri Lanka's next day delivery network: 4 zones, 57 regional hubs and 930+ express points covering the island.",
+      "RedCat is Sri Lanka's next day delivery network: 57 regional hubs across 25 districts and 930+ express points.",
   },
 };
 
@@ -89,7 +89,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Hidden form definition for Netlify Forms indexing on static export */}
         <form name="enquiry" data-netlify="true" data-netlify-honeypot="website" hidden>
           <input type="hidden" name="form-name" value="enquiry" />
-          <input type="hidden" name="_to" value="info@redcat.lk" />
           <input type="text" name="name" />
           <input type="tel" name="phone" />
           <input type="email" name="email" />

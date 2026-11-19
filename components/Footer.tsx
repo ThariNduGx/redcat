@@ -11,7 +11,7 @@ function Year() {
 
 
 export default function Footer() {
-  const hasContact = CONTACT.phone || CONTACT.email || CONTACT.address || CONTACT.whatsapp;
+  const hasContact = CONTACT.phone || CONTACT.address || CONTACT.whatsapp;
   return (
     <footer className="relative overflow-clip bg-ink text-white">
       <div className="mx-auto max-w-7xl px-5 pt-20">
@@ -31,7 +31,7 @@ export default function Footer() {
           <nav aria-label="Footer">
             <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-brand">Explore</h2>
             <ul className="mt-5 space-y-3">
-              {NAV.map((item) => (
+              {[...NAV, { href: "/about", label: "About" }, { href: "/dealers", label: "Become a dealer" }].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="group inline-flex items-center gap-2 text-lg font-semibold text-white/80 transition hover:text-white">
                     {item.label}
@@ -48,7 +48,6 @@ export default function Footer() {
               <ul className="mt-5 space-y-3 text-lg text-white/80">
                 {CONTACT.phone && <li><a href={`tel:${CONTACT.phone}`} className="hover:text-white">{CONTACT.phone}</a></li>}
                 {CONTACT.whatsapp && <li>WhatsApp: {CONTACT.whatsapp}</li>}
-                {CONTACT.email && <li><a href={`mailto:${CONTACT.email}`} className="hover:text-white">{CONTACT.email}</a></li>}
                 {CONTACT.address && <li>{CONTACT.address}</li>}
               </ul>
             ) : (

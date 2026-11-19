@@ -1,3 +1,4 @@
+import { HUB_MAP_HREF } from "@/lib/site";
 import Mascot from "@/components/ui/Mascot";
 import ArrowLink from "@/components/ui/ArrowLink";
 
@@ -12,7 +13,7 @@ export default function NotFound() {
           <p className="mx-auto mt-3 max-w-sm text-lg text-ink/70">Even our cat can&rsquo;t find it. Let&rsquo;s get you back on the route.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <ArrowLink href="/">Go home</ArrowLink>
-            <ArrowLink href="/network" variant="brand">Explore the network</ArrowLink>
+            <ArrowLink href={HUB_MAP_HREF} variant="brand">Explore the network</ArrowLink>
           </div>
         </div>
       </div>

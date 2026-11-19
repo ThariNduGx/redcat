@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Suspense } from "react";
 import HeroHeadline from "@/components/HeroHeadline";
 import Journey from "@/components/Journey";
 import Reveal from "@/components/Reveal";
@@ -15,8 +16,7 @@ import { HUBS } from "@/data/hubs";
 const stats = [
   { to: 930, suffix: "+", label: "Express points", note: "to send and collect" },
   { to: 57, suffix: "", label: "Regional hubs", note: "in every district" },
-  { to: 4, suffix: "", label: "Zones", note: "operating zones" },
-  { to: 1, suffix: "", label: "Mixing point", note: "central sorting hub" },
+  { to: 25, suffix: "", label: "Districts", note: "across Sri Lanka" },
 ];
 
 const tech = [
@@ -48,7 +48,7 @@ export default function Home() {
               We are building the fastest and largest courier network in Sri Lanka.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <ArrowLink href="/hr" variant="light">Careers</ArrowLink>
+              <ArrowLink href="/careers" variant="light">Careers</ArrowLink>
               <ArrowLink href="/dealers" variant="outline" className="text-white">Become a dealer</ArrowLink>
             </div>
           </div>
@@ -82,7 +82,7 @@ export default function Home() {
             Sri Lanka is becoming a delivery economy. <span className="text-ink/35">We built the network for it.</span>
           </p>
         </Reveal>
-        <dl className="mt-14 grid grid-cols-2 border-t border-black/10 lg:grid-cols-4">
+        <dl className="mt-14 grid grid-cols-2 border-t border-black/10 sm:grid-cols-3">
           {stats.map((s, i) => (
             <Reveal key={s.label} delay={i * 90} className={`flex flex-col border-b border-black/10 py-8 pr-4 lg:border-b-0 ${i % 2 ? "pl-5 lg:pl-8" : "lg:pl-8 lg:first:pl-0"} ${i > 0 ? "lg:border-l" : ""} ${i % 2 ? "border-l" : ""}`}>
               <dt className="order-2 mt-2 text-base font-bold sm:text-lg">
@@ -100,29 +100,30 @@ export default function Home() {
       {/* ---------- SERVICES ---------- */}
       <Services />
 
-      {/* ---------- HOW IT WORKS ---------- */}
-      <Journey />
-
       {/* ---------- MAP ---------- */}
-      <section className="bg-paper py-20 sm:py-28" aria-labelledby="map-heading">
+      <section id="hubs" className="scroll-mt-20 bg-paper py-20 sm:py-28" aria-labelledby="map-heading">
         <div className="mx-auto max-w-7xl px-5">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <Reveal>
               <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-deep">The network</p>
               <h2 id="map-heading" className="mt-3 max-w-4xl text-balance text-5xl font-extrabold leading-[0.95] tracking-[-0.035em] sm:text-6xl">
-                One island. Four zones. 57 hubs.
+                57 hubs across 25 districts.
               </h2>
               <p className="mt-4 max-w-xl text-lg text-ink/70">
-                Search your town, tap any hub, or let us find the closest one to you.
+                Choose a district to see RedCat’s regional hubs. Pins mark hub towns.
               </p>
             </Reveal>
-            <ArrowLink href="/network" variant="dark">Full network view</ArrowLink>
           </div>
           <div className="mt-10">
-            <NetworkExplorer className="rounded-[1.75rem]" />
+            <Suspense fallback={<p className="min-h-72 rounded-[1.75rem] bg-white p-6" role="status">Loading district map…</p>}>
+              <NetworkExplorer />
+            </Suspense>
           </div>
         </div>
       </section>
+
+      {/* ---------- HOW IT WORKS ---------- */}
+      <Journey />
 
       {/* ---------- FLEET ---------- */}
       <section className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-20 sm:py-28 lg:grid-cols-[1.25fr_1fr]">
@@ -133,7 +134,7 @@ export default function Home() {
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-deep">The fleet</p>
           <h2 className="mt-3 text-5xl font-extrabold leading-[0.95] tracking-[-0.035em]">Trucks, vans and riders. All in red.</h2>
           <p className="mt-5 text-lg text-ink/70">
-            Trucks run the long hauls between zones overnight. Vans and scooters take the last mile. Our goal is simple: the largest delivery network in Sri Lanka.
+            Trucks run the long hauls between regional hubs overnight. Vans and scooters take the last mile. Our goal is simple: the largest delivery network in Sri Lanka.
           </p>
           <ArrowLink href="/about" className="mt-8">About RedCat</ArrowLink>
         </Reveal>

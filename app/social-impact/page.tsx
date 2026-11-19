@@ -1,3 +1,4 @@
+import { HUB_MAP_HREF } from "@/lib/site";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
@@ -47,7 +48,7 @@ export default function SocialImpactPage() {
           <Reveal delay={100}>
             <h2 id="access-heading" className="max-w-lg text-4xl font-extrabold leading-[1.05] tracking-[-0.035em] sm:text-5xl">Bringing delivery closer.</h2>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">Our planned nationwide Express Point network is designed to make sending and receiving parcels more convenient, including in communities with fewer delivery access points.</p>
-            <ArrowLink href="/network" variant="light" className="mt-8">Explore the network</ArrowLink>
+            <ArrowLink href={HUB_MAP_HREF} variant="light" className="mt-8">Explore the network</ArrowLink>
           </Reveal>
         </div>
       </section>

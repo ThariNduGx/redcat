@@ -7,7 +7,6 @@ import { ArrowRight, Check, Link2, Package, Share2 } from "lucide-react";
 import { mockShipment, STAGES, type MockShipment } from "@/lib/mockTracking";
 import { toast } from "./ui/Toaster";
 import RouteMap from "./map/RouteMap";
-import { zoneById } from "@/data/hubs";
 
 export default function TrackView() {
   const params = useSearchParams();
@@ -120,7 +119,7 @@ function Result({ s }: { s: MockShipment }) {
             <p className="mt-1 text-4xl font-extrabold tracking-tight sm:text-5xl">{s.statusLabel}</p>
             <p className="mt-2 text-lg text-white/75">
               {s.from.name} <ArrowRight size={18} strokeWidth={2.5} className="inline -mt-0.5 text-brand" aria-hidden /><span className="sr-only">to</span> {s.to.name}
-              <span className="text-white/45"> · {zoneById(s.from.zone).name} to {zoneById(s.to.zone).name}</span>
+              <span className="text-white/45"> · {s.from.district} to {s.to.district}</span>
             </p>
           </div>
           <div className="flex gap-2">

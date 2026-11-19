@@ -27,10 +27,10 @@ export function typicalRoute(from: Hub, to: Hub): Leg[] {
   const legs: Leg[] = [{ label: `${from.name} hub`, detail: `${from.district} District`, lat: from.lat, lng: from.lng }];
 
   if (from.zone === to.zone) {
-    if (from.km > 0) legs.push({ label: `${fz.center} zone`, detail: `${from.km} km`, lat: fz.lat, lng: fz.lng });
+    if (from.km > 0) legs.push({ label: `${fz.center} hub`, detail: `${from.km} km`, lat: fz.lat, lng: fz.lng });
   } else {
-    if (from.km > 0) legs.push({ label: `${fz.center} zone`, detail: "Through the overnight network", lat: fz.lat, lng: fz.lng });
-    if (to.km > 0) legs.push({ label: `${tz.center} zone`, detail: `On the way to ${to.name}`, lat: tz.lat, lng: tz.lng });
+    if (from.km > 0) legs.push({ label: `${fz.center} hub`, detail: "Through the overnight network", lat: fz.lat, lng: fz.lng });
+    if (to.km > 0) legs.push({ label: `${tz.center} hub`, detail: `On the way to ${to.name}`, lat: tz.lat, lng: tz.lng });
   }
 
   legs.push({ label: `${to.name} hub`, detail: "Out for delivery", lat: to.lat, lng: to.lng });

@@ -1,3 +1,4 @@
+import { HUB_MAP_HREF } from "@/lib/site";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
@@ -16,8 +17,6 @@ export const metadata: Metadata = {
 const tiers = [
   { n: 930, suffix: "+", label: "Express points", note: "Local parcel drop-off and collection in your neighbourhood", tag: "Islandwide" },
   { n: 57, suffix: "", label: "Regional hubs", note: "Located in every district from Jaffna to Hambantota", tag: "Every district" },
-  { n: 4, suffix: "", label: "Operating zones", note: "Regional coordination across Northern, Central, Western & Southern sectors", tag: "4 Zones" },
-  { n: 1, suffix: "", label: "Mixing point", note: "Central overnight sorting facility connecting every line-haul route", tag: "Central Hub" },
 ];
 
 export default function AboutPage() {
@@ -41,7 +40,7 @@ export default function AboutPage() {
               We are building the nation&apos;s fastest, most accessible parcel network — uniting local franchise entrepreneurs, smart digital tracking, and a steadfast promise of next-day delivery.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <ArrowLink href="/network" variant="light">Explore network</ArrowLink>
+              <ArrowLink href={HUB_MAP_HREF} variant="light">Explore network</ArrowLink>
               <ArrowLink href="/dealers" variant="outline" className="text-white hover:bg-white hover:text-ink">
                 Become a dealer
               </ArrowLink>
@@ -185,7 +184,7 @@ export default function AboutPage() {
         <Reveal className="text-center">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand">Nationwide Infrastructure</p>
           <h2 id="network-hierarchy" className="mt-2 text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
-            Built in four connected tiers.
+            Express points and regional hubs.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-ink/75">
             Connecting every corner of the island through synchronized line-haul logistics and local community touchpoints.
@@ -244,7 +243,7 @@ export default function AboutPage() {
                 Wherever your parcel needs to go, RedCat delivers across Sri Lanka.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <ArrowLink href="/network">See the network</ArrowLink>
+                <ArrowLink href={HUB_MAP_HREF}>See the network</ArrowLink>
                 <ArrowLink href="/dealers" variant="brand">Become a dealer</ArrowLink>
               </div>
             </div>

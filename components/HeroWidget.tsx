@@ -4,11 +4,12 @@ import { useId, useMemo, useRef, useState, useSyncExternalStore, type FormEvent 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowRight, ArrowUpDown, Clock, LocateFixed, Package, Search, X } from "lucide-react";
+import { ArrowRight, ArrowUpDown, Clock, LocateFixed, MapPin, Package, Search, X } from "lucide-react";
 import HubPicker from "./HubPicker";
 import Mascot from "./ui/Mascot";
 import { toast } from "./ui/Toaster";
-import { zoneById, type Hub } from "@/data/hubs";
+import type { Hub } from "@/data/hubs";
+import { HUB_MAP_HREF, hubMapHref } from "@/lib/site";
 import { nearestHubs } from "@/lib/geo";
 import { nextDayLabel, typicalRoute } from "@/lib/route";
 
@@ -356,11 +357,11 @@ function FindPanel() {
             {list.map(({ hub: h, km }, i) => (
               <li key={h.id}>
                 <Link
-                  href={`/network?hub=${h.id}`}
+                  href={hubMapHref(h.id)}
                   className="group flex items-center gap-3 rounded-2xl border-2 border-black/5 p-3 transition hover:border-ink"
                 >
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-sm font-extrabold text-white" style={{ background: zoneById(h.zone).color }}>
-                    {h.zone}
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand-deep">
+                    <MapPin size={18} aria-hidden />
                   </span>
                   <span className="flex-1">
                     <span className="block font-bold">
@@ -381,7 +382,7 @@ function FindPanel() {
       </AnimatePresence>
 
       {!list.length && (
-        <Link href="/network" className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-ink/60 hover:text-ink">
+        <Link href={HUB_MAP_HREF} className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-ink/60 hover:text-ink">
           <Search size={15} /> Or browse all 57 hubs on the map
         </Link>
       )}

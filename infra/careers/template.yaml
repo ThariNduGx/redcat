@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: RedCat careers application intake
+
+Parameters:
+  SiteOrigin:
+    Type: String
+    Default: https://redcat.lk
+    Description: Exact site origin without trailing slash
+
+Resources:
+  CareersApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: '$default'
+      DefinitionBody:
+        openapi: '3.0.1'
+        info:
+          title: RedCat careers
+          version: '1.0'
+        paths: {}
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref SiteOrigin
+        AllowMethods: [POST, OPTIONS]
+        AllowHeaders: [Content-Type]
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 10
+        ThrottlingRateLimit: 3
+
+  Applications:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  CvBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  Intake:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handler.submit
+      Runtime: python3.12
+      Timeout: 15
+      Environment:
+        Variables:
+          APPLICATIONS_TABLE: !Ref Applications
+          CV_BUCKET: !Ref CvBucket
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem]
+              Resource: !GetAtt Applications.Arn
+            - Effect: Allow
+              Action: s3:PutObject
+              Resource: !Sub '${CvBucket.Arn}/applications/*'
+      Events:
+        Submit:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CareersApi
+            Path: /applications
+            Method: POST
+            PayloadFormatVersion: '2.0'
+
+Outputs:
+  CareersApiUrl:
+    Value: !Sub 'https://${CareersApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/applications'
+  ApplicationsTable:
+    Value: !Ref Applications
+  CvBucketName:
+    Value: !Ref CvBucket

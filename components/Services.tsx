@@ -44,7 +44,7 @@ export default function Services() {
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
 
   return (
-    <section id="services" aria-labelledby="services-heading" className="bg-mist py-20 sm:py-28">
+    <section id="services" aria-labelledby="services-heading" className="scroll-mt-20 bg-mist py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-5">
         <Reveal className="grid gap-6 lg:grid-cols-2 lg:items-end">
           <h2 id="services-heading" className="text-4xl font-extrabold leading-[1.05] tracking-[-0.035em] sm:text-5xl">Delivery your way.</h2>

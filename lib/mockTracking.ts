@@ -47,7 +47,7 @@ export function mockShipment(rawId: string): MockShipment {
     { title: "Collected by RedCat", where: `${from.name} hub`, when: "Day 1 · 15:40" },
     { title: "Sorted within the network", where: "Overnight delivery network", when: "Day 1 · 22:05" },
     {
-      title: to.zone === "A" ? `On the way to ${to.name}` : "On the way to the destination zone",
+      title: to.zone === "A" ? `On the way to ${to.name}` : "On the way to the destination hub",
       where: route[Math.min(last, mid + 1)].label,
       when: "Day 2 · 02:30",
     },

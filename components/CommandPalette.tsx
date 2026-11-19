@@ -4,8 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CornerDownLeft, MapPin, Package, Search } from "lucide-react";
 import { searchHubs } from "@/lib/geo";
-import { zoneById } from "@/data/hubs";
-import { FEATURES, NAV } from "@/lib/site";
+import { FEATURES, NAV, hubMapHref } from "@/lib/site";
 
 export const openPalette = () => window.dispatchEvent(new Event("rc:palette"));
 
@@ -50,9 +49,9 @@ export default function CommandPalette() {
       out.push({ key: "track", label: `Track ${query.toUpperCase()}`, hint: "Tracking", icon: "track", href: `/track?id=${encodeURIComponent(query)}` });
     }
     for (const h of searchHubs(query, 6)) {
-      out.push({ key: h.id, label: h.name, hint: `${h.district} · ${zoneById(h.zone).name}`, icon: "hub", href: `/network?hub=${h.id}` });
+      out.push({ key: h.id, label: h.name, hint: `${h.district} District`, icon: "hub", href: hubMapHref(h.id) });
     }
-    const pages = [{ href: "/", label: "Home" }, ...NAV].filter((p) => !query || p.label.toLowerCase().includes(query.toLowerCase()));
+    const pages = [...NAV, { href: "/about", label: "About" }, { href: "/dealers", label: "Become a dealer" }, { href: "/contact", label: "Contact" }].filter((p) => !query || p.label.toLowerCase().includes(query.toLowerCase()));
     for (const p of pages) out.push({ key: p.href, label: p.label, hint: "Page", icon: "page", href: p.href });
     return out;
   }, [q]);

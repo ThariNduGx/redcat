@@ -1,0 +1,8 @@
+# Disable directory browsing
+Options -Indexes
+
+# Block public access to configuration, ini, and database files
+<FilesMatch "^(php\.ini|\.env|.*\.sql|.*\.example\.php)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

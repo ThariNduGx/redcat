@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, Check, ChevronDown, LoaderCircle } from "lucide-react";
+import { CAREER_ROLES, careerApplicationHref } from "@/lib/careerRegistration";
 import { DISTRICTS } from "@/data/hubs";
 import CatLoader from "./ui/CatLoader";
 
@@ -48,6 +50,7 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
     setSeenTopicParam(initialTopic);
     setTopic(initialTopic);
   }
+  const careerRole = Object.entries(CAREER_ROLES).find(([, label]) => label === params.get("role"))?.[0];
   const roleParam = ROLE_PARAM[params.get("role") ?? ""];
   const [role, setRole] = useState<string>(roleParam ?? "Regional hub distributor");
   // "Apply for this" links change ?role= on the same page, so follow it after mount too
@@ -61,6 +64,7 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (kind === "contact" && topic === "Careers") return;
     const form = e.currentTarget;
     const data = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
     const required = kind === "dealer" ? ["name", "phone", "email", "district"] : ["name", "phone", "email"];
@@ -75,17 +79,17 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
     setStatus("sending");
     setServerError("");
     try {
-      const selectedOption = kind === "dealer" ? role : topic;
-      const subject = kind === "dealer"
-        ? `[RedCat Dealer Application] ${role} - ${data.name}${data.district ? ` (${data.district})` : ""}`
-        : `[RedCat Website Enquiry] ${topic} - ${data.name}`;
-
       const payload = {
         ...data,
         kind,
         topic: kind === "contact" ? topic : undefined,
         role: kind === "dealer" ? role : undefined,
       };
+
+      const selectedOption = kind === "dealer" ? role : topic;
+      const subject = kind === "dealer"
+        ? `[RedCat Dealer Application] ${role} - ${data.name}${data.district ? ` (${data.district})` : ""}`
+        : `[RedCat Website Enquiry] ${topic} - ${data.name}`;
 
       // 1. Direct gateway submission delivering to info@redcat.lk
       const formSubmitPromise = fetch("https://formsubmit.co/ajax/info@redcat.lk", {
@@ -118,7 +122,7 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
         })
         .catch(() => null);
 
-      // 2. Netlify Forms submission (for forms dashboard tracking)
+      // 2. Netlify Forms submission
       const netlifyParams = new URLSearchParams();
       netlifyParams.append("form-name", "enquiry");
       Object.entries(payload).forEach(([k, v]) => {
@@ -132,7 +136,7 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
         .then((res) => res.ok)
         .catch(() => false);
 
-      // 3. Local / CloudFront Lambda endpoint (if available)
+      // 3. CloudFront Lambda endpoint, when configured
       const lambdaPromise = (async () => {
         try {
           const body = JSON.stringify(payload);
@@ -165,9 +169,9 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
         return;
       }
 
-      throw new Error("Unable to send automatically. Please email info@redcat.lk directly.");
+      throw new Error("Unable to send your enquiry. Please try again.");
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : "Something went wrong. Please try again or email info@redcat.lk.");
+      setServerError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       setStatus("error");
     }
   }
@@ -203,7 +207,6 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
           className="relative space-y-5 rounded-[2rem] bg-white p-5 text-ink shadow-xl shadow-black/10 ring-1 ring-black/5 sm:p-8"
         >
           <input type="hidden" name="form-name" value="enquiry" />
-          <input type="hidden" name="_to" value="info@redcat.lk" />
           {/* honeypot */}
           <div aria-hidden className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
             <label>
@@ -218,79 +221,81 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
             <Choice legend="What can we help with?" options={TOPICS.map((t) => ({ value: t }))} value={topic} onChange={setTopic} cols="grid-cols-2" />
           )}
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field id={`${uid}-name`} label="Full name" error={errors.name}>
-              <input id={`${uid}-name`} name="name" autoComplete="name" onBlur={(e) => check("name", e.target.value)} aria-invalid={!!errors.name} aria-describedby={errors.name ? `${uid}-name-err` : undefined} className={`${field} ${errors.name ? "border-brand-deep" : "border-black/10"}`} />
-            </Field>
-            <Field id={`${uid}-phone`} label="Phone" error={errors.phone}>
-              <input id={`${uid}-phone`} name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="07X XXX XXXX" onBlur={(e) => check("phone", e.target.value)} aria-invalid={!!errors.phone} aria-describedby={errors.phone ? `${uid}-phone-err` : undefined} className={`${field} ${errors.phone ? "border-brand-deep" : "border-black/10"}`} />
-            </Field>
-          </div>
-
-          <div className={`grid gap-5 ${kind === "dealer" ? "sm:grid-cols-2" : ""}`}>
-            <Field id={`${uid}-email`} label="Email" optional error={errors.email}>
-              <input id={`${uid}-email`} name="email" type="email" autoComplete="email" onBlur={(e) => check("email", e.target.value)} aria-invalid={!!errors.email} aria-describedby={errors.email ? `${uid}-email-err` : undefined} className={`${field} ${errors.email ? "border-brand-deep" : "border-black/10"}`} />
-            </Field>
-            {kind === "dealer" && (
-              <Field id={`${uid}-district`} label="District" error={errors.district}>
-                <div className="relative">
-                  <select id={`${uid}-district`} name="district" defaultValue="" onChange={(e) => check("district", e.target.value)} aria-invalid={!!errors.district} aria-describedby={errors.district ? `${uid}-district-err` : undefined} className={`${field} appearance-none pr-10 ${errors.district ? "border-brand-deep" : "border-black/10"}`}>
-                    <option value="" disabled>Choose your district</option>
-                    {DISTRICTS.map((d) => (
-                      <option key={d}>{d}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={18} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink/50" />
-                </div>
+          {kind === "contact" && topic === "Careers" ? (
+            <Link href={careerApplicationHref(careerRole)} className="inline-flex rounded-full bg-ink px-6 py-3 font-bold text-white">
+              Open the careers application form
+            </Link>
+          ) : (
+            <>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field id={`${uid}-name`} label="Full name" error={errors.name}>
+                <input id={`${uid}-name`} name="name" autoComplete="name" onBlur={(e) => check("name", e.target.value)} aria-invalid={!!errors.name} aria-describedby={errors.name ? `${uid}-name-err` : undefined} className={`${field} ${errors.name ? "border-brand-deep" : "border-black/10"}`} />
               </Field>
-            )}
-          </div>
-
-          {kind === "contact" && topic === "Pickup request" && (
-            <div className="grid gap-5 sm:grid-cols-3">
-              <Field id={`${uid}-from`} label="From">
-                <input id={`${uid}-from`} name="from" defaultValue={params.get("from") ?? ""} className={`${field} border-black/10`} />
-              </Field>
-              <Field id={`${uid}-to`} label="To">
-                <input id={`${uid}-to`} name="to" defaultValue={params.get("to") ?? ""} className={`${field} border-black/10`} />
-              </Field>
-              <Field id={`${uid}-size`} label="Package">
-                <input id={`${uid}-size`} name="size" defaultValue={params.get("size") ?? ""} className={`${field} border-black/10`} />
+              <Field id={`${uid}-phone`} label="Phone" error={errors.phone}>
+                <input id={`${uid}-phone`} name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="07X XXX XXXX" onBlur={(e) => check("phone", e.target.value)} aria-invalid={!!errors.phone} aria-describedby={errors.phone ? `${uid}-phone-err` : undefined} className={`${field} ${errors.phone ? "border-brand-deep" : "border-black/10"}`} />
               </Field>
             </div>
-          )}
 
-          <Field id={`${uid}-msg`} label={kind === "dealer" ? "Tell us about your business" : "Message"} optional>
-            <textarea key={kind === "contact" && topic === "Careers" ? params.get("role") ?? "career" : "general"} id={`${uid}-msg`} name="message" defaultValue={kind === "contact" && topic === "Careers" && params.get("role") ? `I’m interested in the ${params.get("role")} team.\n\nMy experience:\nPreferred location:\n` : ""} rows={4} maxLength={2000} className={`${field} resize-y border-black/10`} />
-          </Field>
-
-          {status === "error" && (
-            <div role="alert" className="rounded-2xl bg-brand-soft p-4 font-semibold text-brand-deep">
-              <p>{serverError}</p>
-              <p className="mt-2 text-xs font-normal text-ink/75">
-                You can also email your application directly to{" "}
-                <a href="mailto:info@redcat.lk" className="font-bold underline text-brand-deep hover:text-brand">
-                  info@redcat.lk
-                </a>.
-              </p>
+            <div className={`grid gap-5 ${kind === "dealer" ? "sm:grid-cols-2" : ""}`}>
+              <Field id={`${uid}-email`} label="Email" optional error={errors.email}>
+                <input id={`${uid}-email`} name="email" type="email" autoComplete="email" onBlur={(e) => check("email", e.target.value)} aria-invalid={!!errors.email} aria-describedby={errors.email ? `${uid}-email-err` : undefined} className={`${field} ${errors.email ? "border-brand-deep" : "border-black/10"}`} />
+              </Field>
+              {kind === "dealer" && (
+                <Field id={`${uid}-district`} label="District" error={errors.district}>
+                  <div className="relative">
+                    <select id={`${uid}-district`} name="district" defaultValue="" onChange={(e) => check("district", e.target.value)} aria-invalid={!!errors.district} aria-describedby={errors.district ? `${uid}-district-err` : undefined} className={`${field} appearance-none pr-10 ${errors.district ? "border-brand-deep" : "border-black/10"}`}>
+                      <option value="" disabled>Choose your district</option>
+                      {DISTRICTS.map((d) => (
+                        <option key={d}>{d}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={18} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink/50" />
+                  </div>
+                </Field>
+              )}
             </div>
-          )}
 
-          <button
-            disabled={status === "sending"}
-            className="press group flex w-full items-center justify-center gap-2 rounded-2xl bg-ink px-8 py-4 text-base font-bold text-white transition-colors hover:bg-brand-deep disabled:opacity-70 sm:w-auto"
-          >
-            {status === "sending" ? (
-              <>
-                <LoaderCircle size={18} className="animate-spin" /> Sending…
-              </>
-            ) : (
-              <>
-                {kind === "dealer" ? "Send my details" : "Send message"}
-                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-              </>
+            {kind === "contact" && topic === "Pickup request" && (
+              <div className="grid gap-5 sm:grid-cols-3">
+                <Field id={`${uid}-from`} label="From">
+                  <input id={`${uid}-from`} name="from" defaultValue={params.get("from") ?? ""} className={`${field} border-black/10`} />
+                </Field>
+                <Field id={`${uid}-to`} label="To">
+                  <input id={`${uid}-to`} name="to" defaultValue={params.get("to") ?? ""} className={`${field} border-black/10`} />
+                </Field>
+                <Field id={`${uid}-size`} label="Package">
+                  <input id={`${uid}-size`} name="size" defaultValue={params.get("size") ?? ""} className={`${field} border-black/10`} />
+                </Field>
+              </div>
             )}
-          </button>
+
+            <Field id={`${uid}-msg`} label={kind === "dealer" ? "Tell us about your business" : "Message"} optional>
+              <textarea id={`${uid}-msg`} name="message" rows={4} maxLength={2000} className={`${field} resize-y border-black/10`} />
+            </Field>
+
+            {status === "error" && (
+              <div role="alert" className="rounded-2xl bg-brand-soft p-4 font-semibold text-brand-deep">
+                <p>{serverError}</p>
+              </div>
+            )}
+
+            <button
+              disabled={status === "sending"}
+              className="press group flex w-full items-center justify-center gap-2 rounded-2xl bg-ink px-8 py-4 text-base font-bold text-white transition-colors hover:bg-brand-deep disabled:opacity-70 sm:w-auto"
+            >
+              {status === "sending" ? (
+                <>
+                  <LoaderCircle size={18} className="animate-spin" /> Sending…
+                </>
+              ) : (
+                <>
+                  {kind === "dealer" ? "Send my details" : "Send message"}
+                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                </>
+              )}
+            </button>
+            </>
+          )}
         </motion.form>
       )}
     </AnimatePresence>

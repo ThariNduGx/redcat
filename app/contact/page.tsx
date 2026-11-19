@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { ArrowUpRight, MapPin, Package, Store } from "lucide-react";
 import EnquiryForm from "@/components/EnquiryForm";
 import CatLoader from "@/components/ui/CatLoader";
-import { CONTACT, FEATURES } from "@/lib/site";
+import { CONTACT, FEATURES, HUB_MAP_HREF } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 const shortcuts = [
   ...(FEATURES.tracking ? [{ href: "/track", icon: Package, title: "Track a parcel", body: "Live status and route" }] : []),
-  { href: "/network", icon: MapPin, title: "Find a hub", body: "57 hubs on the map" },
+  { href: HUB_MAP_HREF, icon: MapPin, title: "Find a hub", body: "57 hubs on the map" },
   { href: "/dealers", icon: Store, title: "Become a dealer", body: "Run RedCat in your town" },
 ];
 
@@ -21,7 +21,6 @@ export default function ContactPage() {
   const rows: [string, string | null, string?][] = [
     ["Phone", CONTACT.phone, CONTACT.phone ? `tel:${CONTACT.phone}` : undefined],
     ["WhatsApp", CONTACT.whatsapp],
-    ["Email", CONTACT.email, CONTACT.email ? `mailto:${CONTACT.email}` : undefined],
     ["Address", CONTACT.address],
   ];
   const shown = rows.filter(([, v]) => v);

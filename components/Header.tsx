@@ -45,8 +45,8 @@ export default function Header() {
         </Link>
 
         <nav aria-label="Main" className="hidden items-center gap-0.5 xl:flex">
-          {NAV.filter((n) => n.href !== "/dealers").map((item) => {
-            const active = pathname === item.href;
+          {NAV.map((item) => {
+            const active = pathname === item.href || (pathname === "/hr" && item.href === "/careers");
             return (
               <Link
                 key={item.href}
@@ -76,12 +76,6 @@ export default function Header() {
           <button type="button" onClick={openPalette} aria-label="Search" className="press grid h-11 w-11 place-items-center rounded-full border border-black/10 md:hidden">
             <Search size={18} />
           </button>
-          <Link
-            href="/dealers"
-            className="press hidden rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-deep sm:inline-block"
-          >
-            Become a dealer
-          </Link>
           <button
             type="button"
             className="press grid h-11 w-11 place-items-center rounded-full border border-black/10 xl:hidden"
