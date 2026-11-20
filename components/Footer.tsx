@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Logo } from "./Logo";
@@ -60,10 +61,15 @@ export default function Footer() {
         </div>
       </div>
 
-      <p aria-hidden className="pointer-events-none mt-16 select-none whitespace-nowrap text-center text-[clamp(5rem,22vw,20rem)] font-extrabold leading-[0.78] tracking-[-0.06em]">
-        <span className="text-brand">RED</span>
-        <span className="text-white/[0.07]">CAT</span>
-      </p>
+      <div className="pointer-events-none mx-auto mt-14 max-w-7xl select-none px-5 pb-6 sm:mt-20 sm:pb-10">
+        <Image
+          src="/brand/footer-logo@2x.png"
+          alt="RedCat"
+          width={1008}
+          height={174}
+          className="mx-auto h-auto w-full max-w-4xl object-contain sm:max-w-5xl"
+        />
+      </div>
 
       <div className="relative border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-sm text-white/50">
