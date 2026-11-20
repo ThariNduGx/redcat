@@ -2,83 +2,28 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Suspense } from "react";
 import CareerApplication from "@/components/CareerApplication";
+import JobOpenings from "@/components/JobOpenings";
 import { CAREER_ROLES } from "@/lib/careerRegistration";
 import {
   Award,
-  Briefcase,
   CheckCircle2,
-  Compass,
-  Sparkles,
   TrendingUp,
-  Truck,
   Users,
 } from "lucide-react";
-import Reveal from "@/components/Reveal";
 import CareerApplyLink from "@/components/CareerApplyLink";
 
 export const metadata: Metadata = {
   title: "Careers & HR | RedCat",
   description:
-    "Join RedCat and help build Sri Lanka's next-day delivery network. Open positions: Business Development Manager and Zone Operations Manager. Register online.",
+    "Join RedCat and help build Sri Lanka's next-day delivery network. Open positions: Business Development Executive and Zone Operations Manager. Register online.",
   alternates: {
     canonical: "https://redcat.lk/hr",
   },
 };
 
 const POSITIONS = [
-  {
-    id: "bdm",
-    title: CAREER_ROLES.bdm,
-    badge: "Regional / Islandwide",
-    tagline: "Lead the expansion of Redcat across Sri Lanka.",
-    overview:
-      "Redcat is building the largest courier network of 930 strategic franchise partners. We are looking for ambitious and commercially minded Regional Business Development Managers to identify business opportunities, develop strategic partnerships and recruit franchise partners to establish and expand the RedCat network.",
-    responsibilities: [
-      "Develop relationships with entrepreneurs and potential business partners across target districts.",
-      "Identify suitable commercial locations and strategic opportunities for expanding the CAT Point network.",
-      "Monitor the commercial performance and continuous footfall growth of the regional franchise network.",
-      "Identify local opportunities to increase parcel volumes in the region and secure commercial partnerships.",
-    ],
-    requirementsTitle: "What We're Looking For",
-    requirements: [
-      "Ambitious, commercially minded professional with proven deal-making capability.",
-      "Experience in B2B business development, franchise expansion, or regional sales.",
-      "Strong communication, negotiation, and entrepreneur relationship-building skills.",
-      "Deep familiarity with regional business centers and commercial hubs in Sri Lanka.",
-    ],
-    benefits: [
-      "Attractive performance-based incentives and commercial commission tiers.",
-      "Fast career growth within a rapidly expanding nationwide organization.",
-      "An opportunity to play a leading role in building a transformative national network.",
-    ],
-  },
-  {
-    id: "zom",
-    title: CAREER_ROLES.zom,
-    badge: "Operations / Logistics",
-    tagline: "Train and empower the people behind the RedCat network.",
-    overview:
-      "Redcat is building the largest courier network of 930 strategic franchise partners. We are looking for capable and results-driven managers to oversee delivery operations across assigned districts.",
-    responsibilities: [
-      "Oversee smooth, reliable delivery operations across assigned districts.",
-      "Coordinate and supervise Regional Centres and local CAT Point franchise operations.",
-      "Manage transportation schedules, line-haul dispatches, and inter-regional parcel movements.",
-      "Monitor daily parcel volumes, next-day delivery performance SLAs, and operational efficiency.",
-      "Supervise regional operational teams and ensure all staff strictly adhere to standard operating procedures (SOPs).",
-    ],
-    requirementsTitle: "What We're Looking For",
-    requirements: [
-      "Proven experience in logistics, courier operations, supply chain, or field operations management.",
-      "Strong leadership and team management capabilities across distributed personnel.",
-      "Ability to coordinate multiple operational locations, hubs, and transport teams simultaneously.",
-      "High attention to operational discipline, safety standards, and real-time problem solving.",
-    ],
-    benefits: [
-      "Competitive executive remuneration and performance-linked operational bonuses.",
-      "Direct leadership authority over regional delivery operations across assigned districts.",
-      "Clear career trajectory within executive logistics management.",
-    ],
-  },
+  { id: "bdm", title: CAREER_ROLES.bdm },
+  { id: "zom", title: CAREER_ROLES.zom },
 ];
 
 export default function HrPage() {
@@ -204,124 +149,8 @@ export default function HrPage() {
         </div>
       </section>
 
-      {/* ---------- OPEN POSITIONS SECTION ---------- */}
-      <section id="open-positions" className="scroll-mt-20 bg-paper py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-5">
-          <Reveal>
-            <div className="flex flex-wrap items-end justify-between gap-6 border-b border-black/10 pb-8">
-              <div>
-                <span className="text-sm font-bold uppercase tracking-[0.18em] text-brand">
-                  Current Openings
-                </span>
-                <h2 className="mt-3 text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">
-                  Open Positions
-                </h2>
-              </div>
-              <p className="max-w-xl text-lg text-ink/75">
-                Explore the responsibilities, requirements and benefits for each open position.
-              </p>
-            </div>
-          </Reveal>
-
-          {/* Detailed Job Cards */}
-          <div className="mt-12 space-y-10">
-            {POSITIONS.map((pos, idx) => (
-              <Reveal key={pos.id} delay={idx * 100}>
-                <article className="overflow-hidden rounded-[2.5rem] border-2 border-black/5 bg-white shadow-xl transition-all duration-300 hover:border-brand/30 hover:shadow-2xl">
-
-                  {/* Card Header */}
-                  <div className="border-b border-black/5 bg-gradient-to-r from-mist via-white to-brand-soft/30 p-8 sm:p-10">
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand text-white shadow-md shadow-brand/20">
-                          {pos.id === "bdm" ? (
-                            <Briefcase size={22} strokeWidth={2.4} />
-                          ) : (
-                            <Truck size={22} strokeWidth={2.4} />
-                          )}
-                        </span>
-                        <div>
-                          <span className="rounded-full bg-ink px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
-                            {pos.badge}
-                          </span>
-                        </div>
-                      </div>
-                      <CareerApplyLink roleId={pos.id} variant="brand" aria-label={`Apply now for ${pos.title}`}>
-                        Apply now
-                      </CareerApplyLink>
-                    </div>
-
-                    <h3 className="mt-6 text-3xl sm:text-4xl font-extrabold tracking-tight text-ink">
-                      {pos.title}
-                    </h3>
-                    <p className="mt-2 text-lg font-bold text-brand">
-                      {pos.tagline}
-                    </p>
-                    <p className="mt-4 max-w-4xl text-base sm:text-lg leading-relaxed text-ink/80">
-                      {pos.overview}
-                    </p>
-                  </div>
-
-                  {/* Card Content: Responsibilities, Requirements & Benefits */}
-                  <div className="grid gap-8 p-8 sm:p-10 lg:grid-cols-3">
-
-                    {/* Responsibilities */}
-                    <div className="rounded-2xl bg-mist/60 p-6">
-                      <h4 className="flex items-center gap-2 text-base font-extrabold uppercase tracking-wider text-ink">
-                        <Compass size={18} className="text-brand" />
-                        Key Responsibilities
-                      </h4>
-                      <ul className="mt-4 space-y-3">
-                        {pos.responsibilities.map((resp) => (
-                          <li key={resp} className="flex items-start gap-2.5 text-sm leading-relaxed text-ink/75">
-                            <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand" />
-                            <span>{resp}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Requirements */}
-                    <div className="rounded-2xl bg-mist/60 p-6">
-                      <h4 className="flex items-center gap-2 text-base font-extrabold uppercase tracking-wider text-ink">
-                        <CheckCircle2 size={18} className="text-brand" />
-                        {pos.requirementsTitle}
-                      </h4>
-                      <ul className="mt-4 space-y-3">
-                        {pos.requirements.map((req) => (
-                          <li key={req} className="flex items-start gap-2.5 text-sm leading-relaxed text-ink/75">
-                            <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand" />
-                            <span>{req}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* What You Get / Benefits */}
-                    <div className="rounded-2xl bg-brand-soft/50 border border-brand/20 p-6">
-                      <h4 className="flex items-center gap-2 text-base font-extrabold uppercase tracking-wider text-brand">
-                        <Sparkles size={18} className="text-brand" />
-                        What You Get
-                      </h4>
-                      <ul className="mt-4 space-y-3">
-                        {pos.benefits.map((ben) => (
-                          <li key={ben} className="flex items-start gap-2.5 text-sm leading-relaxed text-ink/85 font-medium">
-                            <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-brand" />
-                            <span>{ben}</span>
-                          </li>
-                        ))}
-                      </ul>
-
-                    </div>
-
-                  </div>
-
-                </article>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ---------- OPEN POSITIONS WITH BILINGUAL SWITCHER ---------- */}
+      <JobOpenings />
 
       {/* ---------- ONLINE REGISTRATION ---------- */}
       <section id="apply" aria-labelledby="apply-heading" className="scroll-mt-24 bg-mist px-5 py-16">

@@ -1,5 +1,5 @@
 export const CAREER_ROLES = {
-  bdm: "Business Development Manager",
+  bdm: "Business Development Executive",
   zom: "Zone Operations Manager",
   general: "General application",
 } as const;

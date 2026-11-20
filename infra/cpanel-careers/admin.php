@@ -174,7 +174,7 @@ if ($isLoggedIn) {
                 }
 
                 $roleLabel = match($r['role']) {
-                    'bdm' => 'Business Development Manager',
+                    'bdm' => 'Business Development Executive',
                     'zom' => 'Zone Operations Manager',
                     default => 'General Application',
                 };
@@ -230,7 +230,7 @@ if ($isLoggedIn) {
 // Helpers for presentation
 function formatRole(string $role): array {
     return match($role) {
-        'bdm' => ['label' => 'Business Development Manager', 'bg' => 'bg-red-50 text-red-700 border-red-200', 'badge' => 'BDM'],
+        'bdm' => ['label' => 'Business Development Executive', 'bg' => 'bg-red-50 text-red-700 border-red-200', 'badge' => 'BDE'],
         'zom' => ['label' => 'Zone Operations Manager', 'bg' => 'bg-amber-50 text-amber-800 border-amber-200', 'badge' => 'ZOM'],
         default => ['label' => 'General Application', 'bg' => 'bg-slate-100 text-slate-700 border-slate-200', 'badge' => 'General'],
     };
@@ -375,9 +375,9 @@ function formatPhoneWhatsApp(string $phone): string {
       </div>
 
       <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-        <p class="text-xs font-bold uppercase tracking-wider text-red-600">Business Dev. Managers</p>
+        <p class="text-xs font-bold uppercase tracking-wider text-red-600">Business Dev. Executives</p>
         <p class="mt-2 text-3xl font-extrabold text-slate-900"><?= $stats['bdm'] ?></p>
-        <p class="mt-1 text-xs text-slate-500">BDM candidate pool</p>
+        <p class="mt-1 text-xs text-slate-500">BDE candidate pool</p>
       </div>
 
       <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
@@ -401,7 +401,7 @@ function formatPhoneWhatsApp(string $phone): string {
           All (<?= $stats['total'] ?>)
         </button>
         <button onclick="setFilter('bdm')" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200" data-filter="bdm">
-          BDM (<?= $stats['bdm'] ?>)
+          BDE (<?= $stats['bdm'] ?>)
         </button>
         <button onclick="setFilter('zom')" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200" data-filter="zom">
           Zone Operations (<?= $stats['zom'] ?>)
