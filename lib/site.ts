@@ -25,6 +25,6 @@ export function hubMapHref(hubId: string) {
 export const NAV = [
   { href: "/", label: "Home" },
   { href: "/#services", label: "Services" },
-  { href: "/careers", label: "Careers" },
+  { href: "/hr", label: "Careers" },
   { href: "/social-impact", label: "Social Impact" },
 ];

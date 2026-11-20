@@ -20,7 +20,7 @@ export const EMPLOYMENT_AMBITIONS = [
 ];
 
 export const IMPACT_AREAS = [
-  { title: "Work closer to home", body: "As the network grows, RedCat aims to create employment opportunities for people from all walks of life, through local delivery, transport and franchise operations.", href: "/careers", action: "Explore careers" },
+  { title: "Work closer to home", body: "As the network grows, RedCat aims to create employment opportunities for people from all walks of life, through local delivery, transport and franchise operations.", href: "/hr", action: "Explore careers" },
   { title: "Local entrepreneurs", body: "A franchise-powered network gives local business owners a way to operate customer-facing parcel locations, supported by shared technology and coordinated logistics.", href: "/dealers", action: "Explore dealer opportunities" },
   { title: "Small businesses, wider reach", body: "RedCat aims to connect thousands of small businesses across the island with a reliable, convenient way to distribute their products by the next day.", href: "/contact?topic=Business%20account", action: "Talk about your business" },
 ];

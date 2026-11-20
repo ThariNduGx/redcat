@@ -48,7 +48,7 @@ export default function Home() {
               We are building the fastest and largest courier network in Sri Lanka.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <ArrowLink href="/careers" variant="light">Careers</ArrowLink>
+              <ArrowLink href="/hr" variant="light">Careers</ArrowLink>
               <ArrowLink href="/dealers" variant="outline" className="text-white">Become a dealer</ArrowLink>
             </div>
           </div>

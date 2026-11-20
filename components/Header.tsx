@@ -46,7 +46,7 @@ export default function Header() {
 
         <nav aria-label="Main" className="hidden items-center gap-0.5 xl:flex">
           {NAV.map((item) => {
-            const active = pathname === item.href || (pathname === "/hr" && item.href === "/careers");
+            const active = pathname === item.href;
             return (
               <Link
                 key={item.href}
