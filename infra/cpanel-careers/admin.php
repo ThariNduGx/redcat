@@ -7,6 +7,7 @@ declare(strict_types=1);
  */
 
 // Enable strict session cookie settings
+header('X-RedCat-Admin: 2.2');
 if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params([
         'lifetime' => 0,
@@ -132,9 +133,9 @@ if ($isLoggedIn) {
                 }
             }
 
-            $stmt = $pdo->prepare("SELECT name, role, {$column} AS file_data FROM career_applications WHERE id = :id LIMIT 1");
-            $stmt->execute(['id' => $fileId]);
-            $row = $stmt->fetch();
+            $quotedId = $pdo->quote($fileId);
+            $stmt = $pdo->query("SELECT name, role, {$column} AS file_data FROM career_applications WHERE id = {$quotedId} LIMIT 1");
+            $row = $stmt ? $stmt->fetch() : null;
 
             if (!$row || empty($row['file_data'])) {
                 http_response_code(404);
@@ -144,6 +145,10 @@ if ($isLoggedIn) {
             $sanitizedName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $row['name']);
             $prefix = $isDoc ? 'Document' : 'CV';
             $filename = sprintf('%s-%s-%s.pdf', $prefix, strtoupper($row['role']), $sanitizedName);
+
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
 
             header('Content-Type: application/pdf');
             header('Content-Length: ' . strlen($row['file_data']));
@@ -353,7 +358,7 @@ function formatPhoneWhatsApp(string $phone): string {
             RC
           </div>
           <div>
-            <h1 class="text-lg font-bold text-slate-900 leading-tight">RedCat Careers Admin</h1>
+            <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">RedCat Careers Admin <span class="text-[11px] font-mono font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200">v2.2</span></h1>
             <p class="text-xs text-slate-500">Applicant Tracking &amp; CV Repository</p>
           </div>
         </div>
