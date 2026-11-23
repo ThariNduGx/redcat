@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-const CV_LIMIT = 5_000_000;
-const BODY_LIMIT = 7 * 1024 * 1024;
+const CV_LIMIT = 10_000_000;
+const DOC_LIMIT = 10_000_000;
+const BODY_LIMIT = 30 * 1024 * 1024;
 
 function respond(int $status, array $payload = []): never
 {
@@ -46,15 +47,32 @@ function applicationData(array $payload): array
         throw new InvalidArgumentException('Enter a valid phone number.');
     }
 
-    $encoded = $payload['cv'] ?? null;
-    $cv = is_string($encoded) && strlen($encoded) <= 4 * intdiv(CV_LIMIT + 2, 3)
-        ? base64_decode($encoded, true)
+    // Required CV (PDF, under 10 MB)
+    $encodedCv = $payload['cv'] ?? null;
+    $cv = is_string($encodedCv) && strlen($encodedCv) <= 4 * intdiv(CV_LIMIT + 2, 3)
+        ? base64_decode($encodedCv, true)
         : false;
-    if ($cv === false || strlen($cv) >= CV_LIMIT || !str_starts_with($cv, '%PDF-') ||
+    if ($cv === false || strlen($cv) > CV_LIMIT || !str_starts_with($cv, '%PDF-') ||
         (new finfo(FILEINFO_MIME_TYPE))->buffer($cv) !== 'application/pdf') {
-        throw new InvalidArgumentException('Choose a valid PDF CV under 5 MB.');
+        throw new InvalidArgumentException('Choose a valid PDF CV under 10 MB.');
     }
-    return [$fields, $cv];
+
+    // Optional Document / Work Experience Letter (PDF, under 10 MB)
+    $doc = null;
+    $encodedDoc = $payload['document'] ?? null;
+    if (!empty($encodedDoc)) {
+        if (!is_string($encodedDoc) || strlen($encodedDoc) > 4 * intdiv(DOC_LIMIT + 2, 3)) {
+            throw new InvalidArgumentException('Work experience letter or document must be under 10 MB.');
+        }
+        $decodedDoc = base64_decode($encodedDoc, true);
+        if ($decodedDoc === false || strlen($decodedDoc) > DOC_LIMIT || !str_starts_with($decodedDoc, '%PDF-') ||
+            (new finfo(FILEINFO_MIME_TYPE))->buffer($decodedDoc) !== 'application/pdf') {
+            throw new InvalidArgumentException('Work experience letter or document must be a valid PDF under 10 MB.');
+        }
+        $doc = $decodedDoc;
+    }
+
+    return [$fields, $cv, $doc];
 }
 
 $method = $_SERVER['REQUEST_METHOD'] ?? '';
@@ -88,28 +106,51 @@ try {
     }
     $raw = file_get_contents('php://input', false, null, 0, BODY_LIMIT + 1);
     if ($raw === false || strlen($raw) > BODY_LIMIT) {
-        respond(413, ['error' => 'Choose a PDF CV under 5 MB.']);
+        respond(413, ['error' => 'Uploaded files exceed the maximum allowed size (10 MB).']);
     }
     $payload = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
     if (!is_array($payload)) {
         throw new InvalidArgumentException('Enter your application details.');
     }
-    [$fields, $cv] = applicationData($payload);
+    [$fields, $cv, $doc] = applicationData($payload);
 
-    $fingerprint = hash('sha256', json_encode($fields, JSON_THROW_ON_ERROR) . $cv);
+    $fingerprint = hash('sha256', json_encode($fields, JSON_THROW_ON_ERROR) . $cv . ($doc ?? ''));
     $pdo = new PDO($config['dsn'], $config['username'], $config['password'], [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_EMULATE_PREPARES => false,
     ]);
-    $insert = $pdo->prepare(
-        'INSERT INTO career_applications (id, role, name, email, phone, message, cv, fingerprint, received_at)
-         VALUES (:id, :role, :name, :email, :phone, :message, :cv, :fingerprint, UTC_TIMESTAMP())'
-    );
-    foreach ($fields as $key => $value) {
-        $insert->bindValue(':' . $key, $value);
+
+    // Check whether the database table has the 'document' column
+    static $hasDocColumn = null;
+    if ($hasDocColumn === null) {
+        $checkCol = $pdo->prepare("SHOW COLUMNS FROM career_applications LIKE 'document'");
+        $checkCol->execute();
+        $hasDocColumn = (bool) $checkCol->fetch();
     }
-    $insert->bindValue(':cv', $cv, PDO::PARAM_LOB);
-    $insert->bindValue(':fingerprint', $fingerprint);
+
+    if ($hasDocColumn) {
+        $insert = $pdo->prepare(
+            'INSERT INTO career_applications (id, role, name, email, phone, message, cv, document, fingerprint, received_at)
+             VALUES (:id, :role, :name, :email, :phone, :message, :cv, :document, :fingerprint, UTC_TIMESTAMP())'
+        );
+        foreach ($fields as $key => $value) {
+            $insert->bindValue(':' . $key, $value);
+        }
+        $insert->bindValue(':cv', $cv, PDO::PARAM_LOB);
+        $insert->bindValue(':document', $doc, $doc !== null ? PDO::PARAM_LOB : PDO::PARAM_NULL);
+        $insert->bindValue(':fingerprint', $fingerprint);
+    } else {
+        $insert = $pdo->prepare(
+            'INSERT INTO career_applications (id, role, name, email, phone, message, cv, fingerprint, received_at)
+             VALUES (:id, :role, :name, :email, :phone, :message, :cv, :fingerprint, UTC_TIMESTAMP())'
+        );
+        foreach ($fields as $key => $value) {
+            $insert->bindValue(':' . $key, $value);
+        }
+        $insert->bindValue(':cv', $cv, PDO::PARAM_LOB);
+        $insert->bindValue(':fingerprint', $fingerprint);
+    }
+
     try {
         $insert->execute();
     } catch (PDOException $exception) {

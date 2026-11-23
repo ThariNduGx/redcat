@@ -108,32 +108,44 @@ $isLoggedIn = !empty($_SESSION['admin_logged_in']);
 // SECURED ACTIONS: CV DOWNLOAD / PREVIEW / CSV EXPORT
 // -------------------------------------------------------------
 if ($isLoggedIn) {
-    // 1. Download or View CV
-    if (isset($_GET['cv_id'])) {
-        $cvId = $_GET['cv_id'];
+    // 1. Download or View CV / Document
+    if (isset($_GET['cv_id']) || isset($_GET['doc_id'])) {
+        $fileId = $_GET['doc_id'] ?? $_GET['cv_id'];
+        $isDoc = isset($_GET['doc_id']) || (($_GET['type'] ?? '') === 'doc');
         $download = !empty($_GET['download']);
 
-        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $cvId)) {
+        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $fileId)) {
             http_response_code(400);
-            exit('Invalid CV ID');
+            exit('Invalid File ID');
         }
 
         try {
             $pdo = getPdo($config);
-            $stmt = $pdo->prepare('SELECT name, role, cv FROM career_applications WHERE id = :id LIMIT 1');
-            $stmt->execute(['id' => $cvId]);
+            $column = $isDoc ? 'document' : 'cv';
+
+            // Check if column exists in database
+            $checkCol = $pdo->prepare("SHOW COLUMNS FROM career_applications LIKE :col");
+            $checkCol->execute(['col' => $column]);
+            if (!$checkCol->fetch()) {
+                http_response_code(404);
+                exit(($isDoc ? 'Document' : 'CV') . ' not configured in database.');
+            }
+
+            $stmt = $pdo->prepare("SELECT name, role, {$column} AS file_data FROM career_applications WHERE id = :id LIMIT 1");
+            $stmt->execute(['id' => $fileId]);
             $row = $stmt->fetch();
 
-            if (!$row || empty($row['cv'])) {
+            if (!$row || empty($row['file_data'])) {
                 http_response_code(404);
-                exit('CV not found.');
+                exit(($isDoc ? 'Document' : 'CV') . ' not found.');
             }
 
             $sanitizedName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $row['name']);
-            $filename = sprintf('CV-%s-%s.pdf', strtoupper($row['role']), $sanitizedName);
+            $prefix = $isDoc ? 'Document' : 'CV';
+            $filename = sprintf('%s-%s-%s.pdf', $prefix, strtoupper($row['role']), $sanitizedName);
 
             header('Content-Type: application/pdf');
-            header('Content-Length: ' . strlen($row['cv']));
+            header('Content-Length: ' . strlen($row['file_data']));
             header('X-Content-Type-Options: nosniff');
             header('Cache-Control: private, max-age=3600');
 
@@ -143,11 +155,11 @@ if ($isLoggedIn) {
                 header('Content-Disposition: inline; filename="' . $filename . '"');
             }
 
-            echo $row['cv'];
+            echo $row['file_data'];
             exit;
         } catch (Throwable $e) {
             http_response_code(500);
-            exit('Failed to retrieve CV: ' . htmlspecialchars($e->getMessage()));
+            exit('Failed to retrieve file: ' . htmlspecialchars($e->getMessage()));
         }
     }
 
@@ -208,7 +220,15 @@ $stats = ['total' => 0, 'bdm' => 0, 'zom' => 0, 'general' => 0, 'today' => 0];
 if ($isLoggedIn) {
     try {
         $pdo = getPdo($config);
-        $stmt = $pdo->query('SELECT id, role, name, email, phone, message, LENGTH(cv) as cv_size, received_at FROM career_applications ORDER BY received_at DESC');
+        $checkCol = $pdo->prepare("SHOW COLUMNS FROM career_applications LIKE 'document'");
+        $checkCol->execute();
+        $hasDocCol = (bool) $checkCol->fetch();
+
+        if ($hasDocCol) {
+            $stmt = $pdo->query('SELECT id, role, name, email, phone, message, LENGTH(cv) as cv_size, LENGTH(document) as doc_size, received_at FROM career_applications ORDER BY received_at DESC');
+        } else {
+            $stmt = $pdo->query('SELECT id, role, name, email, phone, message, LENGTH(cv) as cv_size, 0 as doc_size, received_at FROM career_applications ORDER BY received_at DESC');
+        }
         $applications = $stmt->fetchAll();
 
         $today = date('Y-m-d');
@@ -448,6 +468,7 @@ function formatPhoneWhatsApp(string $phone): string {
                 $parsed = parseMessage($app['message']);
                 $waPhone = formatPhoneWhatsApp($app['phone']);
                 $cvKb = round(($app['cv_size'] ?? 0) / 1024, 1);
+                $docKb = !empty($app['doc_size']) ? round($app['doc_size'] / 1024, 1) : 0;
                 $receivedTime = date('M j, Y &bull; g:i A', strtotime($app['received_at']));
               ?>
                 <tr class="applicant-row hover:bg-slate-50/70 transition-colors"
@@ -460,6 +481,8 @@ function formatPhoneWhatsApp(string $phone): string {
                     data-email="<?= htmlspecialchars($app['email']) ?>"
                     data-area="<?= htmlspecialchars($parsed['area']) ?>"
                     data-experience="<?= htmlspecialchars($parsed['experience']) ?>"
+                    data-cv-size="<?= $cvKb ?>"
+                    data-doc-size="<?= $docKb ?>"
                     data-received="<?= htmlspecialchars($receivedTime) ?>">
 
                   <!-- Applicant Name & Email -->
@@ -511,19 +534,37 @@ function formatPhoneWhatsApp(string $phone): string {
                         Details
                       </button>
 
-                      <!-- View PDF Inline -->
+                      <!-- View CV Inline -->
                       <a href="admin.php?cv_id=<?= urlencode($app['id']) ?>" target="_blank"
+                         title="View CV PDF"
                          class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold brand-red-text hover:bg-red-50 transition border border-red-200">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                        View CV (<?= $cvKb ?> KB)
+                        CV (<?= $cvKb ?> KB)
                       </a>
 
-                      <!-- Download PDF -->
+                      <!-- Download CV PDF -->
                       <a href="admin.php?cv_id=<?= urlencode($app['id']) ?>&download=1"
-                         title="Download PDF"
+                         title="Download CV PDF"
                          class="inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition border border-slate-200">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                       </a>
+
+                      <?php if ($docKb > 0): ?>
+                        <!-- View Extra Document Inline -->
+                        <a href="admin.php?doc_id=<?= urlencode($app['id']) ?>" target="_blank"
+                           title="View Experience Letter / Document"
+                           class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-800 hover:bg-amber-100 transition border border-amber-300 bg-amber-50">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                          Doc (<?= $docKb ?> KB)
+                        </a>
+
+                        <!-- Download Extra Document -->
+                        <a href="admin.php?doc_id=<?= urlencode($app['id']) ?>&download=1"
+                           title="Download Experience Letter / Document"
+                           class="inline-flex items-center justify-center h-8 w-8 rounded-lg text-amber-800 hover:text-amber-950 hover:bg-amber-100 transition border border-amber-300 bg-amber-50">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        </a>
+                      <?php endif; ?>
                     </div>
                   </td>
                 </tr>
@@ -570,18 +611,40 @@ function formatPhoneWhatsApp(string $phone): string {
           <div id="modalExp" class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-slate-700 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto font-medium"></div>
         </div>
 
+        <!-- Optional Work Experience Letter / Additional Document -->
+        <div id="modalDocSection" class="p-4 rounded-xl border border-amber-200 bg-amber-50/70 hidden">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="block text-xs font-bold text-amber-900 uppercase tracking-wide">Work Experience Letter / Relevant Document</span>
+              <span id="modalDocSize" class="text-xs text-amber-700 font-semibold mt-0.5 block"></span>
+            </div>
+            <div class="flex gap-2">
+              <a id="modalDownloadDoc" href="#"
+                 class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-800 text-white hover:bg-amber-900 transition flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Download Doc
+              </a>
+              <a id="modalViewDoc" href="#" target="_blank"
+                 class="px-3 py-1.5 rounded-lg text-xs font-bold border border-amber-400 text-amber-950 bg-white hover:bg-amber-100 transition flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                View Doc
+              </a>
+            </div>
+          </div>
+        </div>
+
         <div class="flex items-center justify-between pt-4 border-t border-slate-100">
           <span id="modalReceived" class="text-xs text-slate-400 font-medium"></span>
           <div class="flex gap-2">
             <a id="modalDownloadCv" href="#"
                class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white hover:bg-slate-800 transition flex items-center gap-1.5">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-              Download PDF
+              Download CV
             </a>
             <a id="modalViewCv" href="#" target="_blank"
                class="px-4 py-2 rounded-xl text-xs font-bold brand-red text-white hover:bg-red-700 transition flex items-center gap-1.5 shadow-md shadow-red-500/20">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-              Open CV in New Tab
+              Open CV
             </a>
           </div>
         </div>
@@ -636,6 +699,17 @@ function formatPhoneWhatsApp(string $phone): string {
       const id = tr.getAttribute('data-id');
       document.getElementById('modalViewCv').href = 'admin.php?cv_id=' + encodeURIComponent(id);
       document.getElementById('modalDownloadCv').href = 'admin.php?cv_id=' + encodeURIComponent(id) + '&download=1';
+
+      const docSize = parseFloat(tr.getAttribute('data-doc-size') || '0');
+      const docSection = document.getElementById('modalDocSection');
+      if (docSize > 0) {
+        document.getElementById('modalDocSize').textContent = docSize + ' KB (PDF attached)';
+        document.getElementById('modalViewDoc').href = 'admin.php?doc_id=' + encodeURIComponent(id);
+        document.getElementById('modalDownloadDoc').href = 'admin.php?doc_id=' + encodeURIComponent(id) + '&download=1';
+        docSection.classList.remove('hidden');
+      } else {
+        docSection.classList.add('hidden');
+      }
 
       document.getElementById('detailModal').classList.remove('hidden');
     }

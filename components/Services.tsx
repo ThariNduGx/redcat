@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useId, useRef, useState } from "react";
 import Reveal from "./Reveal";
-import ArrowLink from "./ui/ArrowLink";
 
 const SERVICES = [
   {
@@ -70,7 +69,6 @@ export default function Services() {
               <div className="p-6 sm:p-8 lg:p-10">
                 <h3 className="max-w-lg text-3xl font-extrabold leading-[1.1] tracking-[-0.035em] sm:text-4xl">{service.headline}</h3>
                 <p className="mt-5 max-w-lg text-lg leading-relaxed text-ink/80">{service.body}</p>
-                <ArrowLink href={service.href} className="mt-7">{service.action}</ArrowLink>
               </div>
             </div>
           </div>

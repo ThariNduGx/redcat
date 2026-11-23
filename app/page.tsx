@@ -49,7 +49,7 @@ export default function Home() {
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <ArrowLink href="/hr" variant="light">Careers</ArrowLink>
-              <ArrowLink href="/dealers" variant="outline" className="text-white">Become a dealer</ArrowLink>
+              <ArrowLink href="/dealers" variant="outline" className="text-white">Become a franchisee</ArrowLink>
             </div>
           </div>
 
@@ -179,7 +179,7 @@ export default function Home() {
           </p>
           <div className="mt-10">
             <Magnetic>
-              <ArrowLink href="/dealers" variant="brand" className="px-9 py-5 text-lg">Become a dealer</ArrowLink>
+              <ArrowLink href="/dealers" variant="brand" className="px-9 py-5 text-lg">Become a franchisee</ArrowLink>
             </Magnetic>
           </div>
         </div>

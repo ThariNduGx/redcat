@@ -4,7 +4,8 @@ export const CAREER_ROLES = {
   general: "General application",
 } as const;
 
-export const MAX_CV_BYTES = 5_000_000;
+export const MAX_CV_BYTES = 10_000_000;
+export const MAX_DOC_BYTES = 10_000_000;
 
 export const CAREERS_CPANEL_URL = process.env.NEXT_PUBLIC_CAREERS_CPANEL_URL || "https://apply.bestproducts.lk/apply.php";
 
