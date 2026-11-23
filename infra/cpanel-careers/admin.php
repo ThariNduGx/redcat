@@ -123,12 +123,13 @@ if ($isLoggedIn) {
             $pdo = getPdo($config);
             $column = $isDoc ? 'document' : 'cv';
 
-            // Check if column exists in database
-            $checkCol = $pdo->prepare("SHOW COLUMNS FROM career_applications LIKE :col");
-            $checkCol->execute(['col' => $column]);
-            if (!$checkCol->fetch()) {
-                http_response_code(404);
-                exit(($isDoc ? 'Document' : 'CV') . ' not configured in database.');
+            // If downloading extra document, verify the column exists in database
+            if ($isDoc) {
+                $checkCol = $pdo->query("SHOW COLUMNS FROM career_applications LIKE 'document'");
+                if (!$checkCol || !$checkCol->fetch()) {
+                    http_response_code(404);
+                    exit('Document column is not configured in database.');
+                }
             }
 
             $stmt = $pdo->prepare("SELECT name, role, {$column} AS file_data FROM career_applications WHERE id = :id LIMIT 1");
@@ -220,9 +221,8 @@ $stats = ['total' => 0, 'bdm' => 0, 'zom' => 0, 'general' => 0, 'today' => 0];
 if ($isLoggedIn) {
     try {
         $pdo = getPdo($config);
-        $checkCol = $pdo->prepare("SHOW COLUMNS FROM career_applications LIKE 'document'");
-        $checkCol->execute();
-        $hasDocCol = (bool) $checkCol->fetch();
+        $checkCol = $pdo->query("SHOW COLUMNS FROM career_applications LIKE 'document'");
+        $hasDocCol = $checkCol && (bool) $checkCol->fetch();
 
         if ($hasDocCol) {
             $stmt = $pdo->query('SELECT id, role, name, email, phone, message, LENGTH(cv) as cv_size, LENGTH(document) as doc_size, received_at FROM career_applications ORDER BY received_at DESC');

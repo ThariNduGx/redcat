@@ -123,9 +123,8 @@ try {
     // Check whether the database table has the 'document' column
     static $hasDocColumn = null;
     if ($hasDocColumn === null) {
-        $checkCol = $pdo->prepare("SHOW COLUMNS FROM career_applications LIKE 'document'");
-        $checkCol->execute();
-        $hasDocColumn = (bool) $checkCol->fetch();
+        $checkCol = $pdo->query("SHOW COLUMNS FROM career_applications LIKE 'document'");
+        $hasDocColumn = $checkCol && (bool) $checkCol->fetch();
     }
 
     if ($hasDocColumn) {
