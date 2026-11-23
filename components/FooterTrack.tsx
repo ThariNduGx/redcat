@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useId, type FormEvent } from "react";
 import { ArrowRight } from "lucide-react";
+import { trackShipmentSearch } from "@/lib/analytics";
 
 export default function FooterTrack() {
   const router = useRouter();
@@ -10,7 +11,10 @@ export default function FooterTrack() {
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const id = String(new FormData(e.currentTarget).get("id") ?? "").trim();
-    if (id) router.push(`/track?id=${encodeURIComponent(id)}`);
+    if (id) {
+      trackShipmentSearch(id);
+      router.push(`/track?id=${encodeURIComponent(id)}`);
+    }
   }
   return (
     <form onSubmit={onSubmit} className="flex rounded-full bg-white/10 p-1.5 ring-1 ring-white/15 transition focus-within:ring-white/60">

@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import Script from "next/script";
+import { Suspense } from "react";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CommandPalette from "@/components/CommandPalette";
 import Toaster from "@/components/ui/Toaster";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -54,7 +56,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <link rel="preconnect" href="https://tiles.openfreemap.org" crossOrigin="anonymous" />
         {/* Google Tag Manager */}
         <Script
-          src="https://www.googletagmanager.com/gtm.js?id=GTM-WF62Q5VP"
+          src="https://www.googletagmanager.com/gtm.js?id=GTM-K6G4P8TP"
           strategy="afterInteractive"
         />
         <Script id="gtm-init" strategy="afterInteractive">
@@ -64,6 +66,23 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             gtag('js', new Date());
           `}
         </Script>
+
+        {/* Meta Pixel Code */}
+        <Script id="meta-pixel-init" strategy="afterInteractive">
+          {`
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '2271290716935198');
+            fbq('track', 'PageView');
+          `}
+        </Script>
+
         {/* Microsoft Clarity */}
         <Script id="clarity-init" strategy="afterInteractive">
           {`
@@ -76,6 +95,29 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </Script>
       </head>
       <body className="min-h-full flex flex-col">
+        {/* Google Tag Manager (noscript) */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-K6G4P8TP"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
+        {/* Meta Pixel (noscript) */}
+        <noscript>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src="https://www.facebook.com/tr?id=2271290716935198&ev=PageView&noscript=1"
+            alt=""
+          />
+        </noscript>
+        <Suspense fallback={null}>
+          <AnalyticsTracker />
+        </Suspense>
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-ink focus:px-5 focus:py-3 focus:text-white"

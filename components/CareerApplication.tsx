@@ -10,6 +10,7 @@ import {
   MAX_CV_BYTES,
   MAX_DOC_BYTES,
 } from "@/lib/careerRegistration";
+import { trackCareerApplication } from "@/lib/analytics";
 
 const endpoint = CAREERS_CPANEL_URL;
 const field = "mt-2 block w-full rounded-xl border border-ink/25 bg-white px-4 py-3";
@@ -111,6 +112,11 @@ export default function CareerApplication() {
       if (response.ok && result?.id === id) {
         attempt.current = null;
         setReceipt(id);
+        trackCareerApplication({
+          role: String(data.get("role") ?? selectedRole),
+          area,
+          reference_id: id,
+        });
       } else {
         setError(typeof result?.error === "string" ? result.error : "We couldn’t confirm your submission. Please try again.");
       }

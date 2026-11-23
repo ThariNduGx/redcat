@@ -5,6 +5,7 @@ import { useId, useMemo, useState, type FormEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, Check, Link2, Package, Share2 } from "lucide-react";
 import { mockShipment, STAGES, type MockShipment } from "@/lib/mockTracking";
+import { trackShipmentSearch } from "@/lib/analytics";
 import { toast } from "./ui/Toaster";
 import RouteMap from "./map/RouteMap";
 
@@ -22,6 +23,7 @@ export default function TrackView() {
     e.preventDefault();
     const next = String(new FormData(e.currentTarget).get("id") ?? "").trim();
     setActiveId(null);
+    if (next) trackShipmentSearch(next);
     router.push(next ? `/track?id=${encodeURIComponent(next)}` : "/track");
   }
 

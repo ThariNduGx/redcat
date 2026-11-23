@@ -12,6 +12,7 @@ import type { Hub } from "@/data/hubs";
 import { HUB_MAP_HREF, hubMapHref } from "@/lib/site";
 import { nearestHubs } from "@/lib/geo";
 import { nextDayLabel, typicalRoute } from "@/lib/route";
+import { trackShipmentSearch } from "@/lib/analytics";
 
 const TABS = [
   { id: "track", label: "Track" },
@@ -147,6 +148,7 @@ function TrackPanel() {
       return;
     }
     writeRecent([...new Set([...ids, ...recent])]);
+    trackShipmentSearch(ids.join(", "));
     router.push(`/track?id=${encodeURIComponent(ids.join(","))}`);
   }
 

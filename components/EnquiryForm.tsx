@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, Check, ChevronDown, LoaderCircle } from "lucide-react";
 import { CAREER_ROLES, careerApplicationHref } from "@/lib/careerRegistration";
 import { DISTRICTS } from "@/data/hubs";
+import { trackDealerEnquiry, trackContactEnquiry } from "@/lib/analytics";
 import CatLoader from "./ui/CatLoader";
 
 type Kind = "dealer" | "contact";
@@ -164,6 +165,18 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
       ]);
 
       if (fsRes !== null || netlifyOk || lambdaOk) {
+        if (kind === "dealer") {
+          trackDealerEnquiry({
+            role,
+            district: data.district,
+            name: data.name,
+          });
+        } else {
+          trackContactEnquiry({
+            topic,
+            district: data.district,
+          });
+        }
         setFirstName(String(data.name ?? "").trim().split(/\s+/)[0]);
         setStatus("sent");
         return;
