@@ -86,7 +86,7 @@ export default function PointApplicationPage() {
         />
       </section>
 
-      <section id="apply" className="bg-paper pb-20 pt-6 sm:pb-28">
+      <section id="apply" className="bg-paper pb-20 pt-10 sm:pb-28 sm:pt-14">
         <div className="mx-auto max-w-4xl px-5">
           <Suspense
             fallback={

@@ -39,6 +39,15 @@ import { trackDealerEnquiry, trackMetaEvent } from "@/lib/analytics";
 type LangMode = "both" | "en" | "si";
 const STORAGE_KEY = "redcat_point_franchise_draft_v1";
 
+const SHORT_LABELS: Record<number, { en: string; si: string }> = {
+  1: { en: "Registration", si: "ලියාපදිංචිය" },
+  2: { en: "Location", si: "ස්ථානය" },
+  3: { en: "Experience", si: "පළපුරුද්ද" },
+  4: { en: "Financials", si: "මූල්‍ය" },
+  5: { en: "Premises", si: "ගොඩනැගිල්ල" },
+  6: { en: "Commitment", si: "කැපවීම" },
+};
+
 const inputCls =
   "mt-2 block w-full rounded-xl border-2 border-black/10 bg-white px-4 py-3 text-base font-medium text-ink outline-none transition placeholder:text-ink/35 hover:border-black/25 focus:border-brand";
 
@@ -88,6 +97,12 @@ function initialData(): PointFranchiseFormData {
   };
 }
 
+function t(lang: LangMode, en: string, si: string) {
+  if (lang === "en") return en;
+  if (lang === "si") return si;
+  return `${en} / ${si}`;
+}
+
 function Label({
   en,
   si,
@@ -101,12 +116,12 @@ function Label({
 }) {
   return (
     <div className="mb-1">
-      <span className="block text-base font-extrabold text-ink leading-snug">
+      <span className="block text-[15px] font-extrabold text-ink leading-snug">
         {lang !== "si" ? en : si}
         {required && <span className="text-brand ml-1">*</span>}
       </span>
       {lang === "both" && (
-        <span className="mt-0.5 block text-sm font-medium text-ink/65">{si}</span>
+        <span className="mt-0.5 block text-xs font-medium text-ink/65">{si}</span>
       )}
     </div>
   );
@@ -220,54 +235,53 @@ export default function PointFranchiseApplication() {
 
   function validateStep(s: number): string | null {
     if (s === 1) {
-      if (!form.fullName.trim()) return "Please enter your full name.";
+      if (!form.fullName.trim()) return t(lang, "Please enter your full name.", "කරුණාකර ඔබගේ සම්පූර්ණ නම ඇතුළත් කරන්න.");
       if (!/^[+\d][\d\s() -]{6,18}$/.test(form.mobileNumber.trim()))
-        return "Please enter a valid mobile number.";
+        return t(lang, "Please enter a valid mobile number.", "කරුණාකර වලංගු ජංගම දුරකථන අංකයක් ඇතුළත් කරන්න.");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
-        return "Please enter a valid email address.";
-      if (!form.residentialDistrict) return "Please select your residential district.";
-      if (!form.currentOccupation) return "Please select your current occupation.";
-      if (!form.preferredDistrict) return "Please select your preferred franchise district.";
-      if (!form.preferredPoint.trim()) return "Please enter or select your preferred REDCAT Point.";
-      if (!form.availableInvestment) return "Please select your available investment.";
-      if (!form.businessPremises) return "Please select your business premises status.";
-      if (!form.previousBusinessExperience) return "Please indicate your previous business experience.";
-      if (!form.whenCanYouStart) return "Please select when you can start.";
-      if (!form.agreePrivacyTerms) return "Please agree to the privacy notice and application terms.";
-      if (!form.agreeContact) return "Please agree to be contacted regarding your application.";
+        return t(lang, "Please enter a valid email address.", "කරුණාකර වලංගු විද්‍යුත් තැපැල් ලිපිනයක් ඇතුළත් කරන්න.");
+      if (!form.residentialDistrict) return t(lang, "Please select your residential district.", "කරුණාකර පදිංචි දිස්ත්‍රික්කය තෝරන්න.");
+      if (!form.currentOccupation) return t(lang, "Please select your current occupation.", "කරුණාකර වර්තමාන රැකියාව තෝරන්න.");
+      if (!form.preferredDistrict) return t(lang, "Please select your preferred franchise district.", "කරුණාකර කැමති ව්‍යාපාරික දිස්ත්‍රික්කය තෝරන්න.");
+      if (!form.preferredPoint.trim()) return t(lang, "Please enter or select your preferred REDCAT Point.", "කරුණාකර කැමති REDCAT Point ස්ථානය තෝරන්න.");
+      if (!form.availableInvestment) return t(lang, "Please select your available investment.", "කරුණාකර ආයෝජනය කළ හැකි මුදල තෝරන්න.");
+      if (!form.businessPremises) return t(lang, "Please select your business premises status.", "කරුණාකර ව්‍යාපාරික ගොඩනැගිල්ල තෝරන්න.");
+      if (!form.previousBusinessExperience) return t(lang, "Please indicate your previous business experience.", "කරුණාකර පෙර ව්‍යාපාරික පළපුරුද්ද තෝරන්න.");
+      if (!form.whenCanYouStart) return t(lang, "Please select when you can start.", "කරුණාකර ආරම්භ කළ හැකි කාලය තෝරන්න.");
+      if (!form.agreePrivacyTerms) return t(lang, "Please agree to the privacy notice and application terms.", "කරුණාකර පෞද්ගලිකත්ව නිවේදනයට හා කොන්දේසිවලට එකඟ වන්න.");
+      if (!form.agreeContact) return t(lang, "Please agree to be contacted regarding your application.", "කරුණාකර සන්නිවේදන කැමැත්ත තහවුරු කරන්න.");
     }
     if (s === 2) {
-      if (!form.residentialTown.trim()) return "Please enter your residential town.";
-      if (!form.occupationDetails) return "Please select your occupation details.";
-      if (!form.knowledgeOfPreferredArea) return "Please indicate your knowledge of the preferred area.";
-      if (!form.existingLocalContacts) return "Please indicate your local business contacts.";
+      if (!form.residentialTown.trim()) return t(lang, "Please enter your residential town.", "කරුණාකර පදිංචි නගරය ඇතුළත් කරන්න.");
+      if (!form.knowledgeOfPreferredArea) return t(lang, "Please indicate your knowledge of the preferred area.", "කරුණාකර කැමති ප්‍රදේශය පිළිබඳ දැනුම තෝරන්න.");
+      if (!form.existingLocalContacts) return t(lang, "Please indicate your local business contacts.", "කරුණාකර ප්‍රදේශයේ ව්‍යාපාරික සම්බන්ධතා තෝරන්න.");
     }
     if (s === 3) {
-      if (!form.currentlyOperatingBusiness) return "Please indicate if you currently operate a business.";
-      if (!form.yearsBusinessExperience) return "Please select your years of business experience.";
-      if (!form.courierLogisticsExperience) return "Please indicate your courier or logistics experience.";
-      if (!form.customerServiceExperience) return "Please indicate your customer service experience.";
-      if (!form.computerAppSkills) return "Please select your computer and mobile app skills.";
+      if (!form.currentlyOperatingBusiness) return t(lang, "Please indicate if you currently operate a business.", "දැනට ව්‍යාපාරයක් පවත්වාගෙන යනවාද යන්න තෝරන්න.");
+      if (!form.yearsBusinessExperience) return t(lang, "Please select your years of business experience.", "ව්‍යාපාරික පළපුරුද්ද වසර ගණන තෝරන්න.");
+      if (!form.courierLogisticsExperience) return t(lang, "Please indicate your courier or logistics experience.", "කුරියර් හෝ ප්‍රවාහන පළපුරුද්ද තෝරන්න.");
+      if (!form.customerServiceExperience) return t(lang, "Please indicate your customer service experience.", "පාරිභෝගික සේවා පළපුරුද්ද තෝරන්න.");
+      if (!form.computerAppSkills) return t(lang, "Please select your computer and mobile app skills.", "පරිගණක හා ජංගම යෙදුම් භාවිත හැකියාව තෝරන්න.");
     }
     if (s === 4) {
-      if (!form.investmentFundsReady) return "Please indicate whether investment funds are ready.";
-      if (!form.fundingSource) return "Please select your funding source.";
-      if (!form.additionalWorkingCapital) return "Please indicate if additional working capital is available.";
+      if (!form.investmentFundsReady) return t(lang, "Please indicate whether investment funds are ready.", "ආයෝජන මුදල් සූදානම්ද යන්න තෝරන්න.");
+      if (!form.fundingSource) return t(lang, "Please select your funding source.", "මුදල් ලබාගන්නා මාර්ගය තෝරන්න.");
+      if (!form.additionalWorkingCapital) return t(lang, "Please indicate if additional working capital is available.", "අමතර මෙහෙයුම් ප්‍රාග්ධනය තිබේද යන්න තෝරන්න.");
     }
     if (s === 5) {
-      if (!form.premisesSize) return "Please select your premises size.";
-      if (!form.mainRoadFrontage) return "Please indicate if the site has main road frontage.";
-      if (!form.parkingAvailable) return "Please indicate if parking is available.";
-      if (!form.existingBusinessAtSite) return "Please indicate if there is an existing business at the site.";
+      if (!form.premisesSize) return t(lang, "Please select your premises size.", "ගොඩනැගිල්ලේ ප්‍රමාණය තෝරන්න.");
+      if (!form.mainRoadFrontage) return t(lang, "Please indicate if the site has main road frontage.", "ප්‍රධාන මාර්ගයට මුහුණලා තිබේද යන්න තෝරන්න.");
+      if (!form.parkingAvailable) return t(lang, "Please indicate if parking is available.", "වාහන නැවැත්වීමේ පහසුකම් තිබේද යන්න තෝරන්න.");
+      if (!form.existingBusinessAtSite) return t(lang, "Please indicate if there is an existing business at the site.", "එම ස්ථානයේ දැනට ව්‍යාපාරයක් තිබේද යන්න තෝරන්න.");
     }
     if (s === 6) {
-      if (!form.whoWillManagePoint) return "Please select who will manage the Point.";
-      if (!form.mainOrAdditionalBusiness) return "Please indicate if this is a full-time or additional business.";
-      if (!form.readyToRecruitStaff) return "Please answer if you are ready to recruit staff.";
-      if (!form.canMeetServiceHours) return "Please answer if you can meet required service hours.";
-      if (!form.willingToCompleteTraining) return "Please answer if you are willing to complete REDCAT training.";
-      if (!form.willingToUseItSystem) return "Please answer if you are willing to use the REDCAT IT system.";
-      if (!form.agreeOperationalStandards) return "Please indicate if you agree to operational standards.";
+      if (!form.whoWillManagePoint) return t(lang, "Please select who will manage the Point.", "Point එක කළමනාකරණය කරන්නේ කවුද යන්න තෝරන්න.");
+      if (!form.mainOrAdditionalBusiness) return t(lang, "Please indicate if this is a full-time or additional business.", "ප්‍රධාන හෝ අමතර ව්‍යාපාරයක්ද යන්න තෝරන්න.");
+      if (!form.readyToRecruitStaff) return t(lang, "Please answer if you are ready to recruit staff.", "සේවකයන් බඳවා ගැනීමට සූදානම්ද යන්න තෝරන්න.");
+      if (!form.canMeetServiceHours) return t(lang, "Please answer if you can meet required service hours.", "නියමිත සේවා වේලාවන් පිළිපැදිය හැකිද යන්න තෝරන්න.");
+      if (!form.willingToCompleteTraining) return t(lang, "Please answer if you are willing to complete REDCAT training.", "REDCAT පුහුණුව සම්පූර්ණ කිරීමට කැමතිද යන්න තෝරන්න.");
+      if (!form.willingToUseItSystem) return t(lang, "Please answer if you are willing to use the REDCAT IT system.", "REDCAT IT පද්ධතිය භාවිත කිරීමට කැමතිද යන්න තෝරන්න.");
+      if (!form.agreeOperationalStandards) return t(lang, "Please indicate if you agree to operational standards.", "මෙහෙයුම් ප්‍රමිතීන්ට එකඟද යන්න තෝරන්න.");
     }
     return null;
   }
@@ -311,7 +325,13 @@ export default function PointFranchiseApplication() {
       const cpanelPromise = fetch(POINT_FRANCHISE_CPANEL_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, rcRef, stageMode, ...form }),
+        body: JSON.stringify({
+          id,
+          rcRef,
+          stageMode,
+          firstPreferredPoint: form.preferredPoint,
+          ...form,
+        }),
         signal: AbortSignal.timeout(25_000),
         credentials: "omit",
       })
@@ -348,7 +368,7 @@ export default function PointFranchiseApplication() {
           "When Can Start": form.whenCanYouStart,
           ...(stageMode === "detailed"
             ? {
-                "Occupation Details": form.occupationDetails,
+                "Occupation Details": form.occupationDetails || form.currentOccupation,
                 "Area Knowledge": form.knowledgeOfPreferredArea,
                 "Local Contacts": form.existingLocalContacts,
                 "Currently Operating Business": form.currentlyOperatingBusiness,
@@ -405,10 +425,10 @@ export default function PointFranchiseApplication() {
         });
         scrollToCard();
       } else {
-        setError("We couldn't confirm your submission right now. Please try again.");
+        setError(t(lang, "We couldn't confirm your submission right now. Please try again.", "මේ මොහොතේ අයදුම්පත තහවුරු කිරීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."));
       }
     } catch {
-      setError("We couldn't confirm your submission right now. Please try again.");
+      setError(t(lang, "We couldn't confirm your submission right now. Please try again.", "මේ මොහොතේ අයදුම්පත තහවුරු කිරීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."));
     } finally {
       setBusy(false);
     }
@@ -416,44 +436,51 @@ export default function PointFranchiseApplication() {
 
   const districtHubs = HUBS.filter((h) => h.district === form.preferredDistrict);
   const currentSection = POINT_SECTIONS[step - 1];
+  const progressPct = Math.round((step / 6) * 100);
 
   if (receipt) {
     return (
       <div
         ref={cardTopRef}
-        className="scroll-mt-24 rounded-[2rem] bg-white p-8 shadow-2xl shadow-black/10 sm:p-12"
+        className="scroll-mt-24 rounded-[2rem] bg-white p-8 shadow-2xl shadow-black/10 ring-1 ring-black/5 sm:p-12"
       >
         <div className="mx-auto max-w-2xl text-center">
           <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-700">
             <CheckCircle2 size={34} />
           </span>
           <h3 className="mt-5 text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
-            Application Confirmation
+            {lang === "si" ? "අයදුම්පත ලැබීම තහවුරු කිරීම" : "Application Confirmation"}
           </h3>
-          <p className="mt-1 text-base font-bold text-ink/70">
-            අයදුම්පත ලැබීම තහවුරු කිරීම
-          </p>
+          {lang === "both" && (
+            <p className="mt-1 text-base font-bold text-ink/70">
+              අයදුම්පත ලැබීම තහවුරු කිරීම
+            </p>
+          )}
           <div className="mt-6 rounded-2xl border border-black/10 bg-mist p-5 text-left text-sm leading-relaxed text-ink">
-            <p className="font-semibold">
-              Thank you for applying for a REDCAT Point Franchise. Your application{" "}
-              <strong className="text-brand">{receipt.rcRef}</strong> for{" "}
-              <strong>{receipt.point}</strong> has been received and is under review. Our Franchise
-              Development Team will contact you after reviewing your application.
-            </p>
-            <p className="mt-3 text-ink/75">
-              REDCAT Point Franchise සඳහා අයදුම් කිරීම පිළිබඳව ස්තූතියි.{" "}
-              <strong>{receipt.point}</strong> සඳහා ඔබගේ{" "}
-              <strong className="text-brand">{receipt.rcRef}</strong> අයදුම්පත ලැබී ඇති අතර එය
-              සමාලෝචනය වෙමින් පවතී. සමාලෝචනයෙන් පසු අපගේ Franchise Development කණ්ඩායම ඔබව සම්බන්ධ
-              කරගනු ඇත.
-            </p>
+            {lang !== "si" && (
+              <p className="font-semibold">
+                Thank you for applying for a REDCAT Point Franchise. Your application{" "}
+                <strong className="text-brand">{receipt.rcRef}</strong> for{" "}
+                <strong>{receipt.point}</strong> has been received and is under review. Our
+                Franchise Development Team will contact you after reviewing your application.
+              </p>
+            )}
+            {lang !== "en" && (
+              <p className={lang === "both" ? "mt-3 text-ink/75" : "font-semibold"}>
+                REDCAT Point Franchise සඳහා අයදුම් කිරීම පිළිබඳව ස්තූතියි.{" "}
+                <strong>{receipt.point}</strong> සඳහා ඔබගේ{" "}
+                <strong className="text-brand">{receipt.rcRef}</strong> අයදුම්පත ලැබී ඇති අතර එය
+                සමාලෝචනය වෙමින් පවතී. සමාලෝචනයෙන් පසු අපගේ Franchise Development කණ්ඩායම ඔබව සම්බන්ධ
+                කරගනු ඇත.
+              </p>
+            )}
           </div>
         </div>
 
         {/* 8-Step Selection Workflow */}
         <div className="mt-10 border-t border-black/10 pt-8">
           <h4 className="text-center text-sm font-extrabold uppercase tracking-[0.16em] text-brand-deep">
-            Selection workflow / තෝරාගැනීමේ ක්‍රියාවලිය
+            {t(lang, "Selection workflow", "තෝරාගැනීමේ ක්‍රියාවලිය")}
           </h4>
           <ol className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {POINT_SELECTION_WORKFLOW.map((item, idx) => (
@@ -473,8 +500,8 @@ export default function PointFranchiseApplication() {
                   {item.step}
                 </span>
                 <div>
-                  <span className="block font-bold text-ink">{item.en}</span>
-                  <span className="block text-xs text-ink/65">{item.si}</span>
+                  {lang !== "si" && <span className="block font-bold text-ink">{item.en}</span>}
+                  {lang !== "en" && <span className="block text-xs text-ink/65">{item.si}</span>}
                 </div>
               </li>
             ))}
@@ -487,16 +514,20 @@ export default function PointFranchiseApplication() {
   return (
     <div
       ref={cardTopRef}
-      className="scroll-mt-24 overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-black/10 ring-1 ring-black/5"
+      className="scroll-mt-24 overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-black/10 ring-1 ring-black/8"
     >
       {/* Header & Language Switcher */}
       <div className="border-b border-black/10 bg-mist/60 px-5 py-5 sm:px-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand">
+            <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-brand">
               {step === 1
-                ? "Stage 1: Initial Application (2–3 minutes)"
-                : `Stage 2: Detailed Qualification · Section ${currentSection.code} of 06`}
+                ? t(lang, "Stage 1: Initial Application (2–3 min)", "පළමු අදියර: මූලික අයදුම්පත")
+                : t(
+                    lang,
+                    `Stage 2: Detailed Qualification · Section ${currentSection.code} of 06`,
+                    `දෙවැනි අදියර: සවිස්තර ඇගයීම · කොටස ${currentSection.code} / 06`
+                  )}
             </p>
             <h3 className="mt-1 text-xl font-extrabold text-ink sm:text-2xl">
               {lang !== "si" && currentSection.en}
@@ -538,12 +569,21 @@ export default function PointFranchiseApplication() {
           </div>
         </div>
 
-        {/* 6-Section Pill Navigation */}
-        <div className="mt-5 grid grid-cols-6 gap-1.5">
+        {/* Progress Bar */}
+        <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
+          <div
+            className="h-full rounded-full bg-brand transition-all duration-300"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+
+        {/* 6-Section Step Pills with Clear Labels */}
+        <div className="mt-3 grid grid-cols-3 gap-1.5 sm:grid-cols-6">
           {POINT_SECTIONS.map((s) => {
             const active = s.id === step;
             const visited = s.id <= maxVisited;
             const done = s.id < step;
+            const short = SHORT_LABELS[s.id];
             return (
               <button
                 key={s.id}
@@ -555,8 +595,7 @@ export default function PointFranchiseApplication() {
                     setError("");
                   }
                 }}
-                title={`${s.code}. ${s.en}`}
-                className={`rounded-xl py-2 text-xs font-bold transition ${
+                className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-center transition ${
                   active
                     ? "bg-brand text-white shadow-sm"
                     : done
@@ -566,7 +605,10 @@ export default function PointFranchiseApplication() {
                     : "cursor-not-allowed bg-black/5 text-ink/35"
                 }`}
               >
-                {s.code}
+                <span className="text-[11px] font-extrabold leading-none">{s.code}</span>
+                <span className="mt-1 hidden text-[10px] font-semibold leading-tight opacity-90 sm:block">
+                  {lang === "si" ? short.si : short.en}
+                </span>
               </button>
             );
           })}
@@ -585,7 +627,7 @@ export default function PointFranchiseApplication() {
                 value={form.fullName}
                 onChange={(e) => update("fullName", e.target.value)}
                 maxLength={120}
-                placeholder="Enter your full name"
+                placeholder={lang === "si" ? "සම්පූර්ණ නම ඇතුළත් කරන්න" : "Enter your full name"}
                 className={inputCls}
               />
             </div>
@@ -623,7 +665,7 @@ export default function PointFranchiseApplication() {
                   onChange={(e) => update("residentialDistrict", e.target.value)}
                   className={inputCls}
                 >
-                  <option value="">Select district / දිස්ත්‍රික්කය තෝරන්න</option>
+                  <option value="">{t(lang, "Select district", "දිස්ත්‍රික්කය තෝරන්න")}</option>
                   {DISTRICTS.map((d) => (
                     <option key={d} value={d}>
                       {d}
@@ -638,7 +680,7 @@ export default function PointFranchiseApplication() {
                   onChange={(e) => update("preferredDistrict", e.target.value)}
                   className={inputCls}
                 >
-                  <option value="">Select franchise district</option>
+                  <option value="">{t(lang, "Select franchise district", "දිස්ත්‍රික්කය තෝරන්න")}</option>
                   {DISTRICTS.map((d) => (
                     <option key={d} value={d}>
                       {d}
@@ -657,7 +699,7 @@ export default function PointFranchiseApplication() {
                   value={form.preferredPoint}
                   onChange={(e) => update("preferredPoint", e.target.value)}
                   maxLength={100}
-                  placeholder="Enter town or select from list (e.g. Horana)"
+                  placeholder={lang === "si" ? "නගරය ඇතුළත් කරන්න (උදා: හොරණ)" : "Enter town or select (e.g. Horana)"}
                   className={inputCls}
                 />
                 <datalist id="point-locations">
@@ -680,7 +722,7 @@ export default function PointFranchiseApplication() {
                   value={form.secondPreference}
                   onChange={(e) => update("secondPreference", e.target.value)}
                   maxLength={100}
-                  placeholder="Alternative town / Point"
+                  placeholder={lang === "si" ? "විකල්ප ස්ථානය" : "Alternative town / Point"}
                   className={inputCls}
                 />
               </div>
@@ -721,7 +763,7 @@ export default function PointFranchiseApplication() {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
-              <div>
+              <div className="flex flex-col justify-between">
                 <Label en="Previous business experience" si="පෙර ව්‍යාපාරික පළපුරුද්ද" lang={lang} />
                 <OptionGroup
                   name="previousBusinessExperience"
@@ -732,7 +774,7 @@ export default function PointFranchiseApplication() {
                   columns="grid-cols-2"
                 />
               </div>
-              <div>
+              <div className="flex flex-col justify-between">
                 <Label en="When can you start?" si="ආරම්භ කළ හැක්කේ කවදාද?" lang={lang} />
                 <OptionGroup
                   name="whenCanYouStart"
@@ -748,7 +790,7 @@ export default function PointFranchiseApplication() {
             {/* Privacy notice & consents */}
             <div className="space-y-3 border-t border-black/10 pt-6">
               <p className="text-xs font-semibold text-ink/65">
-                Submission does not guarantee approval. / අයදුම් කිරීම අනුමැතිය සහතික නොකරයි.
+                {t(lang, "Submission does not guarantee approval.", "අයදුම් කිරීම අනුමැතිය සහතික නොකරයි.")}
               </p>
               <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-black/10 bg-white p-3.5 transition hover:border-black/25">
                 <input
@@ -765,7 +807,11 @@ export default function PointFranchiseApplication() {
                   {form.agreePrivacyTerms && <Check size={13} strokeWidth={3} />}
                 </span>
                 <span className="text-sm font-semibold text-ink">
-                  I agree to the REDCAT Privacy Notice and Point Franchise Application Terms. *
+                  {t(
+                    lang,
+                    "I agree to the REDCAT Privacy Notice and Point Franchise Application Terms. *",
+                    "REDCAT පෞද්ගලිකත්ව නිවේදනය හා අයදුම්පත් කොන්දේසි සඳහා එකඟ වෙමි. *"
+                  )}
                 </span>
               </label>
 
@@ -784,7 +830,11 @@ export default function PointFranchiseApplication() {
                   {form.agreeContact && <Check size={13} strokeWidth={3} />}
                 </span>
                 <span className="text-sm font-semibold text-ink">
-                  I consent to be contacted by the REDCAT Franchise Development Team regarding my application. *
+                  {t(
+                    lang,
+                    "I consent to be contacted by the REDCAT Franchise Development Team regarding my application. *",
+                    "මාගේ අයදුම්පත සම්බන්ධයෙන් REDCAT කණ්ඩායම මා හා සම්බන්ධ වීමට එකඟ වෙමි. *"
+                  )}
                 </span>
               </label>
             </div>
@@ -813,14 +863,14 @@ export default function PointFranchiseApplication() {
                   value={form.residentialTown}
                   onChange={(e) => update("residentialTown", e.target.value)}
                   maxLength={100}
-                  placeholder="Enter your residential town"
+                  placeholder={lang === "si" ? "පදිංචි නගරය" : "Enter your residential town"}
                   className={inputCls}
                 />
               </div>
             </div>
 
             <div>
-              <Label en="Occupation details" si="රැකියාව පිළිබඳ විස්තර" lang={lang} />
+              <Label en="Occupation details (optional)" si="රැකියාව පිළිබඳ විස්තර (අනිවාර්ය නොවේ)" lang={lang} required={false} />
               <OptionGroup
                 name="occupationDetails"
                 options={POINT_OCCUPATION_DETAILED}
@@ -831,7 +881,7 @@ export default function PointFranchiseApplication() {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
-              <div>
+              <div className="flex flex-col justify-between">
                 <Label en="Knowledge of preferred area" si="කැමති ප්‍රදේශය පිළිබඳ දැනුම" lang={lang} />
                 <OptionGroup
                   name="knowledgeOfPreferredArea"
@@ -842,7 +892,7 @@ export default function PointFranchiseApplication() {
                   columns="grid-cols-2"
                 />
               </div>
-              <div>
+              <div className="flex flex-col justify-between">
                 <Label en="Existing local business contacts" si="ප්‍රදේශයේ ව්‍යාපාරික සම්බන්ධතා" lang={lang} />
                 <OptionGroup
                   name="existingLocalContacts"
@@ -897,7 +947,7 @@ export default function PointFranchiseApplication() {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
-              <div>
+              <div className="flex flex-col justify-between">
                 <Label en="Courier or logistics experience" si="කුරියර් හෝ ප්‍රවාහන පළපුරුද්ද" lang={lang} />
                 <OptionGroup
                   name="courierLogisticsExperience"
@@ -908,7 +958,7 @@ export default function PointFranchiseApplication() {
                   columns="grid-cols-2"
                 />
               </div>
-              <div>
+              <div className="flex flex-col justify-between">
                 <Label en="Customer service experience" si="පාරිභෝගික සේවා පළපුරුද්ද" lang={lang} />
                 <OptionGroup
                   name="customerServiceExperience"
@@ -938,7 +988,11 @@ export default function PointFranchiseApplication() {
         {step === 4 && (
           <div className="space-y-6">
             <div className="rounded-2xl border border-brand/25 bg-brand-soft/45 p-4 text-sm font-semibold text-ink">
-              Investment bands are proposed; align with final fees and working capital requirements. / ආයෝජන පරාස යෝජිත ඒවාය. අවසාන ගාස්තු හා මෙහෙයුම් ප්‍රාග්ධන අවශ්‍යතා අනුව සකස් කරන්න.
+              {t(
+                lang,
+                "Investment bands are proposed; align with final fees and working capital requirements.",
+                "ආයෝජන පරාස යෝජිත ඒවාය. අවසාන ගාස්තු හා මෙහෙයුම් ප්‍රාග්ධන අවශ්‍යතා අනුව සකස් කරන්න."
+              )}
             </div>
 
             <div>
@@ -991,8 +1045,8 @@ export default function PointFranchiseApplication() {
               />
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-3">
-              <div>
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="flex flex-col justify-between">
                 <Label en="Main road frontage?" si="ප්‍රධාන මාර්ගයට මුහුණලා තිබේද?" lang={lang} />
                 <OptionGroup
                   name="mainRoadFrontage"
@@ -1003,7 +1057,7 @@ export default function PointFranchiseApplication() {
                   columns="grid-cols-2"
                 />
               </div>
-              <div>
+              <div className="flex flex-col justify-between">
                 <Label en="Parking available?" si="වාහන නැවැත්වීමේ පහසුකම් තිබේද?" lang={lang} />
                 <OptionGroup
                   name="parkingAvailable"
@@ -1014,17 +1068,18 @@ export default function PointFranchiseApplication() {
                   columns="grid-cols-2"
                 />
               </div>
-              <div>
-                <Label en="Existing business at site?" si="එම ස්ථානයේ දැනට ව්‍යාපාරයක් තිබේද?" lang={lang} />
-                <OptionGroup
-                  name="existingBusinessAtSite"
-                  options={YES_NO_OPTIONS}
-                  value={form.existingBusinessAtSite}
-                  onChange={(v) => update("existingBusinessAtSite", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
+            </div>
+
+            <div>
+              <Label en="Existing business at site?" si="එම ස්ථානයේ දැනට ව්‍යාපාරයක් තිබේද?" lang={lang} />
+              <OptionGroup
+                name="existingBusinessAtSite"
+                options={YES_NO_OPTIONS}
+                value={form.existingBusinessAtSite}
+                onChange={(v) => update("existingBusinessAtSite", v)}
+                lang={lang}
+                columns="sm:grid-cols-2"
+              />
             </div>
 
             <div>
@@ -1055,7 +1110,11 @@ export default function PointFranchiseApplication() {
             </div>
 
             <div className="rounded-xl border border-black/10 bg-mist/60 p-4 text-xs font-medium text-ink/75">
-              Note: Identity documents, bank statements, business registration, and building photographs are collected securely after initial review. / හැඳුනුම්පත්, බැංකු වාර්තා, ව්‍යාපාර ලියාපදිංචි ලේඛන හා ඡායාරූප දෙවැනි අදියරේදී පමණක් ආරක්ෂිතව ලබාගනු ඇත.
+              {t(
+                lang,
+                "Identity documents, bank statements, business registration, and building photographs are collected securely after initial review.",
+                "හැඳුනුම්පත්, බැංකු වාර්තා, ව්‍යාපාර ලියාපදිංචි ලේඛන හා ඡායාරූප දෙවැනි අදියරේදී පමණක් ආරක්ෂිතව ලබාගනු ඇත."
+              )}
             </div>
           </div>
         )}
@@ -1087,7 +1146,7 @@ export default function PointFranchiseApplication() {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
-              <div>
+              <div className="flex flex-col justify-between">
                 <Label en="Ready to recruit staff?" si="සේවකයන් බඳවා ගැනීමට සූදානම්ද?" lang={lang} />
                 <OptionGroup
                   name="readyToRecruitStaff"
@@ -1098,7 +1157,7 @@ export default function PointFranchiseApplication() {
                   columns="grid-cols-2"
                 />
               </div>
-              <div>
+              <div className="flex flex-col justify-between">
                 <Label en="Can meet required service hours?" si="නියමිත සේවා වේලාවන් පිළිපැදිය හැකිද?" lang={lang} />
                 <OptionGroup
                   name="canMeetServiceHours"
@@ -1111,8 +1170,8 @@ export default function PointFranchiseApplication() {
               </div>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-3">
-              <div>
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="flex flex-col justify-between">
                 <Label en="Willing to complete REDCAT training?" si="REDCAT පුහුණුව සම්පූර්ණ කිරීමට කැමතිද?" lang={lang} />
                 <OptionGroup
                   name="willingToCompleteTraining"
@@ -1123,7 +1182,7 @@ export default function PointFranchiseApplication() {
                   columns="grid-cols-2"
                 />
               </div>
-              <div>
+              <div className="flex flex-col justify-between">
                 <Label en="Willing to use REDCAT IT system?" si="REDCAT IT පද්ධතිය භාවිත කිරීමට කැමතිද?" lang={lang} />
                 <OptionGroup
                   name="willingToUseItSystem"
@@ -1134,17 +1193,18 @@ export default function PointFranchiseApplication() {
                   columns="grid-cols-2"
                 />
               </div>
-              <div>
-                <Label en="Agree to operational standards?" si="මෙහෙයුම් ප්‍රමිතීන්ට එකඟද?" lang={lang} />
-                <OptionGroup
-                  name="agreeOperationalStandards"
-                  options={YES_NO_OPTIONS}
-                  value={form.agreeOperationalStandards}
-                  onChange={(v) => update("agreeOperationalStandards", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
+            </div>
+
+            <div>
+              <Label en="Agree to operational standards?" si="මෙහෙයුම් ප්‍රමිතීන්ට එකඟද?" lang={lang} />
+              <OptionGroup
+                name="agreeOperationalStandards"
+                options={YES_NO_OPTIONS}
+                value={form.agreeOperationalStandards}
+                onChange={(v) => update("agreeOperationalStandards", v)}
+                lang={lang}
+                columns="sm:grid-cols-2"
+              />
             </div>
           </div>
         )}
@@ -1169,7 +1229,7 @@ export default function PointFranchiseApplication() {
               className="press inline-flex items-center gap-2 rounded-full border-2 border-black/15 px-6 py-3.5 text-sm font-bold text-ink transition hover:border-ink"
             >
               <ArrowLeft size={16} />
-              Previous / පෙර
+              {t(lang, "Previous", "පෙර")}
             </button>
           ) : (
             <div />
@@ -1185,7 +1245,7 @@ export default function PointFranchiseApplication() {
                   className="press inline-flex items-center gap-2 rounded-full border-2 border-ink bg-white px-6 py-3.5 text-sm font-extrabold text-ink transition hover:bg-mist disabled:opacity-50"
                 >
                   {busy ? <LoaderCircle size={16} className="animate-spin" /> : null}
-                  Submit Initial Application
+                  {t(lang, "Submit Initial Application", "මූලික අයදුම්පත යොමු කරන්න")}
                 </button>
                 <button
                   type="button"
@@ -1193,7 +1253,7 @@ export default function PointFranchiseApplication() {
                   onClick={handleNext}
                   className="press inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-deep"
                 >
-                  Continue to Stage 2 (Optional)
+                  {t(lang, "Continue to Stage 2", "දෙවැනි අදියරට යන්න")}
                   <ArrowRight size={16} />
                 </button>
               </>
@@ -1205,7 +1265,7 @@ export default function PointFranchiseApplication() {
                 onClick={handleNext}
                 className="press inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 text-sm font-bold text-white transition hover:bg-brand"
               >
-                Next section / ඊළඟ
+                {t(lang, "Next section", "ඊළඟ")}
                 <ArrowRight size={16} />
               </button>
             )}
@@ -1220,11 +1280,11 @@ export default function PointFranchiseApplication() {
                 {busy ? (
                   <>
                     <LoaderCircle size={18} className="animate-spin" />
-                    Submitting…
+                    {t(lang, "Submitting…", "යොමු කරමින්…")}
                   </>
                 ) : (
                   <>
-                    Submit Detailed Application
+                    {t(lang, "Submit Detailed Application", "සවිස්තර අයදුම්පත යොමු කරන්න")}
                     <ArrowRight size={18} />
                   </>
                 )}
