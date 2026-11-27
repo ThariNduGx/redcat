@@ -7,7 +7,7 @@ import pointSchema from "@/infra/cpanel-hub-franchise/point-application-schema.j
 import catalog from "@/infra/cpanel-hub-franchise/hub-catalog.json";
 import { HUB_FRANCHISE_CPANEL_URL } from "@/lib/hubFranchise";
 
-type Lang = "both" | "en" | "si";
+type Lang = "en" | "si";
 type Copy = { en: string; si: string };
 type Answer = string | string[] | boolean;
 type Answers = Record<string, Answer>;
@@ -39,11 +39,11 @@ const districtNames: Record<string, string> = {
 const hubs = [...catalog.hubs].sort((a, b) => a.district.localeCompare(b.district) || a.name.localeCompare(b.name));
 
 function show(lang: Lang, en: string, si: string) {
-  return lang === "si" ? si : lang === "en" ? en : `${en} / ${si}`;
+  return lang === "si" ? si : en;
 }
 
 function Text({ lang, en, si }: Copy & { lang: Lang }) {
-  return <>{lang !== "si" && <span lang="en">{en}</span>}{lang === "both" && " / "}{lang !== "en" && <span lang="si">{si}</span>}</>;
+  return lang === "si" ? <span lang="si">{si}</span> : <span lang="en">{en}</span>;
 }
 
 function startAnswers(sections: Section[]): Answers {
@@ -169,7 +169,7 @@ export default function FranchiseApplication({ kind = "hub" }: { kind?: "hub" | 
   const reviewStep = sections.length;
   const declarationStep = reviewStep + 1;
   const [answers, setAnswers] = useState(() => startAnswers(sections));
-  const [lang, setLang] = useState<Lang>("both");
+  const [lang, setLang] = useState<Lang>("en");
   const [step, setStep] = useState(1);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<FormError>();
@@ -318,7 +318,7 @@ export default function FranchiseApplication({ kind = "hub" }: { kind?: "hub" | 
             <h2 ref={heading} tabIndex={-1} className="scroll-mt-24 text-2xl font-extrabold tracking-tight sm:text-3xl"><Text lang={lang} {...title} /></h2>
           </div>
           <div role="group" aria-label="Form language / අයදුම්පතේ භාෂාව" className="flex flex-wrap gap-1 rounded-xl border border-ink/20 bg-white p-1">
-            {([["both", "EN + සිංහල"], ["en", "English"], ["si", "සිංහල"]] as const).map(([mode, label]) => (
+            {([["en", "English"], ["si", "සිංහල"]] as const).map(([mode, label]) => (
               <button key={mode} type="button" lang={mode === "si" ? "si" : "en"} aria-pressed={lang === mode} onClick={() => setLang(mode)}
                 className="min-h-10 rounded-lg px-3 text-sm font-bold aria-pressed:bg-ink aria-pressed:text-white focus-visible:outline-2 focus-visible:outline-brand-deep">{label}</button>
             ))}

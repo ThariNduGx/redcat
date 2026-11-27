@@ -36,7 +36,7 @@ import {
 } from "@/lib/pointFranchise";
 import { trackDealerEnquiry, trackMetaEvent } from "@/lib/analytics";
 
-type LangMode = "both" | "en" | "si";
+type LangMode = "en" | "si";
 const STORAGE_KEY = "redcat_point_franchise_draft_v1";
 
 const SHORT_LABELS: Record<number, { en: string; si: string }> = {
@@ -117,12 +117,9 @@ function Label({
   return (
     <div className="mb-1">
       <span className="block text-[15px] font-extrabold text-ink leading-snug">
-        {lang !== "si" ? en : si}
+        {lang === "si" ? si : en}
         {required && <span className="text-brand ml-1">*</span>}
       </span>
-      {lang === "both" && (
-        <span className="mt-0.5 block text-xs font-medium text-ink/65">{si}</span>
-      )}
     </div>
   );
 }
@@ -189,7 +186,7 @@ function OptionGroup({
 export default function PointFranchiseApplication() {
   const [step, setStep] = useState(1);
   const [maxVisited, setMaxVisited] = useState(1);
-  const [lang, setLang] = useState<LangMode>("both");
+  const [lang, setLang] = useState<LangMode>("en");
   const [form, setForm] = useState<PointFranchiseFormData>(initialData);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -451,22 +448,16 @@ export default function PointFranchiseApplication() {
           <h3 className="mt-5 text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
             {lang === "si" ? "අයදුම්පත ලැබීම තහවුරු කිරීම" : "Application Confirmation"}
           </h3>
-          {lang === "both" && (
-            <p className="mt-1 text-base font-bold text-ink/70">
-              අයදුම්පත ලැබීම තහවුරු කිරීම
-            </p>
-          )}
           <div className="mt-6 rounded-2xl border border-black/10 bg-mist p-5 text-left text-sm leading-relaxed text-ink">
-            {lang !== "si" && (
+            {lang === "en" ? (
               <p className="font-semibold">
                 Thank you for applying for a REDCAT Point Franchise. Your application{" "}
                 <strong className="text-brand">{receipt.rcRef}</strong> for{" "}
                 <strong>{receipt.point}</strong> has been received and is under review. Our
                 Franchise Development Team will contact you after reviewing your application.
               </p>
-            )}
-            {lang !== "en" && (
-              <p className={lang === "both" ? "mt-3 text-ink/75" : "font-semibold"}>
+            ) : (
+              <p className="font-semibold">
                 REDCAT Point Franchise සඳහා අයදුම් කිරීම පිළිබඳව ස්තූතියි.{" "}
                 <strong>{receipt.point}</strong> සඳහා ඔබගේ{" "}
                 <strong className="text-brand">{receipt.rcRef}</strong> අයදුම්පත ලැබී ඇති අතර එය
@@ -530,13 +521,7 @@ export default function PointFranchiseApplication() {
                   )}
             </p>
             <h3 className="mt-1 text-xl font-extrabold text-ink sm:text-2xl">
-              {lang !== "si" && currentSection.en}
-              {lang === "both" && " | "}
-              {lang !== "en" && (
-                <span className={lang === "both" ? "text-brand-deep" : ""}>
-                  {currentSection.si}
-                </span>
-              )}
+              {lang === "si" ? currentSection.si : currentSection.en}
             </h3>
           </div>
 
@@ -549,7 +534,6 @@ export default function PointFranchiseApplication() {
             >
               {(
                 [
-                  { id: "both", label: "EN + සිංහල" },
                   { id: "en", label: "English" },
                   { id: "si", label: "සිංහල" },
                 ] as const
