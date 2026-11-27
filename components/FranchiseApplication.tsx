@@ -162,14 +162,27 @@ function StepFields({ field, value, answers, lang, error, onChange }: {
   );
 }
 
-export default function FranchiseApplication({ kind = "hub" }: { kind?: "hub" | "point" }) {
+export default function FranchiseApplication({
+  kind = "hub",
+  lang: controlledLang,
+  onLangChange,
+}: {
+  kind?: "hub" | "point";
+  lang?: Lang;
+  onLangChange?: (lang: Lang) => void;
+}) {
   const isHub = kind === "hub";
   const sections = isHub ? hubSections : pointSections;
   const schema = isHub ? hubSchema : pointSchema;
   const reviewStep = sections.length;
   const declarationStep = reviewStep + 1;
   const [answers, setAnswers] = useState(() => startAnswers(sections));
-  const [lang, setLang] = useState<Lang>("en");
+  const [internalLang, setInternalLang] = useState<Lang>("en");
+  const lang = controlledLang ?? internalLang;
+  const setLang = (next: Lang) => {
+    setInternalLang(next);
+    onLangChange?.(next);
+  };
   const [step, setStep] = useState(1);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<FormError>();
@@ -309,22 +322,58 @@ export default function FranchiseApplication({ kind = "hub" }: { kind?: "hub" | 
   const title = receipt ? { en: "Application received", si: "අයදුම්පත ලැබී ඇත" }
     : section ?? { en: "Review your answers", si: "ඔබේ පිළිතුරු පරීක්ෂා කරන්න" };
   const locked = attempt !== null;
+  const fullWidthKeys = new Set([
+    "fullName",
+    "email",
+    "preferredDistrict",
+    "proposedHubAddress",
+    "googleMapsLocation",
+    "whyInterested",
+    "signature",
+  ]);
   return (
-    <div className="rounded-3xl border border-ink/15 bg-white text-ink">
-      <header ref={header} className="scroll-mt-24 rounded-t-3xl border-b border-ink/10 bg-mist/50 p-5 sm:p-8">
+    <div className="rounded-[2rem] border border-ink/10 bg-white text-ink shadow-2xl shadow-black/10">
+      <header ref={header} className="scroll-mt-24 rounded-t-[2rem] border-b border-ink/10 bg-mist/60 p-5 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            {!receipt && <p className="mb-1 text-sm font-bold text-brand-deep"><Text lang={lang} en={`Step ${step} of ${declarationStep}`} si={`පියවර ${step} / ${declarationStep}`} /></p>}
+            {!receipt && <p className="mb-1 text-xs font-extrabold uppercase tracking-[0.16em] text-brand"><Text lang={lang} en={`Step ${step} of ${declarationStep}`} si={`පියවර ${step} / ${declarationStep}`} /></p>}
             <h2 ref={heading} tabIndex={-1} className="scroll-mt-24 text-2xl font-extrabold tracking-tight sm:text-3xl"><Text lang={lang} {...title} /></h2>
           </div>
-          <div role="group" aria-label="Form language / අයදුම්පතේ භාෂාව" className="flex flex-wrap gap-1 rounded-xl border border-ink/20 bg-white p-1">
+          <div role="group" aria-label={show(lang, "Form language", "අයදුම්පතේ භාෂාව")} className="flex flex-wrap gap-1 rounded-xl border border-ink/15 bg-white p-1 shadow-sm">
             {([["en", "English"], ["si", "සිංහල"]] as const).map(([mode, label]) => (
               <button key={mode} type="button" lang={mode === "si" ? "si" : "en"} aria-pressed={lang === mode} onClick={() => setLang(mode)}
-                className="min-h-10 rounded-lg px-3 text-sm font-bold aria-pressed:bg-ink aria-pressed:text-white focus-visible:outline-2 focus-visible:outline-brand-deep">{label}</button>
+                className="min-h-9 rounded-lg px-3 text-xs font-bold aria-pressed:bg-ink aria-pressed:text-white focus-visible:outline-2 focus-visible:outline-brand-deep">{label}</button>
             ))}
           </div>
         </div>
-        {!receipt && <progress aria-label={show(lang, "Application progress", "අයදුම්පතේ ප්‍රගතිය")} value={step} max={declarationStep} className="mt-4 block h-2 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:bg-brand-deep [&::-webkit-progress-bar]:bg-ink/10 [&::-webkit-progress-value]:bg-brand-deep" />}
+        {!receipt && (
+          <>
+            <progress aria-label={show(lang, "Application progress", "අයදුම්පතේ ප්‍රගතිය")} value={step} max={declarationStep} className="mt-4 block h-1.5 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:bg-brand [&::-webkit-progress-bar]:bg-ink/10 [&::-webkit-progress-value]:bg-brand" />
+            <div className="mt-3 grid grid-cols-6 gap-1.5 sm:grid-cols-11">
+              {Array.from({ length: declarationStep }, (_, i) => i + 1).map((n) => {
+                const active = n === step;
+                const done = n < step;
+                return (
+                  <button
+                    key={n}
+                    type="button"
+                    disabled={n > step}
+                    onClick={() => n < step && go(n)}
+                    className={`rounded-lg py-1.5 text-[11px] font-extrabold transition ${
+                      active
+                        ? "bg-brand text-white shadow-sm"
+                        : done
+                        ? "bg-ink text-white hover:bg-ink/85"
+                        : "cursor-not-allowed bg-white/70 text-ink/35 ring-1 ring-black/5"
+                    }`}
+                  >
+                    {String(n).padStart(2, "0")}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
       </header>
 
       {receipt ? (
@@ -348,11 +397,21 @@ export default function FranchiseApplication({ kind = "hub" }: { kind?: "hub" | 
             </div>
           )}
           {section ? (
-            <fieldset disabled={busy || locked} className="min-w-0 space-y-6">
-              {section.fields.map((field) => (
-                <StepFields key={field.key} field={field} value={answers[field.key]} answers={answers} lang={lang}
-                  error={error?.key === field.key} onChange={(value) => update(field, value)} />
-              ))}
+            <fieldset disabled={busy || locked} className="grid min-w-0 gap-5 sm:grid-cols-2">
+              {section.fields.map((field) => {
+                const spanFull =
+                  fullWidthKeys.has(field.key) ||
+                  field.type === "radio" ||
+                  field.type === "checkbox" ||
+                  field.type === "consent" ||
+                  field.type === "textarea";
+                return (
+                  <div key={field.key} className={spanFull ? "sm:col-span-2" : "min-w-0"}>
+                    <StepFields field={field} value={answers[field.key]} answers={answers} lang={lang}
+                      error={error?.key === field.key} onChange={(value) => update(field, value)} />
+                  </div>
+                );
+              })}
             </fieldset>
           ) : (
             <div className="divide-y divide-ink/15">
@@ -394,12 +453,13 @@ export default function FranchiseApplication({ kind = "hub" }: { kind?: "hub" | 
                 <ArrowLeft size={16} aria-hidden /><Text lang={lang} en={editing ? "Back to review" : "Previous"} si={editing ? "සමාලෝචනයට ආපසු" : "පෙර"} />
               </button>
             )}
-            <button type="submit" disabled={busy} className={`${button} bg-ink text-white hover:bg-brand-deep sm:ml-auto`}>
-              {busy ? <LoaderCircle aria-hidden size={16} className="animate-spin" /> : <ArrowRight aria-hidden size={16} />}
+            <button type="submit" disabled={busy} className={`${button} bg-brand text-white shadow-lg shadow-brand/20 hover:bg-brand-deep sm:ml-auto`}>
+              {busy ? <LoaderCircle aria-hidden size={16} className="animate-spin" /> : null}
               {busy ? <Text lang={lang} en="Submitting…" si="යොමු කරමින්…" />
                 : locked ? <Text lang={lang} en="Retry submission" si="නැවත යොමු කරන්න" />
                 : step === declarationStep ? <Text lang={lang} en="Submit application" si="අයදුම්පත යොමු කරන්න" />
                 : <Text lang={lang} en={editing ? "Return to review" : "Continue"} si={editing ? "සමාලෝචනයට ආපසු" : "ඉදිරියට"} />}
+              {!busy && <ArrowRight aria-hidden size={16} />}
             </button>
           </div>
         </form>
