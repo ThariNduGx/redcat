@@ -99,6 +99,11 @@ export default function DealersPage() {
                   <p className="mt-3 flex-1 text-lg text-ink/70">{r.body}</p>
                   <div className="mt-8 flex flex-wrap items-center gap-3">
                     <ArrowLink href={r.href} className="self-start">{r.action}</ArrowLink>
+                    {r.key === "hub" && (
+                      <ArrowLink href="/dealers/hub-franchise" variant="outline" className="self-start text-ink">
+                        Full Hub Application
+                      </ArrowLink>
+                    )}
                     {r.key === "point" && (
                       <ArrowLink href="/dealers?role=point#apply" variant="outline" className="self-start text-ink">
                         Apply now
