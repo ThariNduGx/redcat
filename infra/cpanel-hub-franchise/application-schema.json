@@ -1,0 +1,1128 @@
+{
+  "termsVersion": "2026-11-27",
+  "sections": [
+    {
+      "id": 1,
+      "code": "01",
+      "en": "Personal information",
+      "si": "පෞද්ගලික තොරතුරු",
+      "fields": [
+        {
+          "key": "fullName",
+          "number": "01",
+          "en": "Full name",
+          "si": "සම්පූර්ණ නම",
+          "type": "text",
+          "max": 120
+        },
+        {
+          "key": "mobileNumber",
+          "number": "02",
+          "en": "Mobile number",
+          "si": "ජංගම දුරකථන අංකය",
+          "type": "tel",
+          "max": 32
+        },
+        {
+          "key": "whatsappNumber",
+          "number": "03",
+          "en": "WhatsApp number",
+          "si": "WhatsApp අංකය",
+          "type": "tel",
+          "optional": true,
+          "max": 32
+        },
+        {
+          "key": "email",
+          "number": "04",
+          "en": "Email address",
+          "si": "විද්‍යුත් තැපැල් ලිපිනය",
+          "type": "email",
+          "max": 254
+        },
+        {
+          "key": "residentialDistrict",
+          "number": "05",
+          "en": "Residential district",
+          "si": "පදිංචි දිස්ත්‍රික්කය",
+          "type": "location"
+        },
+        {
+          "key": "residentialTown",
+          "number": "06",
+          "en": "Residential town",
+          "si": "පදිංචි නගරය",
+          "type": "text",
+          "max": 120
+        },
+        {
+          "key": "currentOccupation",
+          "number": "07",
+          "en": "Current occupation",
+          "si": "වර්තමාන රැකියාව",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Business owner",
+              "en": "Business owner",
+              "si": "ව්‍යාපාරික"
+            },
+            {
+              "value": "Private employee",
+              "en": "Private employee",
+              "si": "පෞද්ගලික සේවක"
+            },
+            {
+              "value": "Government employee",
+              "en": "Government employee",
+              "si": "රාජ්‍ය සේවක"
+            },
+            {
+              "value": "Self-employed",
+              "en": "Self-employed",
+              "si": "ස්වයං රැකියා"
+            },
+            {
+              "value": "Overseas employee",
+              "en": "Overseas employee",
+              "si": "විදේශ රැකියා"
+            },
+            {
+              "value": "Retired",
+              "en": "Retired",
+              "si": "විශ්‍රාමික"
+            },
+            {
+              "value": "Other",
+              "en": "Other",
+              "si": "වෙනත්"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "code": "02",
+      "en": "Preferred Hub location",
+      "si": "අපේක්ෂිත Hub ස්ථානය",
+      "fields": [
+        {
+          "key": "preferredDistrict",
+          "number": "08",
+          "en": "Preferred district",
+          "si": "කැමති දිස්ත්‍රික්කය",
+          "type": "location"
+        },
+        {
+          "key": "firstPreferredHub",
+          "number": "09",
+          "en": "First preferred Hub",
+          "si": "පළමු කැමැත්ත වන Hub ස්ථානය",
+          "type": "location"
+        },
+        {
+          "key": "secondPreferredHub",
+          "number": "10",
+          "en": "Second preferred Hub",
+          "si": "දෙවැනි කැමැත්ත වන Hub ස්ථානය",
+          "type": "location",
+          "optional": true
+        },
+        {
+          "key": "operatingAreaFamiliarity",
+          "number": "11",
+          "en": "Familiarity with operating area",
+          "si": "මෙහෙයුම් ප්‍රදේශය පිළිබඳ අවබෝධය",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Very familiar",
+              "en": "Very familiar",
+              "si": "ඉතා හොඳයි"
+            },
+            {
+              "value": "Moderate",
+              "en": "Moderate",
+              "si": "සාමාන්‍යයි"
+            },
+            {
+              "value": "Not familiar",
+              "en": "Not familiar",
+              "si": "අවබෝධයක් නැත"
+            }
+          ]
+        },
+        {
+          "key": "existingBusinessConnections",
+          "number": "12",
+          "en": "Existing local business connections?",
+          "si": "ප්‍රදේශයේ ව්‍යාපාරික සම්බන්ධතා තිබේද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "code": "03",
+      "en": "Business & management experience",
+      "si": "ව්‍යාපාරික හා කළමනාකරණ පළපුරුද්ද",
+      "fields": [
+        {
+          "key": "currentlyOperateBusiness",
+          "number": "13",
+          "en": "Do you currently operate a business?",
+          "si": "දැනට ව්‍යාපාරයක් පවත්වාගෙන යනවාද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            }
+          ]
+        },
+        {
+          "key": "currentBusinessType",
+          "number": "14",
+          "en": "Current business type",
+          "si": "දැනට පවත්වාගෙන යන ව්‍යාපාර වර්ගය",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Retail",
+              "en": "Retail",
+              "si": "සිල්ලර"
+            },
+            {
+              "value": "Wholesale & distribution",
+              "en": "Wholesale & distribution",
+              "si": "තොග හා බෙදාහැරීම්"
+            },
+            {
+              "value": "Transport",
+              "en": "Transport",
+              "si": "ප්‍රවාහන"
+            },
+            {
+              "value": "Courier & logistics",
+              "en": "Courier & logistics",
+              "si": "පාර්සල් හා සැපයුම්"
+            },
+            {
+              "value": "Manufacturing",
+              "en": "Manufacturing",
+              "si": "නිෂ්පාදන"
+            },
+            {
+              "value": "Services",
+              "en": "Services",
+              "si": "සේවා"
+            },
+            {
+              "value": "Other",
+              "en": "Other",
+              "si": "වෙනත්"
+            },
+            {
+              "value": "Not applicable",
+              "en": "Not applicable",
+              "si": "අදාළ නොවේ"
+            }
+          ]
+        },
+        {
+          "key": "yearsExperience",
+          "number": "15",
+          "en": "Years of business or management experience",
+          "si": "ව්‍යාපාරික හෝ කළමනාකරණ පළපුරුද්ද",
+          "type": "choice",
+          "options": [
+            {
+              "value": "None",
+              "en": "None",
+              "si": "නැත"
+            },
+            {
+              "value": "Under 1 year",
+              "en": "Under 1 year",
+              "si": "වසරකට අඩු"
+            },
+            {
+              "value": "1–3 years",
+              "en": "1–3 years",
+              "si": "වසර 1–3"
+            },
+            {
+              "value": "3–5 years",
+              "en": "3–5 years",
+              "si": "වසර 3–5"
+            },
+            {
+              "value": "Over 5 years",
+              "en": "Over 5 years",
+              "si": "වසර 5කට වැඩි"
+            }
+          ]
+        },
+        {
+          "key": "logisticsExperience",
+          "number": "16",
+          "en": "Transport, distribution or logistics experience?",
+          "si": "ප්‍රවාහන හෝ බෙදාහැරීම් පළපුරුද්ද තිබේද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            }
+          ]
+        },
+        {
+          "key": "largestEmployeesManaged",
+          "number": "17",
+          "en": "Largest number of employees managed",
+          "si": "කළමනාකරණය කළ උපරිම සේවක සංඛ්‍යාව",
+          "type": "choice",
+          "options": [
+            {
+              "value": "None",
+              "en": "None",
+              "si": "නැත"
+            },
+            {
+              "value": "1–5",
+              "en": "1–5",
+              "si": "1–5"
+            },
+            {
+              "value": "6–10",
+              "en": "6–10",
+              "si": "6–10"
+            },
+            {
+              "value": "11–20",
+              "en": "11–20",
+              "si": "11–20"
+            },
+            {
+              "value": "Over 20",
+              "en": "Over 20",
+              "si": "20කට වැඩි"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "code": "04",
+      "en": "Financial capability",
+      "si": "මූල්‍ය හැකියාව",
+      "fields": [
+        {
+          "key": "totalAvailableInvestment",
+          "number": "18",
+          "en": "Total available investment",
+          "si": "යෙදවිය හැකි මුළු ආයෝජන මුදල",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Below LKR 2M",
+              "en": "Below LKR 2M",
+              "si": "අඩු LKR 2M"
+            },
+            {
+              "value": "LKR 2–3M",
+              "en": "LKR 2–3M",
+              "si": "LKR 2–3M"
+            },
+            {
+              "value": "LKR 3–5M",
+              "en": "LKR 3–5M",
+              "si": "LKR 3–5M"
+            },
+            {
+              "value": "LKR 5–10M",
+              "en": "LKR 5–10M",
+              "si": "LKR 5–10M"
+            },
+            {
+              "value": "Above LKR 10M",
+              "en": "Above LKR 10M",
+              "si": "වැඩි LKR 10M"
+            }
+          ]
+        },
+        {
+          "key": "fundsCurrentlyAvailable",
+          "number": "19",
+          "en": "Are funds currently available?",
+          "si": "මුදල් දැනට සූදානම්ද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Fully",
+              "en": "Fully",
+              "si": "සම්පූර්ණයෙන්"
+            },
+            {
+              "value": "Partially",
+              "en": "Partially",
+              "si": "කොටසක්"
+            },
+            {
+              "value": "Arranging",
+              "en": "Arranging",
+              "si": "සම්පාදනය කරමින්"
+            }
+          ]
+        },
+        {
+          "key": "investmentSource",
+          "number": "20",
+          "en": "Source of investment",
+          "si": "ආයෝජන මුදල් ලබාගන්නා ආකාරය",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Personal",
+              "en": "Personal",
+              "si": "පෞද්ගලික"
+            },
+            {
+              "value": "Business",
+              "en": "Business",
+              "si": "ව්‍යාපාරික"
+            },
+            {
+              "value": "Bank loan",
+              "en": "Bank loan",
+              "si": "බැංකු ණය"
+            },
+            {
+              "value": "Partner",
+              "en": "Partner",
+              "si": "හවුල්කරු"
+            },
+            {
+              "value": "Combination",
+              "en": "Combination",
+              "si": "ක්‍රම කිහිපයක්"
+            }
+          ]
+        },
+        {
+          "key": "fundThreeMonthsOps",
+          "number": "21",
+          "en": "Can you fund three months of initial operating expenses?",
+          "si": "පළමු මාස තුනේ මෙහෙයුම් වියදම් දැරිය හැකිද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            },
+            {
+              "value": "Need information",
+              "en": "Need information",
+              "si": "වැඩිදුර තොරතුරු අවශ්‍යයි"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "code": "05",
+      "en": "Premises & infrastructure",
+      "si": "ගොඩනැගිලි හා යටිතල පහසුකම්",
+      "fields": [
+        {
+          "key": "suitablePremises",
+          "number": "22",
+          "en": "Do you have suitable premises?",
+          "si": "සුදුසු ගොඩනැගිල්ලක් තිබේද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Own",
+              "en": "Own",
+              "si": "තමන්ගේ"
+            },
+            {
+              "value": "Rented",
+              "en": "Rented",
+              "si": "කුලී"
+            },
+            {
+              "value": "Identified",
+              "en": "Identified",
+              "si": "හඳුනාගෙන ඇත"
+            },
+            {
+              "value": "Searching",
+              "en": "Searching",
+              "si": "සොයමින්"
+            }
+          ]
+        },
+        {
+          "key": "availableFloorArea",
+          "number": "23",
+          "en": "Available floor area (sq. ft.)",
+          "si": "පවතින ඉඩකඩ (වර්ග අඩි)",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Below 1,500",
+              "en": "Below 1,500 sq. ft.",
+              "si": "වර්ග අඩි 1,500ට අඩු"
+            },
+            {
+              "value": "1,500–2,000",
+              "en": "1,500–2,000 sq. ft.",
+              "si": "1,500–2,000"
+            },
+            {
+              "value": "2,000–3,000",
+              "en": "2,000–3,000 sq. ft.",
+              "si": "2,000–3,000"
+            },
+            {
+              "value": "Above 3,000",
+              "en": "Above 3,000 sq. ft.",
+              "si": "වර්ග අඩි 3,000ට වැඩි"
+            },
+            {
+              "value": "Not identified",
+              "en": "Not identified",
+              "si": "තීරණය කර නැත"
+            }
+          ]
+        },
+        {
+          "key": "vehicleAccessParkingLoading",
+          "number": "24",
+          "en": "Suitable vehicle access, parking and loading?",
+          "si": "වාහන ප්‍රවේශය, නැවැත්වීම හා පැටවීමේ පහසුකම් තිබේද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            },
+            {
+              "value": "Can arrange",
+              "en": "Can arrange",
+              "si": "සකස් කළ හැකිය"
+            }
+          ]
+        },
+        {
+          "key": "earlyNightAccess",
+          "number": "25",
+          "en": "Early morning and night access?",
+          "si": "අලුයම හා රාත්‍රී ප්‍රවේශය තිබේද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            },
+            {
+              "value": "To confirm",
+              "en": "To confirm",
+              "si": "තහවුරු කළ යුතුයි"
+            }
+          ]
+        },
+        {
+          "key": "proposedHubAddress",
+          "number": "26",
+          "en": "Proposed Hub address",
+          "si": "යෝජිත Hub ලිපිනය",
+          "type": "textarea",
+          "optional": true,
+          "max": 500
+        },
+        {
+          "key": "googleMapsLocation",
+          "number": "27",
+          "en": "Google Maps location",
+          "si": "Google Maps ස්ථානය",
+          "type": "text",
+          "optional": true,
+          "max": 500
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "code": "06",
+      "en": "Transport & vehicles",
+      "si": "ප්‍රවාහන හා වාහන",
+      "fields": [
+        {
+          "key": "ownCommercialVehicles",
+          "number": "28",
+          "en": "Do you own commercial vehicles?",
+          "si": "වාණිජ ප්‍රවාහන වාහන තිබේද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            }
+          ]
+        },
+        {
+          "key": "availableVehicleTypes",
+          "number": "29",
+          "en": "Available vehicle types (select all)",
+          "si": "පවතින වාහන වර්ග (අදාළ සියල්ල)",
+          "type": "multi",
+          "options": [
+            {
+              "value": "Motorcycle",
+              "en": "Motorcycle",
+              "si": "යතුරුපැදි"
+            },
+            {
+              "value": "Three-wheeler",
+              "en": "Three-wheeler",
+              "si": "ත්‍රිරෝද රථ"
+            },
+            {
+              "value": "Van",
+              "en": "Van",
+              "si": "වෑන්"
+            },
+            {
+              "value": "Small truck",
+              "en": "Small truck",
+              "si": "කුඩා ලොරි"
+            },
+            {
+              "value": "Medium or large truck",
+              "en": "Medium or large truck",
+              "si": "මධ්‍යම හෝ විශාල ලොරි"
+            },
+            {
+              "value": "None",
+              "en": "None",
+              "si": "නැත"
+            }
+          ]
+        },
+        {
+          "key": "vehicleCountForRedcat",
+          "number": "30",
+          "en": "Number of vehicles available for REDCAT",
+          "si": "REDCAT සඳහා වෙන් කළ හැකි වාහන ගණන",
+          "type": "choice",
+          "options": [
+            {
+              "value": "None",
+              "en": "None",
+              "si": "නැත"
+            },
+            {
+              "value": "1",
+              "en": "1",
+              "si": "1"
+            },
+            {
+              "value": "2–3",
+              "en": "2–3",
+              "si": "2–3"
+            },
+            {
+              "value": "4–5",
+              "en": "4–5",
+              "si": "4–5"
+            },
+            {
+              "value": "Over 5",
+              "en": "Over 5",
+              "si": "5කට වැඩි"
+            }
+          ]
+        },
+        {
+          "key": "transportArrangement",
+          "number": "31",
+          "en": "How will you arrange transport?",
+          "si": "ප්‍රවාහනය සපයාගන්නේ කෙසේද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Own",
+              "en": "Own",
+              "si": "තමන්ගේ"
+            },
+            {
+              "value": "Purchase",
+              "en": "Purchase",
+              "si": "මිලදී ගැනීම"
+            },
+            {
+              "value": "Lease or rent",
+              "en": "Lease or rent",
+              "si": "ලීසිං හෝ කුලී"
+            },
+            {
+              "value": "Contracted",
+              "en": "Contracted",
+              "si": "ගිවිසුම්ගත"
+            },
+            {
+              "value": "Combination",
+              "en": "Combination",
+              "si": "ක්‍රම කිහිපයක්"
+            }
+          ]
+        },
+        {
+          "key": "manageMaintenanceFuelDrivers",
+          "number": "32",
+          "en": "Can you manage maintenance, fuel and driver availability?",
+          "si": "නඩත්තුව, ඉන්ධන හා රියදුරන් කළමනාකරණය කළ හැකිද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "code": "07",
+      "en": "Operational commitment",
+      "si": "මෙහෙයුම් සඳහා කැපවීම",
+      "fields": [
+        {
+          "key": "dailyManager",
+          "number": "33",
+          "en": "Who will manage daily Hub operations?",
+          "si": "දෛනික මෙහෙයුම් කළමනාකරණය කරන්නේ කවුද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Self",
+              "en": "Self",
+              "si": "මා විසින්"
+            },
+            {
+              "value": "Partner",
+              "en": "Partner",
+              "si": "හවුල්කරු"
+            },
+            {
+              "value": "Family",
+              "en": "Family",
+              "si": "පවුලේ සාමාජිකයෙක්"
+            },
+            {
+              "value": "Manager",
+              "en": "Manager",
+              "si": "කළමනාකරු"
+            }
+          ]
+        },
+        {
+          "key": "primaryBusiness",
+          "number": "34",
+          "en": "Will this be your primary business?",
+          "si": "මෙය ඔබගේ ප්‍රධාන ව්‍යාපාරයද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Primary",
+              "en": "Primary",
+              "si": "ප්‍රධාන"
+            },
+            {
+              "value": "Additional",
+              "en": "Additional",
+              "si": "අමතර"
+            }
+          ]
+        },
+        {
+          "key": "recruitManageStaffDrivers",
+          "number": "35",
+          "en": "Can you recruit and manage staff and drivers?",
+          "si": "සේවකයන් හා රියදුරන් බඳවා කළමනාකරණය කළ හැකිද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            }
+          ]
+        },
+        {
+          "key": "coordinatePoints",
+          "number": "36",
+          "en": "Can you coordinate collection and distribution across 10–20 Points?",
+          "si": "Points 10–20 අතර පාර්සල් එකතු කිරීම හා බෙදාහැරීම කළ හැකිද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            },
+            {
+              "value": "With training",
+              "en": "With training",
+              "si": "පුහුණුව සමඟ"
+            }
+          ]
+        },
+        {
+          "key": "maintainShifts",
+          "number": "37",
+          "en": "Can you maintain morning and evening shifts?",
+          "si": "උදෑසන හා සවස මෙහෙයුම් කාලසටහන පවත්වාගත හැකිද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            }
+          ]
+        },
+        {
+          "key": "operateDailyWeekendsHolidays",
+          "number": "38",
+          "en": "Can you operate daily including weekends and required holidays?",
+          "si": "සති අන්ත හා අවශ්‍ය නිවාඩු දින ඇතුළුව දිනපතා ක්‍රියාත්මක කළ හැකිද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            }
+          ]
+        },
+        {
+          "key": "followProcedures",
+          "number": "39",
+          "en": "Will you follow parcel handling, scanning, sorting, security and transport procedures?",
+          "si": "පාර්සල් හැසිරවීම, ස්කෑන් කිරීම, වර්ගීකරණය, ආරක්ෂාව හා ප්‍රවාහන ක්‍රමවේද අනුගමනය කරනවාද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "code": "08",
+      "en": "Technology & training",
+      "si": "තාක්ෂණය හා පුහුණුව",
+      "fields": [
+        {
+          "key": "computerMobileKnowledge",
+          "number": "40",
+          "en": "Computer and mobile app knowledge",
+          "si": "පරිගණක හා ජංගම යෙදුම් දැනුම",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Basic",
+              "en": "Basic",
+              "si": "මූලික"
+            },
+            {
+              "value": "Intermediate",
+              "en": "Intermediate",
+              "si": "මධ්‍යම"
+            },
+            {
+              "value": "Advanced",
+              "en": "Advanced",
+              "si": "උසස්"
+            }
+          ]
+        },
+        {
+          "key": "useRedcatItSystem",
+          "number": "41",
+          "en": "Will you use the REDCAT IT system for all operations?",
+          "si": "සියලු මෙහෙයුම් සඳහා REDCAT IT පද්ධතිය භාවිත කරනවාද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            }
+          ]
+        },
+        {
+          "key": "completeThreeDayCourse",
+          "number": "42",
+          "en": "Will you complete the mandatory three-day certificate course before opening?",
+          "si": "ආරම්භයට පෙර අනිවාර්ය දින තුනක සහතිකපත් පාඨමාලාව සම්පූර්ණ කරනවාද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "code": "09",
+      "en": "Business readiness",
+      "si": "ව්‍යාපාරික සූදානම",
+      "fields": [
+        {
+          "key": "commenceWhen",
+          "number": "43",
+          "en": "When can you commence operations if approved?",
+          "si": "අනුමැතිය ලැබුණහොත් ආරම්භ කළ හැක්කේ කවදාද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Immediately",
+              "en": "Immediately",
+              "si": "වහාම"
+            },
+            {
+              "value": "Within 30 days",
+              "en": "Within 30 days",
+              "si": "දින 30 ඇතුළත"
+            },
+            {
+              "value": "60 days",
+              "en": "60 days",
+              "si": "දින 60"
+            },
+            {
+              "value": "90 days",
+              "en": "90 days",
+              "si": "දින 90"
+            },
+            {
+              "value": "Over 90 days",
+              "en": "Over 90 days",
+              "si": "දින 90ට වැඩි"
+            }
+          ]
+        },
+        {
+          "key": "whyInterested",
+          "number": "44",
+          "en": "Why are you interested in a REDCAT Hub franchise?",
+          "si": "REDCAT Hub අවස්ථාවට ඔබ උනන්දු වන්නේ ඇයි?",
+          "type": "textarea",
+          "max": 2000
+        },
+        {
+          "key": "howDidYouHear",
+          "number": "45",
+          "en": "How did you hear about REDCAT?",
+          "si": "REDCAT පිළිබඳ දැනගත්තේ කෙසේද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Facebook",
+              "en": "Facebook",
+              "si": "Facebook"
+            },
+            {
+              "value": "Instagram",
+              "en": "Instagram",
+              "si": "Instagram"
+            },
+            {
+              "value": "TikTok",
+              "en": "TikTok",
+              "si": "TikTok"
+            },
+            {
+              "value": "YouTube",
+              "en": "YouTube",
+              "si": "YouTube"
+            },
+            {
+              "value": "TV",
+              "en": "TV",
+              "si": "රූපවාහිනිය"
+            },
+            {
+              "value": "Newspaper",
+              "en": "Newspaper",
+              "si": "පුවත්පත්"
+            },
+            {
+              "value": "Referral",
+              "en": "Referral",
+              "si": "නිර්දේශයක්"
+            },
+            {
+              "value": "Website",
+              "en": "Website",
+              "si": "වෙබ් අඩවිය"
+            },
+            {
+              "value": "Other",
+              "en": "Other",
+              "si": "වෙනත්"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "code": "10",
+      "en": "Applicant declaration",
+      "si": "අයදුම්කරුගේ ප්‍රකාශය",
+      "fields": [
+        {
+          "key": "applicantName",
+          "number": "A",
+          "en": "Applicant name",
+          "si": "අයදුම්කරුගේ නම",
+          "type": "text",
+          "max": 120
+        },
+        {
+          "key": "declarationDate",
+          "number": "B",
+          "en": "Date",
+          "si": "දිනය",
+          "type": "date"
+        },
+        {
+          "key": "signature",
+          "number": "C",
+          "en": "Digital Signature (type your full name)",
+          "si": "අත්සන (ඔබගේ සම්පූර්ණ නම ටයිප් කරන්න)",
+          "type": "text",
+          "max": 120
+        },
+        {
+          "key": "agreePrivacyTerms",
+          "type": "consent",
+          "en": "I agree to the Privacy Notice and Franchise Application Terms",
+          "si": "පෞද්ගලිකත්ව නිවේදනයට සහ අයදුම්පත් කොන්දේසිවලට එකඟ වෙමි"
+        },
+        {
+          "key": "agreeContact",
+          "type": "consent",
+          "en": "I agree to be contacted about this application",
+          "si": "මෙම අයදුම්පත සම්බන්ධයෙන් මා අමතන්නට එකඟ වෙමි"
+        }
+      ]
+    }
+  ]
+}

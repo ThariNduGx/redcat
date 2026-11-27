@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { Building2, CheckCircle2, Clock, GraduationCap, Wallet } from "lucide-react";
+import { ArrowRight, Building2, CheckCircle2, Clock, GraduationCap, Wallet } from "lucide-react";
 import HubFranchiseApplication from "@/components/HubFranchiseApplication";
-import CatLoader from "@/components/ui/CatLoader";
 import { SELECTION_PROCESS } from "@/lib/hubFranchise";
 
 export const metadata: Metadata = {
@@ -36,8 +34,8 @@ const HIGHLIGHTS = [
   {
     icon: GraduationCap,
     title: "10–20 Points",
-    subtitle: "3-day training included",
-    si: "දින 3ක සහතිකපත් පුහුණුව",
+    subtitle: "Per regional hub",
+    si: "එක් ප්‍රාදේශීය Hub එකකට",
   },
 ];
 
@@ -54,30 +52,43 @@ export default function HubFranchisePage() {
           <h1 className="mt-5 max-w-4xl text-[clamp(2.4rem,5.5vw,4.75rem)] font-extrabold leading-[0.96] tracking-[-0.04em]">
             Regional Hub Franchise Application
           </h1>
-          <p className="mt-3 text-xl font-bold text-brand-soft sm:text-2xl">
+          <p lang="si" className="mt-3 text-xl font-bold text-brand-soft sm:text-2xl">
             ප්‍රාදේශීය Hub ව්‍යාපාරික නියෝජිත අයදුම්පත
           </p>
           <p className="mt-4 max-w-2xl text-base font-medium text-white/90 sm:text-lg">
-            Complete the applicable fields below in English or Sinhala. Submission does not guarantee approval or reservation of a franchise.
+            Apply in English or Sinhala. Have your preferred hub, investment, premises and transport details ready.
           </p>
 
-          <dl className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <p lang="si" className="mt-2 max-w-2xl text-sm text-white">
+            ඉංග්‍රීසි හෝ සිංහලෙන් අයදුම් කරන්න. කැමති Hub ස්ථානය, ආයෝජනය, ගොඩනැගිලි සහ ප්‍රවාහන තොරතුරු සූදානම් කරගන්න.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+            <a href="#apply" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+              <span>Start application <span className="block text-xs" lang="si">අයදුම්පත ආරම්භ කරන්න</span></span><ArrowRight aria-hidden size={18} />
+            </a>
+            <a href="/dealers/hub-franchise/application-notice" target="_blank" rel="noopener" className="py-2 text-sm font-semibold underline underline-offset-4">
+              Privacy notice and terms <span className="sr-only" lang="si">පෞද්ගලිකත්වය සහ කොන්දේසි</span>
+            </a>
+          </div>
+          <dl className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
             {HIGHLIGHTS.map((item) => (
               <div
                 key={item.title}
                 className="rounded-2xl border border-white/15 bg-black/15 p-4 backdrop-blur-sm"
               >
-                <div className="flex items-center gap-2.5 text-brand-soft">
-                  <item.icon size={18} />
+                <div className="flex items-center gap-2 text-white">
+                  <item.icon aria-hidden className="hidden shrink-0 sm:block" size={18} />
                   <dt className="text-xs font-bold uppercase tracking-wider">{item.subtitle}</dt>
                 </div>
-                <dd className="mt-1.5 text-2xl font-extrabold tracking-tight text-white">
+                <dd className="mt-1.5 text-lg sm:text-2xl font-extrabold tracking-tight text-white">
                   {item.title}
                 </dd>
-                <p className="mt-0.5 text-xs text-white/75">{item.si}</p>
+                <dd lang="si" className="mt-0.5 text-xs text-white">{item.si}</dd>
               </div>
             ))}
           </dl>
+          <p className="mt-4 text-sm text-white">The proposed fee excludes premises, vehicles, staffing and working capital.</p>
+          <p lang="si" className="mt-1 text-sm text-white">යෝජිත ගාස්තුවට ගොඩනැගිලි, වාහන, සේවක සහ කාරක ප්‍රාග්ධන වියදම් ඇතුළත් නොවේ.</p>
         </div>
 
         <div
@@ -88,17 +99,9 @@ export default function HubFranchisePage() {
       </section>
 
       {/* Interactive 10-Section Application Form */}
-      <section id="apply" className="bg-paper pb-20 pt-6 sm:pb-28">
+      <section id="apply" className="scroll-mt-24 bg-paper pb-20 pt-6 sm:pb-28">
         <div className="mx-auto max-w-4xl px-5">
-          <Suspense
-            fallback={
-              <div className="grid h-96 place-items-center rounded-[2rem] bg-white">
-                <CatLoader />
-              </div>
-            }
-          >
-            <HubFranchiseApplication />
-          </Suspense>
+          <HubFranchiseApplication />
         </div>
       </section>
 
@@ -126,7 +129,7 @@ export default function HubFranchisePage() {
                 </span>
                 <div>
                   <h3 className="text-base font-extrabold text-ink">{item.en}</h3>
-                  <p className="mt-0.5 text-sm font-medium text-ink/65">{item.si}</p>
+                  <p lang="si" className="mt-0.5 text-sm font-medium text-ink/65">{item.si}</p>
                 </div>
               </li>
             ))}

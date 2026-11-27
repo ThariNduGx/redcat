@@ -6,16 +6,20 @@ declare(strict_types=1);
  * Single-file dashboard for reviewing applications and downloading CVs.
  */
 
-// Enable strict session cookie settings
-header('X-RedCat-Admin: 2.2');
+// Staff pages use the same server-side session on the application host.
+header('X-RedCat-Admin: 2.3.1');
+header('Cache-Control: no-store, private');
 if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    session_name('redcat_staff');
     session_set_cookie_params([
         'lifetime' => 0,
         'path' => '/',
         'domain' => '',
         'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
         'httponly' => true,
-        'samesite' => 'Lax',
+        'samesite' => 'Strict',
     ]);
     session_start();
 }
@@ -28,6 +32,52 @@ if (!is_readable($configPath)) {
 }
 
 $config = require $configPath;
+
+// Franchise review is opt-in. Credentials and database connections stay separate.
+$hubConfigPath = dirname(__DIR__) . '/redcat-hub-franchise-config.php';
+$hubConfig = [];
+if (is_readable($hubConfigPath)) {
+    try {
+        $loaded = require $hubConfigPath;
+        if (is_array($loaded)) $hubConfig = $loaded;
+    } catch (Throwable $e) {
+        error_log('RedCat franchise reviewer settings could not be loaded.');
+    }
+}
+$careersReviewers = $hubConfig['careers_reviewers'] ?? [];
+if (!is_array($careersReviewers)) $careersReviewers = [];
+
+// null signals unavailable storage, false signals an enforced limit.
+function allowReviewerLogin(string $directory, string $address): ?bool
+{
+    $directory = realpath($directory);
+    $root = realpath($_SERVER['DOCUMENT_ROOT'] ?? __DIR__);
+    if ($directory === false || $root === false || str_starts_with($directory . '/', $root . '/')) return null;
+
+    $file = $directory . '/hub-review-login.json';
+    $lock = @fopen($file . '.lock', 'c');
+    if ($lock === false) return null;
+    try {
+        if (!flock($lock, LOCK_EX)) return null;
+        $window = intdiv(time(), 300);
+        $raw = is_file($file) ? @file_get_contents($file) : '{}';
+        if ($raw === false) return null;
+        $state = json_decode($raw, true, 8, JSON_THROW_ON_ERROR);
+        if (($state['window'] ?? null) !== $window) $state = ['window' => $window, 'total' => 0, 'addresses' => []];
+        $key = hash('sha256', $address);
+        if ($state['total'] >= 30 || ($state['addresses'][$key] ?? 0) >= 8) return false;
+        $state['total']++;
+        $state['addresses'][$key] = ($state['addresses'][$key] ?? 0) + 1;
+        $json = json_encode($state, JSON_THROW_ON_ERROR);
+        if (@file_put_contents($file . '.tmp', $json) !== strlen($json) || !@rename($file . '.tmp', $file)) return null;
+        return true;
+    } catch (Throwable $e) {
+        return null;
+    } finally {
+        fclose($lock);
+    }
+}
+
 
 // Database connection
 function getPdo(array $config): PDO {
@@ -57,7 +107,8 @@ $error = '';
 $action = $_GET['action'] ?? '';
 
 // Logout
-if ($action === 'logout') {
+if (($action === 'logout' && $_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null))
+    || (!empty($_SESSION['franchise_reviewer_login']) && time() - (int) ($_SESSION['admin_login_time'] ?? 0) >= 28800)) {
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
         $params = session_get_cookie_params();
@@ -70,19 +121,24 @@ if ($action === 'logout') {
 
 // Process Login
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+    if (!verifyCsrfToken(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null)) {
         $error = 'Session expired. Please try again.';
     } else {
-        $user = trim($_POST['username'] ?? '');
-        $pass = $_POST['password'] ?? '';
+        $user = is_string($_POST['username'] ?? null) ? trim($_POST['username']) : '';
+        $pass = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
 
         $adminConfig = $config['admin'] ?? [];
         $expectedUser = $adminConfig['username'] ?? 'admin';
         $expectedHash = $adminConfig['password_hash'] ?? '';
         $plainFallback = $adminConfig['password'] ?? null;
 
+        $franchiseEligible = in_array($user, $careersReviewers, true);
+        $reviewerLimit = $careersReviewers === [] ? true : allowReviewerLogin(
+            (string) ($hubConfig['rate_limit_directory'] ?? ''),
+            $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+        );
         $valid = false;
-        if ($user === $expectedUser) {
+        if ($reviewerLimit !== false && $user === $expectedUser) {
             if (!empty($expectedHash) && password_verify($pass, $expectedHash)) {
                 $valid = true;
             } elseif (!empty($plainFallback) && hash_equals($plainFallback, $pass)) {
@@ -92,11 +148,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
 
         if ($valid) {
             session_regenerate_id(true);
+            $_SESSION = [];
+            $_SESSION['franchise_reviewer_login'] = $franchiseEligible && $reviewerLimit === true;
+            if ($franchiseEligible && $reviewerLimit === null) {
+                error_log('RedCat franchise reviewer login limiter is unavailable.');
+                $_SESSION['franchise_login_unavailable'] = true;
+            }
             $_SESSION['admin_logged_in'] = true;
             $_SESSION['admin_user'] = $user;
             $_SESSION['admin_login_time'] = time();
             header('Location: admin.php');
             exit;
+        } elseif ($reviewerLimit === false) {
+            http_response_code(429);
+            header('Retry-After: ' . (300 - time() % 300));
+            $error = 'Too many sign-in attempts. Please wait a few minutes and try again.';
         } else {
             $error = 'Invalid username or password.';
         }
@@ -104,6 +170,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
 }
 
 $isLoggedIn = !empty($_SESSION['admin_logged_in']);
+$canReviewFranchise = $isLoggedIn && ($_SESSION['franchise_reviewer_login'] ?? false) === true
+    && in_array($_SESSION['admin_user'] ?? '', $careersReviewers, true);
+
 
 // -------------------------------------------------------------
 // SECURED ACTIONS: CV DOWNLOAD / PREVIEW / CSV EXPORT
@@ -358,7 +427,7 @@ function formatPhoneWhatsApp(string $phone): string {
             RC
           </div>
           <div>
-            <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">RedCat Careers Admin <span class="text-[11px] font-mono font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200">v2.2</span></h1>
+            <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">RedCat Careers Admin <span class="text-[11px] font-mono font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200">v2.3.1</span></h1>
             <p class="text-xs text-slate-500">Applicant Tracking &amp; CV Repository</p>
           </div>
         </div>
@@ -379,10 +448,10 @@ function formatPhoneWhatsApp(string $phone): string {
 
           <div class="flex items-center gap-2">
             <span class="text-xs font-semibold text-slate-500 hidden md:inline"><?= htmlspecialchars($_SESSION['admin_user'] ?? 'Admin') ?></span>
-            <a href="admin.php?action=logout"
-               class="px-3 py-1.5 rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 transition-colors">
-              Sign out
-            </a>
+            <form method="post" action="admin.php?action=logout">
+              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+              <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 transition-colors">Sign out</button>
+            </form>
           </div>
         </div>
       </div>
@@ -390,6 +459,14 @@ function formatPhoneWhatsApp(string $phone): string {
   </header>
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+    <?php if ($canReviewFranchise): ?>
+      <nav aria-label="RedCat administration" class="flex flex-wrap items-center gap-4 mb-6 text-sm font-bold">
+        <span aria-current="page">Careers</span>
+        <a href="hub-admin.php" class="text-red-700 underline underline-offset-4">Hub Franchise</a>
+      </nav>
+    <?php elseif (!empty($_SESSION['franchise_login_unavailable']) && in_array($_SESSION['admin_user'] ?? '', $careersReviewers, true)): ?>
+      <p role="status" class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">Hub Franchise access is unavailable. Check the private rate-limit folder, then sign out and sign in again.</p>
+    <?php endif; ?>
 
     <!-- KPI Metric Cards -->
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8">

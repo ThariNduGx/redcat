@@ -26,7 +26,7 @@ const roles = [
     title: "Regional hub distributor",
     count: "57 hubs",
     body: "Run a regional hub and connect local express points to our overnight delivery network.",
-    href: "/dealers?role=hub#apply",
+    href: "/dealers/hub-franchise",
     action: "Apply for this",
   },
   {
@@ -98,17 +98,12 @@ export default function DealersPage() {
                   <h3 className="mt-5 text-3xl font-extrabold tracking-tight">{r.title}</h3>
                   <p className="mt-3 flex-1 text-lg text-ink/70">{r.body}</p>
                   <div className="mt-8 flex flex-wrap items-center gap-3">
-                    <ArrowLink href={r.href} className="self-start">{r.action}</ArrowLink>
-                    {r.key === "hub" && (
-                      <ArrowLink href="/dealers/hub-franchise" variant="outline" className="self-start text-ink">
-                        Full Hub Application
-                      </ArrowLink>
-                    )}
-                    {r.key === "point" && (
-                      <ArrowLink href="/dealers?role=point#apply" variant="outline" className="self-start text-ink">
-                        Apply now
-                      </ArrowLink>
-                    )}
+                    {r.key === "hub" ? (
+                      // Open intake in a fresh document so site-wide analytics cannot carry across.
+                      <a href={r.href} className="inline-flex min-h-12 items-center rounded-full bg-ink px-5 py-3 text-sm font-bold text-white hover:bg-brand-deep">
+                        Apply for a regional hub
+                      </a>
+                    ) : <ArrowLink href={r.href} className="self-start">{r.action}</ArrowLink>}
                   </div>
                 </Reveal>
               </li>
