@@ -18,12 +18,7 @@ const field =
 const lbl = "mb-1.5 block text-[13px] font-semibold text-ink/70";
 
 const TOPICS = ["Pickup request", "A parcel I sent or am expecting", "Business account", "Careers", "Something else"] as const;
-const ROLES = [
-  { value: "Regional hub distributor", hint: "Run a hub for your district" },
-  { value: "Express point", hint: "Drop-off and collection in your shop" },
-  { value: "Not sure yet", hint: "Help me choose" },
-] as const;
-const ROLE_PARAM: Record<string, (typeof ROLES)[number]["value"]> = { hub: "Regional hub distributor", point: "Express point" };
+const POINT_ROLE = "Express point";
 
 const PHONE = /^[+\d][\d\s\-()]{6,}$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -52,15 +47,6 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
     setTopic(initialTopic);
   }
   const careerRole = Object.entries(CAREER_ROLES).find(([, label]) => label === params.get("role"))?.[0];
-  const roleParam = ROLE_PARAM[params.get("role") ?? ""];
-  const [role, setRole] = useState<string>(roleParam ?? "Regional hub distributor");
-  // "Apply for this" links change ?role= on the same page, so follow it after mount too
-  const [seenRoleParam, setSeenRoleParam] = useState(roleParam);
-  if (roleParam !== seenRoleParam) {
-    setSeenRoleParam(roleParam);
-    if (roleParam) setRole(roleParam);
-  }
-
   const check = (name: string, value: string) => setErrors((e) => ({ ...e, [name]: validate(name, value) }));
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -84,12 +70,12 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
         ...data,
         kind,
         topic: kind === "contact" ? topic : undefined,
-        role: kind === "dealer" ? role : undefined,
+        role: kind === "dealer" ? POINT_ROLE : undefined,
       };
 
-      const selectedOption = kind === "dealer" ? role : topic;
+      const selectedOption = kind === "dealer" ? POINT_ROLE : topic;
       const subject = kind === "dealer"
-        ? `[RedCat Dealer Application] ${role} - ${data.name}${data.district ? ` (${data.district})` : ""}`
+        ? `[RedCat Dealer Application] ${POINT_ROLE} - ${data.name}${data.district ? ` (${data.district})` : ""}`
         : `[RedCat Website Enquiry] ${topic} - ${data.name}`;
 
       // 1. Direct gateway submission delivering to info@redcat.lk
@@ -167,7 +153,7 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
       if (fsRes !== null || netlifyOk || lambdaOk) {
         if (kind === "dealer") {
           trackDealerEnquiry({
-            role,
+            role: POINT_ROLE,
             district: data.district,
             name: data.name,
           });
@@ -228,9 +214,7 @@ export default function EnquiryForm({ kind }: { kind: Kind }) {
             </label>
           </div>
 
-          {kind === "dealer" ? (
-            <Choice legend="I'm interested in" options={ROLES.map((r) => ({ value: r.value, hint: r.hint }))} value={role} onChange={setRole} cols="sm:grid-cols-3" />
-          ) : (
+          {kind === "contact" && (
             <Choice legend="What can we help with?" options={TOPICS.map((t) => ({ value: t }))} value={topic} onChange={setTopic} cols="grid-cols-2" />
           )}
 

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Suspense } from "react";
 import {
   ArrowRight,
   Banknote,
@@ -22,11 +21,8 @@ import {
   Truck,
   Wallet,
 } from "lucide-react";
-import EnquiryForm from "@/components/EnquiryForm";
 import Reveal from "@/components/Reveal";
 import ArrowLink from "@/components/ui/ArrowLink";
-import CatLoader from "@/components/ui/CatLoader";
-import Mascot from "@/components/ui/Mascot";
 
 export const metadata: Metadata = {
   title: "REDCAT Point Franchise Opportunity",
@@ -648,21 +644,14 @@ export default function PointFranchisePage() {
               Apply for a REDCAT Point Franchise Today
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-lg font-medium text-white/90">
-              Submit your preferred location and business details. Our franchise recruitment team will review your area and get in touch within 24 hours.
+              Share your preferred location and business details in the initial application.
             </p>
           </div>
 
-          <div className="relative mt-16 rounded-[2.5rem] border-[3px] border-ink bg-white p-6 text-ink shadow-2xl sm:p-12">
-            <Mascot className="absolute -top-14 sm:-top-16 left-1/2 w-28 -translate-x-1/2 sm:w-36 [&_svg]:h-auto [&_svg]:w-full drop-shadow-lg z-10" />
-            <Suspense
-              fallback={
-                <div className="grid min-h-[300px] place-items-center">
-                  <CatLoader label="Loading application form…" />
-                </div>
-              }
-            >
-              <EnquiryForm kind="dealer" />
-            </Suspense>
+          <div className="mt-8 text-center">
+            <a href="/dealers/point/application" className="press inline-flex min-h-12 items-center rounded-full bg-white px-6 py-3 font-bold text-ink">
+              Open the RedCat Point application
+            </a>
           </div>
 
           {/* Trust Guarantees */}

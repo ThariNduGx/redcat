@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Suspense } from "react";
-import { Footprints, Repeat2, Rocket, Sparkles } from "lucide-react";
-import EnquiryForm from "@/components/EnquiryForm";
+import { ArrowRight, Footprints, Repeat2, Rocket, Sparkles } from "lucide-react";
 import Reveal from "@/components/Reveal";
 import ArrowLink from "@/components/ui/ArrowLink";
-import CatLoader from "@/components/ui/CatLoader";
-import Mascot from "@/components/ui/Mascot";
 
 export const metadata: Metadata = {
-  title: "Become a Dealer",
+  title: "RedCat Franchise Opportunities",
   description: "Join RedCat as a regional distributor or express point and bring next day delivery to your town.",
 };
 
@@ -23,19 +19,21 @@ const benefits = [
 const roles = [
   {
     key: "hub",
-    title: "Regional hub distributor",
+    title: "Regional Hub Franchise",
     count: "57 hubs",
-    body: "Run a regional hub and connect local express points to our overnight delivery network.",
+    body: "Operate a regional hub that connects express points to RedCat’s overnight delivery network.",
+    application: "Full application · English or Sinhala",
     href: "/dealers/hub-franchise",
-    action: "Apply for this",
+    action: "Apply for a regional hub",
   },
   {
     key: "point",
-    title: "REDCAT Point Franchise",
+    title: "RedCat Point Franchise",
     count: "930+ points",
-    body: "Run a local RedCat parcel drop-off and collection point.",
-    href: "/dealers?role=point#apply",
-    action: "Apply for this",
+    body: "Run a local RedCat parcel drop-off and collection point from your shop.",
+    application: "Initial application · English or Sinhala",
+    href: "/dealers/point/application",
+    action: "Apply for a RedCat Point",
   },
 ];
 
@@ -45,16 +43,14 @@ export default function DealersPage() {
       <section className="rc-grain relative isolate overflow-clip bg-brand pb-24 pt-12 text-white sm:pb-32 sm:pt-16">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 lg:grid-cols-[1.1fr_1fr]">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-ink">For business owners</p>
             <h1 className="mt-4 text-[clamp(2.75rem,7vw,6rem)] font-extrabold leading-[0.92] tracking-[-0.045em]">
-              Join us as a regional distributor.
+              Become a RedCat franchise partner.
             </h1>
             <p className="mt-6 max-w-lg text-xl font-bold leading-snug">
-              Bring RedCat&rsquo;s next day delivery to your town, and grow your own business with it.
+              Operate a regional hub or bring parcel drop-off and collection to your shop.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <ArrowLink href="#apply" variant="outline" className="text-white hover:bg-white hover:text-ink">Apply now</ArrowLink>
-              <ArrowLink href="#roles" variant="outline" className="text-white hover:bg-white hover:text-ink">Ways to join</ArrowLink>
+              <ArrowLink href="#roles" variant="light">Choose a franchise</ArrowLink>
             </div>
           </div>
           <div className="overflow-hidden rounded-3xl">
@@ -62,6 +58,32 @@ export default function DealersPage() {
           </div>
         </div>
         <div aria-hidden className="absolute inset-x-0 -bottom-px h-14 bg-white sm:h-20" style={{ borderRadius: "50% 50% 0 0 / 100% 100% 0 0" }} />
+      </section>
+
+      <section id="roles" className="scroll-mt-24 bg-paper py-20 sm:py-24">
+        <div className="mx-auto max-w-7xl px-5">
+          <Reveal>
+            <h2 className="text-4xl font-extrabold leading-tight tracking-[-0.035em] sm:text-5xl">Choose your franchise</h2>
+          </Reveal>
+          <ul className="mt-8 grid gap-5 md:grid-cols-2">
+            {roles.map((r, i) => (
+              <li key={r.key}>
+                <Reveal delay={i * 100} className="flex h-full flex-col rounded-[2rem] bg-white p-7 shadow-[0_1px_0_rgba(0,0,0,0.04)] sm:p-9">
+                  <p className="text-sm font-semibold text-brand-deep">{r.count} in the network</p>
+                  <h3 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">{r.title}</h3>
+                  <p className="mt-3 flex-1 text-base leading-relaxed text-ink/75 sm:text-lg">{r.body}</p>
+                  <p className="mt-4 border-t border-ink/10 pt-4 text-sm font-semibold text-ink/75">{r.application}</p>
+                  <div className="mt-8 flex flex-wrap items-center gap-3">
+                    {/* Open intake in a fresh document so site-wide analytics cannot carry across. */}
+                    <a href={r.href} className="press inline-flex min-h-12 items-center gap-2.5 rounded-full bg-ink px-6 py-3.5 text-base font-bold text-white hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-deep">
+                      {r.action}<ArrowRight aria-hidden size={18} className="shrink-0" />
+                    </a>
+                  </div>
+                </Reveal>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-20 sm:py-24">
@@ -84,49 +106,9 @@ export default function DealersPage() {
         </ul>
       </section>
 
-      <section id="roles" className="scroll-mt-24 bg-paper py-20 sm:py-24">
+      <section id="apply" className="scroll-mt-24 border-t border-ink/10 bg-paper py-10">
         <div className="mx-auto max-w-7xl px-5">
-          <Reveal>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-deep">Ways to join</p>
-            <h2 className="mt-3 text-5xl font-extrabold leading-[0.95] tracking-[-0.035em]">Pick your part of the network.</h2>
-          </Reveal>
-          <ul className="mt-12 grid gap-5 md:grid-cols-2">
-            {roles.map((r, i) => (
-              <li key={r.key}>
-                <Reveal delay={i * 100} className="flex h-full flex-col rounded-[2rem] bg-white p-7 shadow-[0_1px_0_rgba(0,0,0,0.04)] sm:p-9">
-                  <span className="self-start rounded-full bg-ink px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-white">{r.count}</span>
-                  <h3 className="mt-5 text-3xl font-extrabold tracking-tight">{r.title}</h3>
-                  <p className="mt-3 flex-1 text-lg text-ink/70">{r.body}</p>
-                  <div className="mt-8 flex flex-wrap items-center gap-3">
-                    {r.key === "hub" ? (
-                      // Open intake in a fresh document so site-wide analytics cannot carry across.
-                      <a href={r.href} className="inline-flex min-h-12 items-center rounded-full bg-ink px-5 py-3 text-sm font-bold text-white hover:bg-brand-deep">
-                        Apply for a regional hub
-                      </a>
-                    ) : <ArrowLink href={r.href} className="self-start">{r.action}</ArrowLink>}
-                  </div>
-                </Reveal>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section id="apply" className="rc-grain relative scroll-mt-16 overflow-clip bg-brand pb-20 pt-16 text-white sm:pb-28">
-        <div className="mx-auto max-w-3xl px-5">
-          <div className="text-center">
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-ink">Apply</p>
-            <h2 className="mt-3 text-5xl font-extrabold leading-[0.95] tracking-[-0.035em]">Tell us about you.</h2>
-            <p className="mx-auto mt-4 max-w-md text-xl font-bold">Two minutes, no commitment. We&rsquo;ll call you back.</p>
-          </div>
-          <div className="relative z-10 mt-24">
-            <Mascot className="absolute bottom-[calc(100%-4px)] left-1/2 w-44 -translate-x-1/2 [&_svg]:h-auto [&_svg]:w-full" />
-            <div className="relative z-10">
-              <Suspense fallback={<div className="grid h-96 place-items-center rounded-[2rem] bg-white"><CatLoader /></div>}>
-                <EnquiryForm kind="dealer" />
-              </Suspense>
-            </div>
-          </div>
+          <ArrowLink href="#roles" variant="outline">Choose your application</ArrowLink>
         </div>
       </section>
     </>

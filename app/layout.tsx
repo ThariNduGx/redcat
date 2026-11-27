@@ -57,7 +57,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Google Tag Manager */}
         <Script id="gtm-init" strategy="afterInteractive">
           {`
-            if (!/^\\/dealers\\/hub-franchise(?:\\/|$)/.test(location.pathname)) {
+            if (!/^\\/dealers\\/(?:hub-franchise|point\\/application(?:-notice)?)(?:\\/|$)/.test(location.pathname)) {
               window.dataLayer = window.dataLayer || [];
               window.dataLayer.push({'gtm.start': Date.now(), event: 'gtm.js'});
               var script = document.createElement('script');
@@ -71,7 +71,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Meta Pixel Code */}
         <Script id="meta-pixel-init" strategy="afterInteractive">
           {`
-            if (!/^\\/dealers\\/hub-franchise(?:\\/|$)/.test(location.pathname)) {
+            if (!/^\\/dealers\\/(?:hub-franchise|point\\/application(?:-notice)?)(?:\\/|$)/.test(location.pathname)) {
               !function(f,b,e,v,n,t,s)
               {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
               n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -89,7 +89,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Microsoft Clarity */}
         <Script id="clarity-init" strategy="afterInteractive">
           {`
-            if (!/^\\/dealers\\/hub-franchise(?:\\/|$)/.test(location.pathname)) {
+            if (!/^\\/dealers\\/(?:hub-franchise|point\\/application(?:-notice)?)(?:\\/|$)/.test(location.pathname)) {
               (function(c,l,a,r,i,t,y){
                   c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
                   t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;

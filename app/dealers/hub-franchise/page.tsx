@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ArrowRight, Building2, CheckCircle2, Clock, GraduationCap, Wallet } from "lucide-react";
-import HubFranchiseApplication from "@/components/HubFranchiseApplication";
+import FranchiseApplication from "@/components/FranchiseApplication";
 import { SELECTION_PROCESS } from "@/lib/hubFranchise";
 
 export const metadata: Metadata = {
@@ -101,7 +101,7 @@ export default function HubFranchisePage() {
       {/* Interactive 10-Section Application Form */}
       <section id="apply" className="scroll-mt-24 bg-paper pb-20 pt-6 sm:pb-28">
         <div className="mx-auto max-w-4xl px-5">
-          <HubFranchiseApplication />
+          <FranchiseApplication />
         </div>
       </section>
 

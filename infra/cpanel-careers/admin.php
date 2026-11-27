@@ -421,7 +421,7 @@ function formatPhoneWhatsApp(string $phone): string {
   <!-- ==================== DASHBOARD VIEW ==================== -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16 items-center">
+      <div class="flex min-h-16 flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2">
         <div class="flex items-center gap-3">
           <div class="h-10 w-10 rounded-xl brand-red text-white flex items-center justify-center font-black tracking-wider text-lg shadow-md shadow-red-500/20">
             RC
@@ -432,16 +432,16 @@ function formatPhoneWhatsApp(string $phone): string {
           </div>
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center gap-3 sm:gap-4">
           <a href="admin.php?action=export_csv"
              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors border border-slate-200">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             Export CSV
           </a>
 
-          <a href="https://redcat.lk/hr" target="_blank"
+          <a href="https://redcat.lk/hr#apply" target="_blank" rel="noopener noreferrer"
              class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors">
-            View Live Form &rarr;
+            View careers form &rarr;
           </a>
 
           <div class="h-6 w-px bg-slate-200"></div>
@@ -460,9 +460,10 @@ function formatPhoneWhatsApp(string $phone): string {
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
     <?php if ($canReviewFranchise): ?>
-      <nav aria-label="RedCat administration" class="flex flex-wrap items-center gap-4 mb-6 text-sm font-bold">
-        <span aria-current="page">Careers</span>
-        <a href="hub-admin.php" class="text-red-700 underline underline-offset-4">Hub Franchise</a>
+      <nav aria-label="RedCat administration" class="mb-6 flex flex-wrap items-center gap-5 border-b border-slate-200 text-sm font-semibold">
+        <a href="admin.php" aria-current="page" class="inline-flex min-h-11 items-center border-b-2 border-red-700 px-1 text-red-700">Careers</a>
+        <a href="hub-admin.php" class="inline-flex min-h-11 items-center border-b-2 border-transparent px-1 text-slate-600 hover:text-slate-900">Hub Franchise</a>
+        <a href="hub-admin.php?type=point" class="inline-flex min-h-11 items-center border-b-2 border-transparent px-1 text-slate-600 hover:text-slate-900">Point Franchise</a>
       </nav>
     <?php elseif (!empty($_SESSION['franchise_login_unavailable']) && in_array($_SESSION['admin_user'] ?? '', $careersReviewers, true)): ?>
       <p role="status" class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">Hub Franchise access is unavailable. Check the private rate-limit folder, then sign out and sign in again.</p>
@@ -551,7 +552,7 @@ function formatPhoneWhatsApp(string $phone): string {
                 $waPhone = formatPhoneWhatsApp($app['phone']);
                 $cvKb = round(($app['cv_size'] ?? 0) / 1024, 1);
                 $docKb = !empty($app['doc_size']) ? round($app['doc_size'] / 1024, 1) : 0;
-                $receivedTime = date('M j, Y &bull; g:i A', strtotime($app['received_at']));
+                $receivedTime = date('M j, Y · g:i A', strtotime($app['received_at']));
               ?>
                 <tr class="applicant-row hover:bg-slate-50/70 transition-colors"
                     data-role="<?= htmlspecialchars($app['role']) ?>"
@@ -604,7 +605,7 @@ function formatPhoneWhatsApp(string $phone): string {
 
                   <!-- Received Time -->
                   <td class="py-4 px-4 text-slate-500 whitespace-nowrap">
-                    <?= $receivedTime ?>
+                    <?= htmlspecialchars($receivedTime) ?>
                   </td>
 
                   <!-- Actions: View Details & PDF Download -->

@@ -1,0 +1,223 @@
+{
+  "termsVersion": "point-2026-11-27",
+  "sections": [
+    {
+      "id": 1,
+      "en": "Contact details",
+      "si": "සම්බන්ධතා තොරතුරු",
+      "fields": [
+        {
+          "key": "fullName",
+          "en": "Full name",
+          "si": "සම්පූර්ණ නම",
+          "type": "text",
+          "max": 120
+        },
+        {
+          "key": "mobileNumber",
+          "en": "Mobile number",
+          "si": "ජංගම දුරකථන අංකය",
+          "type": "tel",
+          "max": 32
+        },
+        {
+          "key": "email",
+          "en": "Email address",
+          "si": "විද්‍යුත් තැපැල් ලිපිනය",
+          "type": "email",
+          "max": 254
+        },
+        {
+          "key": "residentialDistrict",
+          "en": "Residential district",
+          "si": "පදිංචි දිස්ත්‍රික්කය",
+          "type": "location"
+        },
+        {
+          "key": "currentOccupation",
+          "en": "Current occupation",
+          "si": "වර්තමාන රැකියාව",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Business owner",
+              "en": "Business owner",
+              "si": "ව්‍යාපාරික"
+            },
+            {
+              "value": "Employed",
+              "en": "Employed",
+              "si": "රැකියාවක නියුතු"
+            },
+            {
+              "value": "Self-employed",
+              "en": "Self-employed",
+              "si": "ස්වයං රැකියා"
+            },
+            {
+              "value": "Other",
+              "en": "Other",
+              "si": "වෙනත්"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "en": "Preferred Point location",
+      "si": "කැමති Point ස්ථානය",
+      "fields": [
+        {
+          "key": "preferredDistrict",
+          "en": "Preferred franchise district",
+          "si": "කැමති ව්‍යාපාරික දිස්ත්‍රික්කය",
+          "type": "location"
+        },
+        {
+          "key": "firstPreferredPoint",
+          "en": "Preferred Point town or area",
+          "si": "පළමු කැමැත්ත වන Point නගරය හෝ ප්‍රදේශය",
+          "type": "text",
+          "max": 120
+        },
+        {
+          "key": "secondPreferredPoint",
+          "en": "Alternative Point town or area",
+          "si": "දෙවැනි කැමැත්ත වන Point නගරය හෝ ප්‍රදේශය",
+          "type": "text",
+          "max": 120,
+          "optional": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "en": "Investment and readiness",
+      "si": "ආයෝජනය හා සූදානම",
+      "fields": [
+        {
+          "key": "investment",
+          "en": "Available investment (LKR)",
+          "si": "ආයෝජනය කළ හැකි මුදල (රුපියල්)",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Below LKR 1 million",
+              "en": "Below LKR 1 million",
+              "si": "රු. මිලියන 1 ට අඩු"
+            },
+            {
+              "value": "LKR 1–1.5 million",
+              "en": "LKR 1–1.5 million",
+              "si": "රු. මිලියන 1–1.5"
+            },
+            {
+              "value": "LKR 1.5–2 million",
+              "en": "LKR 1.5–2 million",
+              "si": "රු. මිලියන 1.5–2"
+            },
+            {
+              "value": "LKR 2–3 million",
+              "en": "LKR 2–3 million",
+              "si": "රු. මිලියන 2–3"
+            },
+            {
+              "value": "Above LKR 3 million",
+              "en": "Above LKR 3 million",
+              "si": "රු. මිලියන 3 ට වැඩි"
+            }
+          ]
+        },
+        {
+          "key": "premises",
+          "en": "Business premises",
+          "si": "ව්‍යාපාරික ගොඩනැගිල්ල",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Own",
+              "en": "Own",
+              "si": "තමන්ගේ"
+            },
+            {
+              "value": "Rented",
+              "en": "Rented",
+              "si": "කුලියට ගත්"
+            },
+            {
+              "value": "Planning to rent",
+              "en": "Planning to rent",
+              "si": "කුලියට ගැනීමට සැලසුම් කර ඇත"
+            }
+          ]
+        },
+        {
+          "key": "businessExperience",
+          "en": "Previous business experience",
+          "si": "පෙර ව්‍යාපාරික පළපුරුද්ද",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Yes",
+              "en": "Yes",
+              "si": "ඔව්"
+            },
+            {
+              "value": "No",
+              "en": "No",
+              "si": "නැත"
+            }
+          ]
+        },
+        {
+          "key": "startWhen",
+          "en": "When can you start?",
+          "si": "ආරම්භ කළ හැක්කේ කවදාද?",
+          "type": "choice",
+          "options": [
+            {
+              "value": "Immediately",
+              "en": "Immediately",
+              "si": "වහාම"
+            },
+            {
+              "value": "Within 30 days",
+              "en": "Within 30 days",
+              "si": "දින 30 තුළ"
+            },
+            {
+              "value": "Within 60 days",
+              "en": "Within 60 days",
+              "si": "දින 60 තුළ"
+            },
+            {
+              "value": "Within 90 days",
+              "en": "Within 90 days",
+              "si": "දින 90 තුළ"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "en": "Application consent",
+      "si": "අයදුම්පත සඳහා එකඟතාව",
+      "fields": [
+        {
+          "key": "agreePrivacyTerms",
+          "en": "I agree to the Privacy Notice and Franchise Application Terms",
+          "si": "පෞද්ගලිකත්ව නිවේදනයට සහ අයදුම්පත් කොන්දේසිවලට එකඟ වෙමි",
+          "type": "consent"
+        },
+        {
+          "key": "agreeContact",
+          "en": "I agree to be contacted about this application",
+          "si": "මෙම අයදුම්පත සම්බන්ධයෙන් මා අමතන්නට එකඟ වෙමි",
+          "type": "consent"
+        }
+      ]
+    }
+  ]
+}

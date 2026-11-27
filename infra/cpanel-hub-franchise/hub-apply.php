@@ -188,13 +188,20 @@ function validateApplication(array $payload, array $schema, array $catalog): arr
     foreach (['preferredDistrict', 'residentialDistrict'] as $key) {
         if (!in_array($answers[$key], $catalog['districts'], true)) respond(422, ['field' => $key]);
     }
-    $hubDistricts = array_column($catalog['hubs'], 'district', 'name');
-    if (($hubDistricts[$answers['firstPreferredHub']] ?? null) !== $answers['preferredDistrict']) {
-        respond(422, ['field' => 'firstPreferredHub']);
-    }
-    $second = $answers['secondPreferredHub'];
-    if ($second !== '' && (!isset($hubDistricts[$second]) || $second === $answers['firstPreferredHub'])) {
-        respond(422, ['field' => 'secondPreferredHub']);
+    if (defined('POINT_FRANCHISE_INTAKE')) {
+        $second = $answers['secondPreferredPoint'];
+        if ($second !== '' && mb_strtolower($second) === mb_strtolower($answers['firstPreferredPoint'])) {
+            respond(422, ['field' => 'secondPreferredPoint']);
+        }
+    } else {
+        $hubDistricts = array_column($catalog['hubs'], 'district', 'name');
+        if (($hubDistricts[$answers['firstPreferredHub']] ?? null) !== $answers['preferredDistrict']) {
+            respond(422, ['field' => 'firstPreferredHub']);
+        }
+        $second = $answers['secondPreferredHub'];
+        if ($second !== '' && (!isset($hubDistricts[$second]) || $second === $answers['firstPreferredHub'])) {
+            respond(422, ['field' => 'secondPreferredHub']);
+        }
     }
     return ['id' => $payload['id'], 'termsVersion' => $payload['termsVersion'], ...$answers];
 }
@@ -232,7 +239,7 @@ function allowRequest(string $directory, string $address): bool
 $method = $_SERVER['REQUEST_METHOD'] ?? '';
 if ($method !== 'OPTIONS' && $method !== 'POST') {
     header('Allow: POST, OPTIONS');
-    respond(405, ['error' => 'Use the RedCat Hub Franchise form.']);
+    respond(405, ['error' => 'Use the RedCat franchise application form.']);
 }
 
 $configPath = dirname(__DIR__) . '/redcat-hub-franchise-config.php';
@@ -245,7 +252,7 @@ try {
     $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
     header('Vary: Origin');
     if ($origin === '' || !in_array($origin, $config['allowed_origins'], true)) {
-        respond(403, ['error' => 'Use the RedCat Hub Franchise form.']);
+        respond(403, ['error' => 'Use the RedCat franchise application form.']);
     }
     header('Access-Control-Allow-Origin: ' . $origin);
     if ($method === 'OPTIONS') {
@@ -280,15 +287,15 @@ try {
         respond(400, ['error' => 'Reload the form and try again.']);
     }
 
-    $schema = json_decode(file_get_contents(__DIR__ . '/application-schema.json'), true, 16, JSON_THROW_ON_ERROR);
+    $pointIntake = defined('POINT_FRANCHISE_INTAKE');
+    $schemaFile = $pointIntake ? '/point-application-schema.json' : '/application-schema.json';
+    $schema = json_decode(file_get_contents(__DIR__ . $schemaFile), true, 16, JSON_THROW_ON_ERROR);
     if (($input['termsVersion'] ?? null) !== $schema['termsVersion']) {
         respond(409, ['code' => 'terms_changed']);
     }
     $catalog = json_decode(file_get_contents(__DIR__ . '/hub-catalog.json'), true, 16, JSON_THROW_ON_ERROR);
     $payload = validateApplication($input, $schema, $catalog);
-    $score = scoreHubApplication($payload);
     $encodedPayload = json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-    $encodedScore = json_encode($score, JSON_THROW_ON_ERROR);
     $fingerprint = hash('sha256', $encodedPayload);
 
     $pdo = new PDO($config['dsn'], $config['username'], $config['password'], [
@@ -296,6 +303,12 @@ try {
         PDO::ATTR_EMULATE_PREPARES => false,
     ]);
 
+    if ($pointIntake) {
+        savePointApplication($pdo, $payload, $encodedPayload, $fingerprint);
+    }
+
+    $score = scoreHubApplication($payload);
+    $encodedScore = json_encode($score, JSON_THROW_ON_ERROR);
     $insert = $pdo->prepare(
         'INSERT INTO hub_franchise_applications (
             id, full_name, mobile_number, whatsapp_number, email,
