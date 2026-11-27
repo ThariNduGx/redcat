@@ -1,15 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
   AlertCircle,
   ArrowLeft,
   ArrowRight,
+  Banknote,
   Check,
   CheckCircle2,
+  Clock,
   Languages,
   LoaderCircle,
   MapPin,
+  ShieldCheck,
 } from "lucide-react";
 import { DISTRICTS, HUBS } from "@/data/hubs";
 import {
@@ -47,6 +51,33 @@ const SHORT_LABELS: Record<number, { en: string; si: string }> = {
   5: { en: "Premises", si: "ගොඩනැගිල්ල" },
   6: { en: "Commitment", si: "කැපවීම" },
 };
+
+const HIGHLIGHTS = [
+  {
+    icon: Banknote,
+    title: "LKR 1.5–2.0M",
+    en: "Proposed turnkey investment",
+    si: "යෝජිත ආයෝජනය (රු. මිලියන)",
+  },
+  {
+    icon: Clock,
+    title: "9 AM – 5 PM",
+    en: "Daytime retail hours",
+    si: "දෛනික වෙළඳ සේවා වේලාවන්",
+  },
+  {
+    icon: ShieldCheck,
+    title: "100% Cash Flow",
+    en: "Zero debtor risk",
+    si: "ණය අවදානමකින් තොරයි",
+  },
+  {
+    icon: MapPin,
+    title: "930+ Points",
+    en: "Exclusive territory",
+    si: "අනන්‍ය ව්‍යාපාරික කලාපය",
+  },
+];
 
 const inputCls =
   "mt-2 block w-full rounded-xl border-2 border-black/10 bg-white px-4 py-3 text-base font-medium text-ink outline-none transition placeholder:text-ink/35 hover:border-black/25 focus:border-brand";
@@ -98,9 +129,7 @@ function initialData(): PointFranchiseFormData {
 }
 
 function t(lang: LangMode, en: string, si: string) {
-  if (lang === "en") return en;
-  if (lang === "si") return si;
-  return `${en} / ${si}`;
+  return lang === "si" ? si : en;
 }
 
 function Label({
@@ -143,14 +172,7 @@ function OptionGroup({
     <div className={`mt-2.5 grid gap-2.5 ${columns}`}>
       {options.map((opt) => {
         const selected = value === opt.value;
-        const label =
-          lang === "en"
-            ? opt.en
-            : lang === "si"
-            ? opt.si
-            : opt.en === opt.si
-            ? opt.en
-            : `${opt.en} / ${opt.si}`;
+        const label = lang === "si" ? opt.si : opt.en;
         return (
           <label
             key={opt.value}
@@ -238,9 +260,9 @@ export default function PointFranchiseApplication() {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
         return t(lang, "Please enter a valid email address.", "කරුණාකර වලංගු විද්‍යුත් තැපැල් ලිපිනයක් ඇතුළත් කරන්න.");
       if (!form.residentialDistrict) return t(lang, "Please select your residential district.", "කරුණාකර පදිංචි දිස්ත්‍රික්කය තෝරන්න.");
-      if (!form.currentOccupation) return t(lang, "Please select your current occupation.", "කරුණාකර වර්තමාන රැකියාව තෝරන්න.");
       if (!form.preferredDistrict) return t(lang, "Please select your preferred franchise district.", "කරුණාකර කැමති ව්‍යාපාරික දිස්ත්‍රික්කය තෝරන්න.");
       if (!form.preferredPoint.trim()) return t(lang, "Please enter or select your preferred REDCAT Point.", "කරුණාකර කැමති REDCAT Point ස්ථානය තෝරන්න.");
+      if (!form.currentOccupation) return t(lang, "Please select your current occupation.", "කරුණාකර වර්තමාන රැකියාව තෝරන්න.");
       if (!form.availableInvestment) return t(lang, "Please select your available investment.", "කරුණාකර ආයෝජනය කළ හැකි මුදල තෝරන්න.");
       if (!form.businessPremises) return t(lang, "Please select your business premises status.", "කරුණාකර ව්‍යාපාරික ගොඩනැගිල්ල තෝරන්න.");
       if (!form.previousBusinessExperience) return t(lang, "Please indicate your previous business experience.", "කරුණාකර පෙර ව්‍යාපාරික පළපුරුද්ද තෝරන්න.");
@@ -422,10 +444,22 @@ export default function PointFranchiseApplication() {
         });
         scrollToCard();
       } else {
-        setError(t(lang, "We couldn't confirm your submission right now. Please try again.", "මේ මොහොතේ අයදුම්පත තහවුරු කිරීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."));
+        setError(
+          t(
+            lang,
+            "We couldn't confirm your submission right now. Please try again.",
+            "මේ මොහොතේ අයදුම්පත තහවුරු කිරීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."
+          )
+        );
       }
     } catch {
-      setError(t(lang, "We couldn't confirm your submission right now. Please try again.", "මේ මොහොතේ අයදුම්පත තහවුරු කිරීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."));
+      setError(
+        t(
+          lang,
+          "We couldn't confirm your submission right now. Please try again.",
+          "මේ මොහොතේ අයදුම්පත තහවුරු කිරීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."
+        )
+      );
     } finally {
       setBusy(false);
     }
@@ -435,103 +469,20 @@ export default function PointFranchiseApplication() {
   const currentSection = POINT_SECTIONS[step - 1];
   const progressPct = Math.round((step / 6) * 100);
 
-  if (receipt) {
-    return (
-      <div
-        ref={cardTopRef}
-        className="scroll-mt-24 rounded-[2rem] bg-white p-8 shadow-2xl shadow-black/10 ring-1 ring-black/5 sm:p-12"
-      >
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-700">
-            <CheckCircle2 size={34} />
-          </span>
-          <h3 className="mt-5 text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
-            {lang === "si" ? "අයදුම්පත ලැබීම තහවුරු කිරීම" : "Application Confirmation"}
-          </h3>
-          <div className="mt-6 rounded-2xl border border-black/10 bg-mist p-5 text-left text-sm leading-relaxed text-ink">
-            {lang === "en" ? (
-              <p className="font-semibold">
-                Thank you for applying for a REDCAT Point Franchise. Your application{" "}
-                <strong className="text-brand">{receipt.rcRef}</strong> for{" "}
-                <strong>{receipt.point}</strong> has been received and is under review. Our
-                Franchise Development Team will contact you after reviewing your application.
-              </p>
-            ) : (
-              <p className="font-semibold">
-                REDCAT Point Franchise සඳහා අයදුම් කිරීම පිළිබඳව ස්තූතියි.{" "}
-                <strong>{receipt.point}</strong> සඳහා ඔබගේ{" "}
-                <strong className="text-brand">{receipt.rcRef}</strong> අයදුම්පත ලැබී ඇති අතර එය
-                සමාලෝචනය වෙමින් පවතී. සමාලෝචනයෙන් පසු අපගේ Franchise Development කණ්ඩායම ඔබව සම්බන්ධ
-                කරගනු ඇත.
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* 8-Step Selection Workflow */}
-        <div className="mt-10 border-t border-black/10 pt-8">
-          <h4 className="text-center text-sm font-extrabold uppercase tracking-[0.16em] text-brand-deep">
-            {t(lang, "Selection workflow", "තෝරාගැනීමේ ක්‍රියාවලිය")}
-          </h4>
-          <ol className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {POINT_SELECTION_WORKFLOW.map((item, idx) => (
-              <li
-                key={item.step}
-                className={`flex items-start gap-3 rounded-xl border p-3.5 text-sm ${
-                  idx === 0
-                    ? "border-emerald-300 bg-emerald-50/70"
-                    : "border-black/10 bg-mist/40"
-                }`}
-              >
-                <span
-                  className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-extrabold ${
-                    idx === 0 ? "bg-emerald-600 text-white" : "bg-ink text-white"
-                  }`}
-                >
-                  {item.step}
-                </span>
-                <div>
-                  {lang !== "si" && <span className="block font-bold text-ink">{item.en}</span>}
-                  {lang !== "en" && <span className="block text-xs text-ink/65">{item.si}</span>}
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div
-      ref={cardTopRef}
-      className="scroll-mt-24 overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-black/10 ring-1 ring-black/8"
-    >
-      {/* Header & Language Switcher */}
-      <div className="border-b border-black/10 bg-mist/60 px-5 py-5 sm:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-brand">
-              {step === 1
-                ? t(lang, "Stage 1: Initial Application (2–3 min)", "පළමු අදියර: මූලික අයදුම්පත")
-                : t(
-                    lang,
-                    `Stage 2: Detailed Qualification · Section ${currentSection.code} of 06`,
-                    `දෙවැනි අදියර: සවිස්තර ඇගයීම · කොටස ${currentSection.code} / 06`
-                  )}
+    <>
+      {/* Hero */}
+      <section className="rc-grain relative isolate overflow-clip bg-brand pb-16 pt-10 text-white sm:pb-24 sm:pt-14">
+        <div className="mx-auto max-w-6xl px-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-white">
+              <span className="h-2 w-2 rounded-full bg-brand" />
+              REDCAT | POINT FRANCHISE
             </p>
-            <h3 className="mt-1 text-xl font-extrabold text-ink sm:text-2xl">
-              {lang === "si" ? currentSection.si : currentSection.en}
-            </h3>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <Languages size={16} className="text-brand hidden sm:block" />
-            <div
-              role="group"
-              aria-label="Form language"
-              className="inline-flex rounded-xl border border-black/10 bg-white p-1 shadow-sm"
-            >
+            {/* Single-language switcher controlling the entire page */}
+            <div className="flex items-center gap-2 rounded-2xl bg-black/20 p-1.5 backdrop-blur-sm">
+              <Languages size={15} className="ml-1.5 text-white/80" />
               {(
                 [
                   { id: "en", label: "English" },
@@ -542,8 +493,10 @@ export default function PointFranchiseApplication() {
                   key={m.id}
                   type="button"
                   onClick={() => setLang(m.id)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                    lang === m.id ? "bg-ink text-white" : "text-ink/65 hover:text-ink"
+                  className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${
+                    lang === m.id
+                      ? "bg-white text-ink shadow-sm"
+                      : "text-white/85 hover:text-white"
                   }`}
                 >
                   {m.label}
@@ -551,732 +504,898 @@ export default function PointFranchiseApplication() {
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Progress Bar */}
-        <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
-          <div
-            className="h-full rounded-full bg-brand transition-all duration-300"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
+          <h1 className="mt-5 max-w-4xl text-[clamp(2.25rem,5vw,4.5rem)] font-extrabold leading-[0.98] tracking-[-0.04em]">
+            {t(
+              lang,
+              "Point Franchise Application",
+              "REDCAT Point ෆ්‍රැන්චයිස් අයදුම්පත"
+            )}
+          </h1>
+          <p className="mt-3 max-w-2xl text-base font-medium text-white/90 sm:text-lg">
+            {t(
+              lang,
+              "Stage 1: Initial application (2–3 minutes). Stage 2: Detailed qualification and interview.",
+              "පළමු අදියර: මූලික අයදුම්පත (මිනිත්තු 2–3). දෙවැනි අදියර: සවිස්තර ඇගයීම හා සම්මුඛ පරීක්ෂණය."
+            )}
+          </p>
 
-        {/* 6-Section Step Pills with Clear Labels */}
-        <div className="mt-3 grid grid-cols-3 gap-1.5 sm:grid-cols-6">
-          {POINT_SECTIONS.map((s) => {
-            const active = s.id === step;
-            const visited = s.id <= maxVisited;
-            const done = s.id < step;
-            const short = SHORT_LABELS[s.id];
-            return (
-              <button
-                key={s.id}
-                type="button"
-                disabled={!visited}
-                onClick={() => {
-                  if (visited) {
-                    setStep(s.id);
-                    setError("");
-                  }
-                }}
-                className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-center transition ${
-                  active
-                    ? "bg-brand text-white shadow-sm"
-                    : done
-                    ? "bg-ink text-white"
-                    : visited
-                    ? "bg-white text-ink ring-1 ring-black/10 hover:bg-brand-soft"
-                    : "cursor-not-allowed bg-black/5 text-ink/35"
-                }`}
+          <dl className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {HIGHLIGHTS.map((item) => (
+              <div
+                key={item.title}
+                className="rounded-2xl border border-white/15 bg-black/15 p-4 backdrop-blur-sm"
               >
-                <span className="text-[11px] font-extrabold leading-none">{s.code}</span>
-                <span className="mt-1 hidden text-[10px] font-semibold leading-tight opacity-90 sm:block">
-                  {lang === "si" ? short.si : short.en}
-                </span>
-              </button>
-            );
-          })}
+                <div className="flex items-center gap-2 text-brand-soft">
+                  <item.icon size={17} />
+                  <dt className="text-xs font-bold uppercase tracking-wider">
+                    {lang === "si" ? item.si : item.en}
+                  </dt>
+                </div>
+                <dd className="mt-1 text-xl font-extrabold tracking-tight text-white sm:text-2xl">
+                  {item.title}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
-      </div>
 
-      {/* Form Body */}
-      <div className="p-5 sm:p-8 lg:p-10">
-        {/* ================= 01: INITIAL ONLINE REGISTRATION ================= */}
-        {step === 1 && (
-          <div className="space-y-6">
-            <div>
-              <Label en="Full name" si="සම්පූර්ණ නම" lang={lang} />
-              <input
-                type="text"
-                value={form.fullName}
-                onChange={(e) => update("fullName", e.target.value)}
-                maxLength={120}
-                placeholder={lang === "si" ? "සම්පූර්ණ නම ඇතුළත් කරන්න" : "Enter your full name"}
-                className={inputCls}
-              />
-            </div>
+        <div
+          aria-hidden
+          className="absolute inset-x-0 -bottom-px h-12 bg-paper sm:h-16"
+          style={{ borderRadius: "50% 50% 0 0 / 100% 100% 0 0" }}
+        />
+      </section>
 
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div>
-                <Label en="Mobile number" si="ජංගම දුරකථන අංකය" lang={lang} />
-                <input
-                  type="tel"
-                  value={form.mobileNumber}
-                  onChange={(e) => update("mobileNumber", e.target.value)}
-                  maxLength={24}
-                  placeholder="07X XXX XXXX"
-                  className={inputCls}
-                />
-              </div>
-              <div>
-                <Label en="Email address" si="විද්‍යුත් තැපැල් ලිපිනය" lang={lang} />
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => update("email", e.target.value)}
-                  maxLength={200}
-                  placeholder="you@example.com"
-                  className={inputCls}
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div>
-                <Label en="Residential district" si="පදිංචි දිස්ත්‍රික්කය" lang={lang} />
-                <select
-                  value={form.residentialDistrict}
-                  onChange={(e) => update("residentialDistrict", e.target.value)}
-                  className={inputCls}
-                >
-                  <option value="">{t(lang, "Select district", "දිස්ත්‍රික්කය තෝරන්න")}</option>
-                  {DISTRICTS.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label en="Preferred franchise district" si="කැමති ව්‍යාපාරික දිස්ත්‍රික්කය" lang={lang} />
-                <select
-                  value={form.preferredDistrict}
-                  onChange={(e) => update("preferredDistrict", e.target.value)}
-                  className={inputCls}
-                >
-                  <option value="">{t(lang, "Select franchise district", "දිස්ත්‍රික්කය තෝරන්න")}</option>
-                  {DISTRICTS.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div>
-                <Label en="Preferred REDCAT Point" si="කැමති REDCAT Point ස්ථානය" lang={lang} />
-                <input
-                  type="text"
-                  list="point-locations"
-                  value={form.preferredPoint}
-                  onChange={(e) => update("preferredPoint", e.target.value)}
-                  maxLength={100}
-                  placeholder={lang === "si" ? "නගරය ඇතුළත් කරන්න (උදා: හොරණ)" : "Enter town or select (e.g. Horana)"}
-                  className={inputCls}
-                />
-                <datalist id="point-locations">
-                  {(districtHubs.length > 0 ? districtHubs : HUBS).map((h) => (
-                    <option key={h.id} value={h.name} />
-                  ))}
-                </datalist>
-              </div>
-
-              <div>
-                <Label
-                  en="Second preference (optional)"
-                  si="දෙවැනි කැමැත්ත (අනිවාර්ය නොවේ)"
-                  lang={lang}
-                  required={false}
-                />
-                <input
-                  type="text"
-                  list="point-locations"
-                  value={form.secondPreference}
-                  onChange={(e) => update("secondPreference", e.target.value)}
-                  maxLength={100}
-                  placeholder={lang === "si" ? "විකල්ප ස්ථානය" : "Alternative town / Point"}
-                  className={inputCls}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label en="Current occupation" si="වර්තමාන රැකියාව" lang={lang} />
-              <OptionGroup
-                name="currentOccupation"
-                options={POINT_OCCUPATION_INITIAL}
-                value={form.currentOccupation}
-                onChange={(v) => update("currentOccupation", v)}
-                lang={lang}
-                columns="sm:grid-cols-2"
-              />
-            </div>
-
-            <div>
-              <Label en="Available investment (LKR million)" si="ආයෝජනය කළ හැකි මුදල (රු. මිලියන)" lang={lang} />
-              <OptionGroup
-                name="availableInvestment"
-                options={POINT_INVESTMENT_OPTIONS}
-                value={form.availableInvestment}
-                onChange={(v) => update("availableInvestment", v)}
-                lang={lang}
-              />
-            </div>
-
-            <div>
-              <Label en="Business premises" si="ව්‍යාපාරික ගොඩනැගිල්ල" lang={lang} />
-              <OptionGroup
-                name="businessPremises"
-                options={POINT_PREMISES_OPTIONS}
-                value={form.businessPremises}
-                onChange={(v) => update("businessPremises", v)}
-                lang={lang}
-              />
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="flex flex-col justify-between">
-                <Label en="Previous business experience" si="පෙර ව්‍යාපාරික පළපුරුද්ද" lang={lang} />
-                <OptionGroup
-                  name="previousBusinessExperience"
-                  options={YES_NO_OPTIONS}
-                  value={form.previousBusinessExperience}
-                  onChange={(v) => update("previousBusinessExperience", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
-              <div className="flex flex-col justify-between">
-                <Label en="When can you start?" si="ආරම්භ කළ හැක්කේ කවදාද?" lang={lang} />
-                <OptionGroup
-                  name="whenCanYouStart"
-                  options={POINT_START_OPTIONS}
-                  value={form.whenCanYouStart}
-                  onChange={(v) => update("whenCanYouStart", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
-            </div>
-
-            {/* Privacy notice & consents */}
-            <div className="space-y-3 border-t border-black/10 pt-6">
-              <p className="text-xs font-semibold text-ink/65">
-                {t(lang, "Submission does not guarantee approval.", "අයදුම් කිරීම අනුමැතිය සහතික නොකරයි.")}
-              </p>
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-black/10 bg-white p-3.5 transition hover:border-black/25">
-                <input
-                  type="checkbox"
-                  checked={form.agreePrivacyTerms}
-                  onChange={(e) => update("agreePrivacyTerms", e.target.checked)}
-                  className="sr-only"
-                />
-                <span
-                  className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border-2 transition ${
-                    form.agreePrivacyTerms ? "border-brand bg-brand text-white" : "border-ink/30 bg-white"
-                  }`}
-                >
-                  {form.agreePrivacyTerms && <Check size={13} strokeWidth={3} />}
-                </span>
-                <span className="text-sm font-semibold text-ink">
-                  {t(
-                    lang,
-                    "I agree to the REDCAT Privacy Notice and Point Franchise Application Terms. *",
-                    "REDCAT පෞද්ගලිකත්ව නිවේදනය හා අයදුම්පත් කොන්දේසි සඳහා එකඟ වෙමි. *"
-                  )}
-                </span>
-              </label>
-
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-black/10 bg-white p-3.5 transition hover:border-black/25">
-                <input
-                  type="checkbox"
-                  checked={form.agreeContact}
-                  onChange={(e) => update("agreeContact", e.target.checked)}
-                  className="sr-only"
-                />
-                <span
-                  className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border-2 transition ${
-                    form.agreeContact ? "border-brand bg-brand text-white" : "border-ink/30 bg-white"
-                  }`}
-                >
-                  {form.agreeContact && <Check size={13} strokeWidth={3} />}
-                </span>
-                <span className="text-sm font-semibold text-ink">
-                  {t(
-                    lang,
-                    "I consent to be contacted by the REDCAT Franchise Development Team regarding my application. *",
-                    "මාගේ අයදුම්පත සම්බන්ධයෙන් REDCAT කණ්ඩායම මා හා සම්බන්ධ වීමට එකඟ වෙමි. *"
-                  )}
-                </span>
-              </label>
-            </div>
-          </div>
-        )}
-
-        {/* ================= 02: PERSONAL & LOCATION DETAILS ================= */}
-        {step === 2 && (
-          <div className="space-y-6">
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div>
-                <Label en="WhatsApp number" si="WhatsApp අංකය" lang={lang} required={false} />
-                <input
-                  type="tel"
-                  value={form.whatsappNumber}
-                  onChange={(e) => update("whatsappNumber", e.target.value)}
-                  maxLength={24}
-                  placeholder="07X XXX XXXX"
-                  className={inputCls}
-                />
-              </div>
-              <div>
-                <Label en="Residential town" si="පදිංචි නගරය" lang={lang} />
-                <input
-                  type="text"
-                  value={form.residentialTown}
-                  onChange={(e) => update("residentialTown", e.target.value)}
-                  maxLength={100}
-                  placeholder={lang === "si" ? "පදිංචි නගරය" : "Enter your residential town"}
-                  className={inputCls}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label en="Occupation details (optional)" si="රැකියාව පිළිබඳ විස්තර (අනිවාර්ය නොවේ)" lang={lang} required={false} />
-              <OptionGroup
-                name="occupationDetails"
-                options={POINT_OCCUPATION_DETAILED}
-                value={form.occupationDetails}
-                onChange={(v) => update("occupationDetails", v)}
-                lang={lang}
-              />
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="flex flex-col justify-between">
-                <Label en="Knowledge of preferred area" si="කැමති ප්‍රදේශය පිළිබඳ දැනුම" lang={lang} />
-                <OptionGroup
-                  name="knowledgeOfPreferredArea"
-                  options={YES_NO_OPTIONS}
-                  value={form.knowledgeOfPreferredArea}
-                  onChange={(v) => update("knowledgeOfPreferredArea", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
-              <div className="flex flex-col justify-between">
-                <Label en="Existing local business contacts" si="ප්‍රදේශයේ ව්‍යාපාරික සම්බන්ධතා" lang={lang} />
-                <OptionGroup
-                  name="existingLocalContacts"
-                  options={YES_NO_OPTIONS}
-                  value={form.existingLocalContacts}
-                  onChange={(v) => update("existingLocalContacts", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ================= 03: BUSINESS EXPERIENCE ================= */}
-        {step === 3 && (
-          <div className="space-y-6">
-            <div>
-              <Label en="Currently operating a business?" si="දැනට ව්‍යාපාරයක් පවත්වාගෙන යනවාද?" lang={lang} />
-              <OptionGroup
-                name="currentlyOperatingBusiness"
-                options={YES_NO_OPTIONS}
-                value={form.currentlyOperatingBusiness}
-                onChange={(v) => update("currentlyOperatingBusiness", v)}
-                lang={lang}
-                columns="sm:grid-cols-2"
-              />
-            </div>
-
-            <div>
-              <Label en="Years of business experience" si="ව්‍යාපාරික පළපුරුද්ද වසර" lang={lang} />
-              <OptionGroup
-                name="yearsBusinessExperience"
-                options={POINT_YEARS_OPTIONS}
-                value={form.yearsBusinessExperience}
-                onChange={(v) => update("yearsBusinessExperience", v)}
-                lang={lang}
-                columns="sm:grid-cols-2 lg:grid-cols-4"
-              />
-            </div>
-
-            <div>
-              <Label en="Current business type" si="දැනට පවතින ව්‍යාපාර වර්ගය" lang={lang} required={false} />
-              <input
-                type="text"
-                value={form.currentBusinessType}
-                onChange={(e) => update("currentBusinessType", e.target.value)}
-                maxLength={120}
-                placeholder="e.g. Pharmacy, Stationery, Supermarket, Communication"
-                className={inputCls}
-              />
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="flex flex-col justify-between">
-                <Label en="Courier or logistics experience" si="කුරියර් හෝ ප්‍රවාහන පළපුරුද්ද" lang={lang} />
-                <OptionGroup
-                  name="courierLogisticsExperience"
-                  options={YES_NO_OPTIONS}
-                  value={form.courierLogisticsExperience}
-                  onChange={(v) => update("courierLogisticsExperience", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
-              <div className="flex flex-col justify-between">
-                <Label en="Customer service experience" si="පාරිභෝගික සේවා පළපුරුද්ද" lang={lang} />
-                <OptionGroup
-                  name="customerServiceExperience"
-                  options={YES_NO_OPTIONS}
-                  value={form.customerServiceExperience}
-                  onChange={(v) => update("customerServiceExperience", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label en="Computer and mobile app skills" si="පරිගණක හා ජංගම යෙදුම් භාවිත හැකියාව" lang={lang} />
-              <OptionGroup
-                name="computerAppSkills"
-                options={SKILL_LEVEL_OPTIONS}
-                value={form.computerAppSkills}
-                onChange={(v) => update("computerAppSkills", v)}
-                lang={lang}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* ================= 04: FINANCIAL CAPABILITY ================= */}
-        {step === 4 && (
-          <div className="space-y-6">
-            <div className="rounded-2xl border border-brand/25 bg-brand-soft/45 p-4 text-sm font-semibold text-ink">
-              {t(
-                lang,
-                "Investment bands are proposed; align with final fees and working capital requirements.",
-                "ආයෝජන පරාස යෝජිත ඒවාය. අවසාන ගාස්තු හා මෙහෙයුම් ප්‍රාග්ධන අවශ්‍යතා අනුව සකස් කරන්න."
-              )}
-            </div>
-
-            <div>
-              <Label en="Are investment funds ready?" si="ආයෝජන මුදල් සූදානම්ද?" lang={lang} />
-              <OptionGroup
-                name="investmentFundsReady"
-                options={FUNDS_READY_OPTIONS}
-                value={form.investmentFundsReady}
-                onChange={(v) => update("investmentFundsReady", v)}
-                lang={lang}
-              />
-            </div>
-
-            <div>
-              <Label en="Funding source" si="මුදල් ලබාගන්නා මාර්ගය" lang={lang} />
-              <OptionGroup
-                name="fundingSource"
-                options={FUNDING_SOURCE_OPTIONS}
-                value={form.fundingSource}
-                onChange={(v) => update("fundingSource", v)}
-                lang={lang}
-              />
-            </div>
-
-            <div>
-              <Label en="Additional working capital available?" si="අමතර මෙහෙයුම් ප්‍රාග්ධනය තිබේද?" lang={lang} />
-              <OptionGroup
-                name="additionalWorkingCapital"
-                options={WORKING_CAP_OPTIONS}
-                value={form.additionalWorkingCapital}
-                onChange={(v) => update("additionalWorkingCapital", v)}
-                lang={lang}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* ================= 05: BUSINESS PREMISES ================= */}
-        {step === 5 && (
-          <div className="space-y-6">
-            <div>
-              <Label en="Premises size (sq. ft.)" si="ගොඩනැගිල්ලේ ප්‍රමාණය (වර්ග අඩි)" lang={lang} />
-              <OptionGroup
-                name="premisesSize"
-                options={POINT_SIZE_OPTIONS}
-                value={form.premisesSize}
-                onChange={(v) => update("premisesSize", v)}
-                lang={lang}
-                columns="sm:grid-cols-2"
-              />
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="flex flex-col justify-between">
-                <Label en="Main road frontage?" si="ප්‍රධාන මාර්ගයට මුහුණලා තිබේද?" lang={lang} />
-                <OptionGroup
-                  name="mainRoadFrontage"
-                  options={YES_NO_OPTIONS}
-                  value={form.mainRoadFrontage}
-                  onChange={(v) => update("mainRoadFrontage", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
-              <div className="flex flex-col justify-between">
-                <Label en="Parking available?" si="වාහන නැවැත්වීමේ පහසුකම් තිබේද?" lang={lang} />
-                <OptionGroup
-                  name="parkingAvailable"
-                  options={YES_NO_OPTIONS}
-                  value={form.parkingAvailable}
-                  onChange={(v) => update("parkingAvailable", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label en="Existing business at site?" si="එම ස්ථානයේ දැනට ව්‍යාපාරයක් තිබේද?" lang={lang} />
-              <OptionGroup
-                name="existingBusinessAtSite"
-                options={YES_NO_OPTIONS}
-                value={form.existingBusinessAtSite}
-                onChange={(v) => update("existingBusinessAtSite", v)}
-                lang={lang}
-                columns="sm:grid-cols-2"
-              />
-            </div>
-
-            <div>
-              <Label en="Proposed business address" si="යෝජිත ව්‍යාපාරික ලිපිනය" lang={lang} required={false} />
-              <textarea
-                rows={2}
-                value={form.proposedBusinessAddress}
-                onChange={(e) => update("proposedBusinessAddress", e.target.value)}
-                maxLength={400}
-                placeholder="Street address or town landmark"
-                className={inputCls}
-              />
-            </div>
-
-            <div>
-              <Label en="Google Maps location" si="Google Maps ස්ථානය" lang={lang} required={false} />
-              <div className="relative">
-                <MapPin size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/40" />
-                <input
-                  type="text"
-                  value={form.googleMapsLocation}
-                  onChange={(e) => update("googleMapsLocation", e.target.value)}
-                  maxLength={300}
-                  placeholder="Paste Google Maps pin link (optional)"
-                  className={`${inputCls} pl-11`}
-                />
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-black/10 bg-mist/60 p-4 text-xs font-medium text-ink/75">
-              {t(
-                lang,
-                "Identity documents, bank statements, business registration, and building photographs are collected securely after initial review.",
-                "හැඳුනුම්පත්, බැංකු වාර්තා, ව්‍යාපාර ලියාපදිංචි ලේඛන හා ඡායාරූප දෙවැනි අදියරේදී පමණක් ආරක්ෂිතව ලබාගනු ඇත."
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ================= 06: OPERATIONAL COMMITMENT ================= */}
-        {step === 6 && (
-          <div className="space-y-6">
-            <div>
-              <Label en="Who will manage the Point?" si="Point එක කළමනාකරණය කරන්නේ කවුද?" lang={lang} />
-              <OptionGroup
-                name="whoWillManagePoint"
-                options={POINT_MANAGER_OPTIONS}
-                value={form.whoWillManagePoint}
-                onChange={(v) => update("whoWillManagePoint", v)}
-                lang={lang}
-              />
-            </div>
-
-            <div>
-              <Label en="Main or additional business?" si="ප්‍රධාන හෝ අමතර ව්‍යාපාරයක්ද?" lang={lang} />
-              <OptionGroup
-                name="mainOrAdditionalBusiness"
-                options={POINT_BUSINESS_MODE_OPTIONS}
-                value={form.mainOrAdditionalBusiness}
-                onChange={(v) => update("mainOrAdditionalBusiness", v)}
-                lang={lang}
-                columns="sm:grid-cols-2"
-              />
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="flex flex-col justify-between">
-                <Label en="Ready to recruit staff?" si="සේවකයන් බඳවා ගැනීමට සූදානම්ද?" lang={lang} />
-                <OptionGroup
-                  name="readyToRecruitStaff"
-                  options={YES_NO_OPTIONS}
-                  value={form.readyToRecruitStaff}
-                  onChange={(v) => update("readyToRecruitStaff", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
-              <div className="flex flex-col justify-between">
-                <Label en="Can meet required service hours?" si="නියමිත සේවා වේලාවන් පිළිපැදිය හැකිද?" lang={lang} />
-                <OptionGroup
-                  name="canMeetServiceHours"
-                  options={YES_NO_OPTIONS}
-                  value={form.canMeetServiceHours}
-                  onChange={(v) => update("canMeetServiceHours", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="flex flex-col justify-between">
-                <Label en="Willing to complete REDCAT training?" si="REDCAT පුහුණුව සම්පූර්ණ කිරීමට කැමතිද?" lang={lang} />
-                <OptionGroup
-                  name="willingToCompleteTraining"
-                  options={YES_NO_OPTIONS}
-                  value={form.willingToCompleteTraining}
-                  onChange={(v) => update("willingToCompleteTraining", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
-              <div className="flex flex-col justify-between">
-                <Label en="Willing to use REDCAT IT system?" si="REDCAT IT පද්ධතිය භාවිත කිරීමට කැමතිද?" lang={lang} />
-                <OptionGroup
-                  name="willingToUseItSystem"
-                  options={YES_NO_OPTIONS}
-                  value={form.willingToUseItSystem}
-                  onChange={(v) => update("willingToUseItSystem", v)}
-                  lang={lang}
-                  columns="grid-cols-2"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label en="Agree to operational standards?" si="මෙහෙයුම් ප්‍රමිතීන්ට එකඟද?" lang={lang} />
-              <OptionGroup
-                name="agreeOperationalStandards"
-                options={YES_NO_OPTIONS}
-                value={form.agreeOperationalStandards}
-                onChange={(v) => update("agreeOperationalStandards", v)}
-                lang={lang}
-                columns="sm:grid-cols-2"
-              />
-            </div>
-          </div>
-        )}
-
-        {error && (
-          <div
-            role="alert"
-            className="mt-6 flex items-center gap-2.5 rounded-xl border border-brand/30 bg-brand-soft/60 px-4 py-3 text-sm font-bold text-brand-deep"
-          >
-            <AlertCircle size={18} className="shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-black/10 pt-6">
-          {step > 1 ? (
-            <button
-              type="button"
-              onClick={handlePrev}
-              disabled={busy}
-              className="press inline-flex items-center gap-2 rounded-full border-2 border-black/15 px-6 py-3.5 text-sm font-bold text-ink transition hover:border-ink"
+      {/* Form Section */}
+      <section id="apply" className="bg-paper pb-16 pt-6 sm:pb-20 sm:pt-8">
+        <div className="mx-auto max-w-4xl px-5">
+          {receipt ? (
+            <div
+              ref={cardTopRef}
+              className="scroll-mt-24 rounded-[2rem] bg-white p-8 shadow-2xl shadow-black/10 ring-1 ring-black/5 sm:p-12"
             >
-              <ArrowLeft size={16} />
-              {t(lang, "Previous", "පෙර")}
-            </button>
+              <div className="mx-auto max-w-2xl text-center">
+                <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-700">
+                  <CheckCircle2 size={34} />
+                </span>
+                <h3 className="mt-5 text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
+                  {t(lang, "Application Confirmation", "අයදුම්පත ලැබීම තහවුරු කිරීම")}
+                </h3>
+                <div className="mt-6 rounded-2xl border border-black/10 bg-mist p-5 text-left text-sm leading-relaxed text-ink">
+                  {lang === "en" ? (
+                    <p className="font-semibold">
+                      Thank you for applying for a REDCAT Point Franchise. Your application{" "}
+                      <strong className="text-brand">{receipt.rcRef}</strong> for{" "}
+                      <strong>{receipt.point}</strong> has been received and is under review. Our
+                      Franchise Development Team will contact you after reviewing your application.
+                    </p>
+                  ) : (
+                    <p className="font-semibold">
+                      REDCAT Point Franchise සඳහා අයදුම් කිරීම පිළිබඳව ස්තූතියි.{" "}
+                      <strong>{receipt.point}</strong> සඳහා ඔබගේ{" "}
+                      <strong className="text-brand">{receipt.rcRef}</strong> අයදුම්පත ලැබී ඇති
+                      අතර එය සමාලෝචනය වෙමින් පවතී. සමාලෝචනයෙන් පසු අපගේ Franchise Development
+                      කණ්ඩායම ඔබව සම්බන්ධ කරගනු ඇත.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
           ) : (
-            <div />
-          )}
+            <div
+              ref={cardTopRef}
+              className="scroll-mt-24 overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-black/10 ring-1 ring-black/8"
+            >
+              {/* Header */}
+              <div className="border-b border-black/10 bg-mist/60 px-5 py-5 sm:px-8">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-brand">
+                      {step === 1
+                        ? t(lang, "Stage 1 · Initial Application", "පළමු අදියර · මූලික අයදුම්පත")
+                        : t(
+                            lang,
+                            `Stage 2 · Section ${currentSection.code} of 06`,
+                            `දෙවැනි අදියර · කොටස ${currentSection.code} / 06`
+                          )}
+                    </p>
+                    <h2 className="mt-1 text-xl font-extrabold text-ink sm:text-2xl">
+                      {lang === "si" ? currentSection.si : currentSection.en}
+                    </h2>
+                  </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {step === 1 && (
-              <>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => submitApplication("initial")}
-                  className="press inline-flex items-center gap-2 rounded-full border-2 border-ink bg-white px-6 py-3.5 text-sm font-extrabold text-ink transition hover:bg-mist disabled:opacity-50"
-                >
-                  {busy ? <LoaderCircle size={16} className="animate-spin" /> : null}
-                  {t(lang, "Submit Initial Application", "මූලික අයදුම්පත යොමු කරන්න")}
-                </button>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={handleNext}
-                  className="press inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-deep"
-                >
-                  {t(lang, "Continue to Stage 2", "දෙවැනි අදියරට යන්න")}
-                  <ArrowRight size={16} />
-                </button>
-              </>
-            )}
+                  {/* Secondary toggle inside card for convenience */}
+                  <div
+                    role="group"
+                    aria-label="Form language"
+                    className="inline-flex rounded-xl border border-black/10 bg-white p-1 shadow-sm"
+                  >
+                    {(
+                      [
+                        { id: "en", label: "English" },
+                        { id: "si", label: "සිංහල" },
+                      ] as const
+                    ).map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => setLang(m.id)}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                          lang === m.id ? "bg-ink text-white" : "text-ink/65 hover:text-ink"
+                        }`}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            {step > 1 && step < 6 && (
-              <button
-                type="button"
-                onClick={handleNext}
-                className="press inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 text-sm font-bold text-white transition hover:bg-brand"
-              >
-                {t(lang, "Next section", "ඊළඟ")}
-                <ArrowRight size={16} />
-              </button>
-            )}
+                {/* Progress Bar */}
+                <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
+                  <div
+                    className="h-full rounded-full bg-brand transition-all duration-300"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
 
-            {step === 6 && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => submitApplication("detailed")}
-                className="press inline-flex items-center gap-2 rounded-full bg-brand px-8 py-4 text-base font-extrabold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-deep disabled:opacity-60"
-              >
-                {busy ? (
-                  <>
-                    <LoaderCircle size={18} className="animate-spin" />
-                    {t(lang, "Submitting…", "යොමු කරමින්…")}
-                  </>
-                ) : (
-                  <>
-                    {t(lang, "Submit Detailed Application", "සවිස්තර අයදුම්පත යොමු කරන්න")}
-                    <ArrowRight size={18} />
-                  </>
+                {/* Clean 6-Section Step Pills */}
+                <div className="mt-3.5 grid grid-cols-3 gap-2 sm:grid-cols-6">
+                  {POINT_SECTIONS.map((s) => {
+                    const active = s.id === step;
+                    const visited = s.id <= maxVisited;
+                    const done = s.id < step;
+                    const short = SHORT_LABELS[s.id];
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        disabled={!visited}
+                        onClick={() => {
+                          if (visited) {
+                            setStep(s.id);
+                            setError("");
+                          }
+                        }}
+                        className={`flex flex-col items-center justify-center rounded-xl px-2 py-2.5 text-center transition ${
+                          active
+                            ? "bg-brand text-white shadow-sm"
+                            : done
+                            ? "bg-ink text-white"
+                            : visited
+                            ? "bg-white text-ink ring-1 ring-black/15 hover:bg-brand-soft"
+                            : "cursor-not-allowed bg-white/60 text-ink/40 ring-1 ring-black/5"
+                        }`}
+                      >
+                        <span className="text-xs font-extrabold leading-none">{s.code}</span>
+                        <span className="mt-1 text-[11px] font-semibold leading-tight">
+                          {lang === "si" ? short.si : short.en}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Form Body */}
+              <div className="p-5 sm:p-8 lg:p-10">
+                {/* ================= 01: INITIAL ONLINE REGISTRATION ================= */}
+                {step === 1 && (
+                  <div className="space-y-6">
+                    <div>
+                      <Label en="Full name" si="සම්පූර්ණ නම" lang={lang} />
+                      <input
+                        type="text"
+                        value={form.fullName}
+                        onChange={(e) => update("fullName", e.target.value)}
+                        maxLength={120}
+                        placeholder={lang === "si" ? "සම්පූර්ණ නම ඇතුළත් කරන්න" : "Enter your full name"}
+                        className={inputCls}
+                      />
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div>
+                        <Label en="Mobile number" si="ජංගම දුරකථන අංකය" lang={lang} />
+                        <input
+                          type="tel"
+                          value={form.mobileNumber}
+                          onChange={(e) => update("mobileNumber", e.target.value)}
+                          maxLength={24}
+                          placeholder="07X XXX XXXX"
+                          className={inputCls}
+                        />
+                      </div>
+                      <div>
+                        <Label en="Email address" si="විද්‍යුත් තැපැල් ලිපිනය" lang={lang} />
+                        <input
+                          type="email"
+                          value={form.email}
+                          onChange={(e) => update("email", e.target.value)}
+                          maxLength={200}
+                          placeholder="you@example.com"
+                          className={inputCls}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div>
+                        <Label en="Residential district" si="පදිංචි දිස්ත්‍රික්කය" lang={lang} />
+                        <select
+                          value={form.residentialDistrict}
+                          onChange={(e) => update("residentialDistrict", e.target.value)}
+                          className={inputCls}
+                        >
+                          <option value="">{t(lang, "Select district", "දිස්ත්‍රික්කය තෝරන්න")}</option>
+                          {DISTRICTS.map((d) => (
+                            <option key={d} value={d}>
+                              {d}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <Label en="Preferred franchise district" si="කැමති ව්‍යාපාරික දිස්ත්‍රික්කය" lang={lang} />
+                        <select
+                          value={form.preferredDistrict}
+                          onChange={(e) => update("preferredDistrict", e.target.value)}
+                          className={inputCls}
+                        >
+                          <option value="">{t(lang, "Select franchise district", "දිස්ත්‍රික්කය තෝරන්න")}</option>
+                          {DISTRICTS.map((d) => (
+                            <option key={d} value={d}>
+                              {d}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div>
+                        <Label en="Preferred REDCAT Point" si="කැමති REDCAT Point ස්ථානය" lang={lang} />
+                        <input
+                          type="text"
+                          list="point-locations"
+                          value={form.preferredPoint}
+                          onChange={(e) => update("preferredPoint", e.target.value)}
+                          maxLength={100}
+                          placeholder={lang === "si" ? "නගරය ඇතුළත් කරන්න (උදා: හොරණ)" : "Enter town or select (e.g. Horana)"}
+                          className={inputCls}
+                        />
+                        <datalist id="point-locations">
+                          {(districtHubs.length > 0 ? districtHubs : HUBS).map((h) => (
+                            <option key={h.id} value={h.name} />
+                          ))}
+                        </datalist>
+                      </div>
+
+                      <div>
+                        <Label
+                          en="Second preference (optional)"
+                          si="දෙවැනි කැමැත්ත (අනිවාර්ය නොවේ)"
+                          lang={lang}
+                          required={false}
+                        />
+                        <input
+                          type="text"
+                          list="point-locations"
+                          value={form.secondPreference}
+                          onChange={(e) => update("secondPreference", e.target.value)}
+                          maxLength={100}
+                          placeholder={lang === "si" ? "විකල්ප ස්ථානය" : "Alternative town / Point"}
+                          className={inputCls}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label en="Current occupation" si="වර්තමාන රැකියාව" lang={lang} />
+                      <OptionGroup
+                        name="currentOccupation"
+                        options={POINT_OCCUPATION_INITIAL}
+                        value={form.currentOccupation}
+                        onChange={(v) => update("currentOccupation", v)}
+                        lang={lang}
+                        columns="sm:grid-cols-2"
+                      />
+                    </div>
+
+                    <div>
+                      <Label en="Available investment (LKR million)" si="ආයෝජනය කළ හැකි මුදල (රු. මිලියන)" lang={lang} />
+                      <OptionGroup
+                        name="availableInvestment"
+                        options={POINT_INVESTMENT_OPTIONS}
+                        value={form.availableInvestment}
+                        onChange={(v) => update("availableInvestment", v)}
+                        lang={lang}
+                      />
+                    </div>
+
+                    <div>
+                      <Label en="Business premises" si="ව්‍යාපාරික ගොඩනැගිල්ල" lang={lang} />
+                      <OptionGroup
+                        name="businessPremises"
+                        options={POINT_PREMISES_OPTIONS}
+                        value={form.businessPremises}
+                        onChange={(v) => update("businessPremises", v)}
+                        lang={lang}
+                      />
+                    </div>
+
+                    <div>
+                      <Label en="Previous business experience" si="පෙර ව්‍යාපාරික පළපුරුද්ද" lang={lang} />
+                      <OptionGroup
+                        name="previousBusinessExperience"
+                        options={YES_NO_OPTIONS}
+                        value={form.previousBusinessExperience}
+                        onChange={(v) => update("previousBusinessExperience", v)}
+                        lang={lang}
+                        columns="grid-cols-2"
+                      />
+                    </div>
+
+                    <div>
+                      <Label en="When can you start?" si="ආරම්භ කළ හැක්කේ කවදාද?" lang={lang} />
+                      <OptionGroup
+                        name="whenCanYouStart"
+                        options={POINT_START_OPTIONS}
+                        value={form.whenCanYouStart}
+                        onChange={(v) => update("whenCanYouStart", v)}
+                        lang={lang}
+                        columns="sm:grid-cols-2 lg:grid-cols-4"
+                      />
+                    </div>
+
+                    {/* Privacy notice & consents */}
+                    <div className="space-y-3 border-t border-black/10 pt-6">
+                      <p className="text-xs font-semibold text-ink/65">
+                        {t(lang, "Submission does not guarantee approval.", "අයදුම් කිරීම අනුමැතිය සහතික නොකරයි.")}{" "}
+                        <Link href="/dealers/point/application-notice" className="underline hover:text-brand">
+                          {t(lang, "Read Privacy Notice & Terms", "පෞද්ගලිකත්ව නිවේදනය සහ කොන්දේසි කියවන්න")}
+                        </Link>
+                      </p>
+                      <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-black/10 bg-white p-3.5 transition hover:border-black/25">
+                        <input
+                          type="checkbox"
+                          checked={form.agreePrivacyTerms}
+                          onChange={(e) => update("agreePrivacyTerms", e.target.checked)}
+                          className="sr-only"
+                        />
+                        <span
+                          className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border-2 transition ${
+                            form.agreePrivacyTerms ? "border-brand bg-brand text-white" : "border-ink/30 bg-white"
+                          }`}
+                        >
+                          {form.agreePrivacyTerms && <Check size={13} strokeWidth={3} />}
+                        </span>
+                        <span className="text-sm font-semibold text-ink">
+                          {t(
+                            lang,
+                            "I agree to the REDCAT Privacy Notice and Point Franchise Application Terms.",
+                            "REDCAT පෞද්ගලිකත්ව නිවේදනය හා අයදුම්පත් කොන්දේසි සඳහා එකඟ වෙමි."
+                          )}
+                        </span>
+                      </label>
+
+                      <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-black/10 bg-white p-3.5 transition hover:border-black/25">
+                        <input
+                          type="checkbox"
+                          checked={form.agreeContact}
+                          onChange={(e) => update("agreeContact", e.target.checked)}
+                          className="sr-only"
+                        />
+                        <span
+                          className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border-2 transition ${
+                            form.agreeContact ? "border-brand bg-brand text-white" : "border-ink/30 bg-white"
+                          }`}
+                        >
+                          {form.agreeContact && <Check size={13} strokeWidth={3} />}
+                        </span>
+                        <span className="text-sm font-semibold text-ink">
+                          {t(
+                            lang,
+                            "I consent to be contacted by the REDCAT Franchise Development Team regarding my application.",
+                            "මාගේ අයදුම්පත සම්බන්ධයෙන් REDCAT කණ්ඩායම මා හා සම්බන්ධ වීමට එකඟ වෙමි."
+                          )}
+                        </span>
+                      </label>
+                    </div>
+                  </div>
                 )}
-              </button>
-            )}
-          </div>
+
+                {/* ================= 02: PERSONAL & LOCATION DETAILS ================= */}
+                {step === 2 && (
+                  <div className="space-y-6">
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div>
+                        <Label en="WhatsApp number" si="WhatsApp අංකය" lang={lang} required={false} />
+                        <input
+                          type="tel"
+                          value={form.whatsappNumber}
+                          onChange={(e) => update("whatsappNumber", e.target.value)}
+                          maxLength={24}
+                          placeholder="07X XXX XXXX"
+                          className={inputCls}
+                        />
+                      </div>
+                      <div>
+                        <Label en="Residential town" si="පදිංචි නගරය" lang={lang} />
+                        <input
+                          type="text"
+                          value={form.residentialTown}
+                          onChange={(e) => update("residentialTown", e.target.value)}
+                          maxLength={100}
+                          placeholder={lang === "si" ? "පදිංචි නගරය" : "Enter your residential town"}
+                          className={inputCls}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label en="Occupation details (optional)" si="රැකියාව පිළිබඳ විස්තර (අනිවාර්ය නොවේ)" lang={lang} required={false} />
+                      <OptionGroup
+                        name="occupationDetails"
+                        options={POINT_OCCUPATION_DETAILED}
+                        value={form.occupationDetails}
+                        onChange={(v) => update("occupationDetails", v)}
+                        lang={lang}
+                      />
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="flex flex-col justify-between">
+                        <Label en="Knowledge of preferred area" si="කැමති ප්‍රදේශය පිළිබඳ දැනුම" lang={lang} />
+                        <OptionGroup
+                          name="knowledgeOfPreferredArea"
+                          options={YES_NO_OPTIONS}
+                          value={form.knowledgeOfPreferredArea}
+                          onChange={(v) => update("knowledgeOfPreferredArea", v)}
+                          lang={lang}
+                          columns="grid-cols-2"
+                        />
+                      </div>
+                      <div className="flex flex-col justify-between">
+                        <Label en="Existing local business contacts" si="ප්‍රදේශයේ ව්‍යාපාරික සම්බන්ධතා" lang={lang} />
+                        <OptionGroup
+                          name="existingLocalContacts"
+                          options={YES_NO_OPTIONS}
+                          value={form.existingLocalContacts}
+                          onChange={(v) => update("existingLocalContacts", v)}
+                          lang={lang}
+                          columns="grid-cols-2"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ================= 03: BUSINESS EXPERIENCE ================= */}
+                {step === 3 && (
+                  <div className="space-y-6">
+                    <div>
+                      <Label en="Currently operating a business?" si="දැනට ව්‍යාපාරයක් පවත්වාගෙන යනවාද?" lang={lang} />
+                      <OptionGroup
+                        name="currentlyOperatingBusiness"
+                        options={YES_NO_OPTIONS}
+                        value={form.currentlyOperatingBusiness}
+                        onChange={(v) => update("currentlyOperatingBusiness", v)}
+                        lang={lang}
+                        columns="sm:grid-cols-2"
+                      />
+                    </div>
+
+                    <div>
+                      <Label en="Years of business experience" si="ව්‍යාපාරික පළපුරුද්ද වසර" lang={lang} />
+                      <OptionGroup
+                        name="yearsBusinessExperience"
+                        options={POINT_YEARS_OPTIONS}
+                        value={form.yearsBusinessExperience}
+                        onChange={(v) => update("yearsBusinessExperience", v)}
+                        lang={lang}
+                        columns="sm:grid-cols-2 lg:grid-cols-4"
+                      />
+                    </div>
+
+                    <div>
+                      <Label en="Current business type" si="දැනට පවතින ව්‍යාපාර වර්ගය" lang={lang} required={false} />
+                      <input
+                        type="text"
+                        value={form.currentBusinessType}
+                        onChange={(e) => update("currentBusinessType", e.target.value)}
+                        maxLength={120}
+                        placeholder="e.g. Pharmacy, Stationery, Supermarket, Communication"
+                        className={inputCls}
+                      />
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="flex flex-col justify-between">
+                        <Label en="Courier or logistics experience" si="කුරියර් හෝ ප්‍රවාහන පළපුරුද්ද" lang={lang} />
+                        <OptionGroup
+                          name="courierLogisticsExperience"
+                          options={YES_NO_OPTIONS}
+                          value={form.courierLogisticsExperience}
+                          onChange={(v) => update("courierLogisticsExperience", v)}
+                          lang={lang}
+                          columns="grid-cols-2"
+                        />
+                      </div>
+                      <div className="flex flex-col justify-between">
+                        <Label en="Customer service experience" si="පාරිභෝගික සේවා පළපුරුද්ද" lang={lang} />
+                        <OptionGroup
+                          name="customerServiceExperience"
+                          options={YES_NO_OPTIONS}
+                          value={form.customerServiceExperience}
+                          onChange={(v) => update("customerServiceExperience", v)}
+                          lang={lang}
+                          columns="grid-cols-2"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label en="Computer and mobile app skills" si="පරිගණක හා ජංගම යෙදුම් භාවිත හැකියාව" lang={lang} />
+                      <OptionGroup
+                        name="computerAppSkills"
+                        options={SKILL_LEVEL_OPTIONS}
+                        value={form.computerAppSkills}
+                        onChange={(v) => update("computerAppSkills", v)}
+                        lang={lang}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* ================= 04: FINANCIAL CAPABILITY ================= */}
+                {step === 4 && (
+                  <div className="space-y-6">
+                    <div className="rounded-2xl border border-brand/25 bg-brand-soft/45 p-4 text-sm font-semibold text-ink">
+                      {t(
+                        lang,
+                        "Investment bands are proposed; align with final fees and working capital requirements.",
+                        "ආයෝජන පරාස යෝජිත ඒවාය. අවසාන ගාස්තු හා මෙහෙයුම් ප්‍රාග්ධන අවශ්‍යතා අනුව සකස් කරන්න."
+                      )}
+                    </div>
+
+                    <div>
+                      <Label en="Are investment funds ready?" si="ආයෝජන මුදල් සූදානම්ද?" lang={lang} />
+                      <OptionGroup
+                        name="investmentFundsReady"
+                        options={FUNDS_READY_OPTIONS}
+                        value={form.investmentFundsReady}
+                        onChange={(v) => update("investmentFundsReady", v)}
+                        lang={lang}
+                      />
+                    </div>
+
+                    <div>
+                      <Label en="Funding source" si="මුදල් ලබාගන්නා මාර්ගය" lang={lang} />
+                      <OptionGroup
+                        name="fundingSource"
+                        options={FUNDING_SOURCE_OPTIONS}
+                        value={form.fundingSource}
+                        onChange={(v) => update("fundingSource", v)}
+                        lang={lang}
+                      />
+                    </div>
+
+                    <div>
+                      <Label en="Additional working capital available?" si="අමතර මෙහෙයුම් ප්‍රාග්ධනය තිබේද?" lang={lang} />
+                      <OptionGroup
+                        name="additionalWorkingCapital"
+                        options={WORKING_CAP_OPTIONS}
+                        value={form.additionalWorkingCapital}
+                        onChange={(v) => update("additionalWorkingCapital", v)}
+                        lang={lang}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* ================= 05: BUSINESS PREMISES ================= */}
+                {step === 5 && (
+                  <div className="space-y-6">
+                    <div>
+                      <Label en="Premises size (sq. ft.)" si="ගොඩනැගිල්ලේ ප්‍රමාණය (වර්ග අඩි)" lang={lang} />
+                      <OptionGroup
+                        name="premisesSize"
+                        options={POINT_SIZE_OPTIONS}
+                        value={form.premisesSize}
+                        onChange={(v) => update("premisesSize", v)}
+                        lang={lang}
+                        columns="sm:grid-cols-2"
+                      />
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="flex flex-col justify-between">
+                        <Label en="Main road frontage?" si="ප්‍රධාන මාර්ගයට මුහුණලා තිබේද?" lang={lang} />
+                        <OptionGroup
+                          name="mainRoadFrontage"
+                          options={YES_NO_OPTIONS}
+                          value={form.mainRoadFrontage}
+                          onChange={(v) => update("mainRoadFrontage", v)}
+                          lang={lang}
+                          columns="grid-cols-2"
+                        />
+                      </div>
+                      <div className="flex flex-col justify-between">
+                        <Label en="Parking available?" si="වාහන නැවැත්වීමේ පහසුකම් තිබේද?" lang={lang} />
+                        <OptionGroup
+                          name="parkingAvailable"
+                          options={YES_NO_OPTIONS}
+                          value={form.parkingAvailable}
+                          onChange={(v) => update("parkingAvailable", v)}
+                          lang={lang}
+                          columns="grid-cols-2"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label en="Existing business at site?" si="එම ස්ථානයේ දැනට ව්‍යාපාරයක් තිබේද?" lang={lang} />
+                      <OptionGroup
+                        name="existingBusinessAtSite"
+                        options={YES_NO_OPTIONS}
+                        value={form.existingBusinessAtSite}
+                        onChange={(v) => update("existingBusinessAtSite", v)}
+                        lang={lang}
+                        columns="sm:grid-cols-2"
+                      />
+                    </div>
+
+                    <div>
+                      <Label en="Proposed business address" si="යෝජිත ව්‍යාපාරික ලිපිනය" lang={lang} required={false} />
+                      <textarea
+                        rows={2}
+                        value={form.proposedBusinessAddress}
+                        onChange={(e) => update("proposedBusinessAddress", e.target.value)}
+                        maxLength={400}
+                        placeholder="Street address or town landmark"
+                        className={inputCls}
+                      />
+                    </div>
+
+                    <div>
+                      <Label en="Google Maps location" si="Google Maps ස්ථානය" lang={lang} required={false} />
+                      <div className="relative">
+                        <MapPin size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/40" />
+                        <input
+                          type="text"
+                          value={form.googleMapsLocation}
+                          onChange={(e) => update("googleMapsLocation", e.target.value)}
+                          maxLength={300}
+                          placeholder="Paste Google Maps pin link (optional)"
+                          className={`${inputCls} pl-11`}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-black/10 bg-mist/60 p-4 text-xs font-medium text-ink/75">
+                      {t(
+                        lang,
+                        "Identity documents, bank statements, business registration, and building photographs are collected securely after initial review.",
+                        "හැඳුනුම්පත්, බැංකු වාර්තා, ව්‍යාපාර ලියාපදිංචි ලේඛන හා ඡායාරූප දෙවැනි අදියරේදී පමණක් ආරක්ෂිතව ලබාගනු ඇත."
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* ================= 06: OPERATIONAL COMMITMENT ================= */}
+                {step === 6 && (
+                  <div className="space-y-6">
+                    <div>
+                      <Label en="Who will manage the Point?" si="Point එක කළමනාකරණය කරන්නේ කවුද?" lang={lang} />
+                      <OptionGroup
+                        name="whoWillManagePoint"
+                        options={POINT_MANAGER_OPTIONS}
+                        value={form.whoWillManagePoint}
+                        onChange={(v) => update("whoWillManagePoint", v)}
+                        lang={lang}
+                      />
+                    </div>
+
+                    <div>
+                      <Label en="Main or additional business?" si="ප්‍රධාන හෝ අමතර ව්‍යාපාරයක්ද?" lang={lang} />
+                      <OptionGroup
+                        name="mainOrAdditionalBusiness"
+                        options={POINT_BUSINESS_MODE_OPTIONS}
+                        value={form.mainOrAdditionalBusiness}
+                        onChange={(v) => update("mainOrAdditionalBusiness", v)}
+                        lang={lang}
+                        columns="sm:grid-cols-2"
+                      />
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="flex flex-col justify-between">
+                        <Label en="Ready to recruit staff?" si="සේවකයන් බඳවා ගැනීමට සූදානම්ද?" lang={lang} />
+                        <OptionGroup
+                          name="readyToRecruitStaff"
+                          options={YES_NO_OPTIONS}
+                          value={form.readyToRecruitStaff}
+                          onChange={(v) => update("readyToRecruitStaff", v)}
+                          lang={lang}
+                          columns="grid-cols-2"
+                        />
+                      </div>
+                      <div className="flex flex-col justify-between">
+                        <Label en="Can meet required service hours?" si="නියමිත සේවා වේලාවන් පිළිපැදිය හැකිද?" lang={lang} />
+                        <OptionGroup
+                          name="canMeetServiceHours"
+                          options={YES_NO_OPTIONS}
+                          value={form.canMeetServiceHours}
+                          onChange={(v) => update("canMeetServiceHours", v)}
+                          lang={lang}
+                          columns="grid-cols-2"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="flex flex-col justify-between">
+                        <Label en="Willing to complete REDCAT training?" si="REDCAT පුහුණුව සම්පූර්ණ කිරීමට කැමතිද?" lang={lang} />
+                        <OptionGroup
+                          name="willingToCompleteTraining"
+                          options={YES_NO_OPTIONS}
+                          value={form.willingToCompleteTraining}
+                          onChange={(v) => update("willingToCompleteTraining", v)}
+                          lang={lang}
+                          columns="grid-cols-2"
+                        />
+                      </div>
+                      <div className="flex flex-col justify-between">
+                        <Label en="Willing to use REDCAT IT system?" si="REDCAT IT පද්ධතිය භාවිත කිරීමට කැමතිද?" lang={lang} />
+                        <OptionGroup
+                          name="willingToUseItSystem"
+                          options={YES_NO_OPTIONS}
+                          value={form.willingToUseItSystem}
+                          onChange={(v) => update("willingToUseItSystem", v)}
+                          lang={lang}
+                          columns="grid-cols-2"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label en="Agree to operational standards?" si="මෙහෙයුම් ප්‍රමිතීන්ට එකඟද?" lang={lang} />
+                      <OptionGroup
+                        name="agreeOperationalStandards"
+                        options={YES_NO_OPTIONS}
+                        value={form.agreeOperationalStandards}
+                        onChange={(v) => update("agreeOperationalStandards", v)}
+                        lang={lang}
+                        columns="sm:grid-cols-2"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {error && (
+                  <div
+                    role="alert"
+                    className="mt-6 flex items-center gap-2.5 rounded-xl border border-brand/30 bg-brand-soft/60 px-4 py-3 text-sm font-bold text-brand-deep"
+                  >
+                    <AlertCircle size={18} className="shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-black/10 pt-6">
+                  {step > 1 ? (
+                    <button
+                      type="button"
+                      onClick={handlePrev}
+                      disabled={busy}
+                      className="press inline-flex items-center gap-2 rounded-full border-2 border-black/15 px-6 py-3.5 text-sm font-bold text-ink transition hover:border-ink"
+                    >
+                      <ArrowLeft size={16} />
+                      {t(lang, "Previous", "පෙර")}
+                    </button>
+                  ) : (
+                    <div />
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    {step === 1 && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => submitApplication("initial")}
+                          className="press inline-flex items-center gap-2 rounded-full border-2 border-ink bg-white px-6 py-3.5 text-sm font-extrabold text-ink transition hover:bg-mist disabled:opacity-50"
+                        >
+                          {busy ? <LoaderCircle size={16} className="animate-spin" /> : null}
+                          {t(lang, "Submit Initial Application", "මූලික අයදුම්පත යොමු කරන්න")}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={handleNext}
+                          className="press inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-deep"
+                        >
+                          {t(lang, "Continue to Stage 2", "දෙවැනි අදියරට යන්න")}
+                          <ArrowRight size={16} />
+                        </button>
+                      </>
+                    )}
+
+                    {step > 1 && step < 6 && (
+                      <button
+                        type="button"
+                        onClick={handleNext}
+                        className="press inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 text-sm font-bold text-white transition hover:bg-brand"
+                      >
+                        {t(lang, "Next section", "ඊළඟ")}
+                        <ArrowRight size={16} />
+                      </button>
+                    )}
+
+                    {step === 6 && (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => submitApplication("detailed")}
+                        className="press inline-flex items-center gap-2 rounded-full bg-brand px-8 py-4 text-base font-extrabold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-deep disabled:opacity-60"
+                      >
+                        {busy ? (
+                          <>
+                            <LoaderCircle size={18} className="animate-spin" />
+                            {t(lang, "Submitting…", "යොමු කරමින්…")}
+                          </>
+                        ) : (
+                          <>
+                            {t(lang, "Submit Detailed Application", "සවිස්තර අයදුම්පත යොමු කරන්න")}
+                            <ArrowRight size={18} />
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+      </section>
+
+      {/* Selection Workflow (strictly in selected language, zero duplicates) */}
+      <section className="border-t border-black/10 bg-white py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl px-5">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-deep">
+            {t(lang, "Selection workflow", "තෝරාගැනීමේ ක්‍රියාවලිය")}
+          </p>
+          <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-4xl">
+            {t(lang, "How Point partners are selected.", "Point හවුල්කරුවන් තෝරාගන්නා ආකාරය.")}
+          </h2>
+          <p className="mt-2 text-base text-ink/70">
+            {t(
+              lang,
+              "Multiple applicants are welcomed per Point so we can select the most suitable candidate.",
+              "වඩාත් සුදුසු අපේක්ෂකයා තෝරාගැනීම සඳහා එක් Point එකකට අයදුම්කරුවන් කිහිපදෙනෙකුට ඉඩ දෙනු ලැබේ."
+            )}
+          </p>
+
+          <ol className="mt-8 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+            {POINT_SELECTION_WORKFLOW.map((item) => (
+              <li
+                key={item.step}
+                className="flex items-center gap-3 rounded-2xl border border-black/10 bg-mist/50 p-4"
+              >
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand text-xs font-extrabold text-white">
+                  {item.step}
+                </span>
+                <span className="text-sm font-extrabold text-ink">
+                  {lang === "si" ? item.si : item.en}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    </>
   );
 }
