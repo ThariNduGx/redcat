@@ -171,7 +171,7 @@ export default function JobOpenings() {
   const t = CONTENT[lang];
 
   return (
-    <section id="open-positions" className="scroll-mt-20 bg-paper py-20 sm:py-28">
+    <section id="open-positions" lang={lang} className="scroll-mt-20 bg-paper py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-5">
         <Reveal>
           <div className="flex flex-wrap items-end justify-between gap-6 border-b border-black/10 pb-8">
@@ -195,11 +195,12 @@ export default function JobOpenings() {
               </span>
               <div
                 role="group"
-                aria-label="Job description language"
+                aria-label={t.switcherLabel}
                 className="inline-flex items-center rounded-2xl bg-white p-1 border border-black/10 shadow-sm"
               >
                 <button
                   type="button"
+                  lang="en"
                   onClick={() => setLang("en")}
                   aria-pressed={lang === "en"}
                   className={`press flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 ${
@@ -213,6 +214,7 @@ export default function JobOpenings() {
                 </button>
                 <button
                   type="button"
+                  lang="si"
                   onClick={() => setLang("si")}
                   aria-pressed={lang === "si"}
                   className={`press flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 ${

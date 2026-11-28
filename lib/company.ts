@@ -1,3 +1,5 @@
+import { FRANCHISE_OPTIONS_HREF } from "@/lib/site";
+
 // Public-facing company content adapted from the investor proposal, pages 2–8.
 // Employment figures are ambitions for the growing network, not current headcount.
 export const VISION = "To become Sri Lanka’s most trusted and fastest parcel delivery network, connecting every corner of the nation through innovation and service excellence.";
@@ -21,7 +23,7 @@ export const EMPLOYMENT_AMBITIONS = [
 
 export const IMPACT_AREAS = [
   { title: "Work closer to home", body: "As the network grows, RedCat aims to create employment opportunities for people from all walks of life, through local delivery, transport and franchise operations.", href: "/hr", action: "Explore careers" },
-  { title: "Local entrepreneurs", body: "A franchise-powered network gives local business owners a way to operate customer-facing parcel locations, supported by shared technology and coordinated logistics.", href: "/dealers", action: "Explore dealer opportunities" },
+  { title: "Local entrepreneurs", body: "A franchise-powered network gives local business owners a way to operate customer-facing parcel locations, supported by shared technology and coordinated logistics.", href: FRANCHISE_OPTIONS_HREF, action: "Explore dealer opportunities" },
   { title: "Small businesses, wider reach", body: "RedCat aims to connect thousands of small businesses across the island with a reliable, convenient way to distribute their products by the next day.", href: "/contact?topic=Business%20account", action: "Talk about your business" },
 ];
 

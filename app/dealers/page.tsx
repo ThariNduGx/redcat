@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ArrowRight, Footprints, Repeat2, Rocket, Sparkles } from "lucide-react";
+import { Footprints, Repeat2, Rocket, Sparkles } from "lucide-react";
+import LegacyFranchiseLink from "@/components/LegacyFranchiseLink";
 import Reveal from "@/components/Reveal";
 import ArrowLink from "@/components/ui/ArrowLink";
+import { HUB_APPLICATION_HREF, POINT_APPLICATION_HREF } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "RedCat Franchise Opportunities",
@@ -23,7 +25,7 @@ const roles = [
     count: "57 hubs",
     body: "Operate a regional hub that connects express points to RedCat’s overnight delivery network.",
     application: "Full application · English or Sinhala",
-    href: "/dealers/hub-franchise",
+    href: HUB_APPLICATION_HREF,
     action: "Apply for a regional hub",
   },
   {
@@ -32,7 +34,7 @@ const roles = [
     count: "930+ points",
     body: "Run a local RedCat parcel drop-off and collection point from your shop.",
     application: "Initial application · English or Sinhala",
-    href: "/dealers/point/application",
+    href: POINT_APPLICATION_HREF,
     action: "Apply for a RedCat Point",
   },
 ];
@@ -40,6 +42,7 @@ const roles = [
 export default function DealersPage() {
   return (
     <>
+      <LegacyFranchiseLink />
       <section className="rc-grain relative isolate overflow-clip bg-brand pb-24 pt-12 text-white sm:pb-32 sm:pt-16">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 lg:grid-cols-[1.1fr_1fr]">
           <div>
@@ -75,9 +78,9 @@ export default function DealersPage() {
                   <p className="mt-4 border-t border-ink/10 pt-4 text-sm font-semibold text-ink/75">{r.application}</p>
                   <div className="mt-8 flex flex-wrap items-center gap-3">
                     {/* Open intake in a fresh document so site-wide analytics cannot carry across. */}
-                    <a href={r.href} className="press inline-flex min-h-12 items-center gap-2.5 rounded-full bg-ink px-6 py-3.5 text-base font-bold text-white hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-deep">
-                      {r.action}<ArrowRight aria-hidden size={18} className="shrink-0" />
-                    </a>
+                    <ArrowLink documentHref={r.href} className="min-h-12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-deep">
+                      {r.action}
+                    </ArrowLink>
                   </div>
                 </Reveal>
               </li>

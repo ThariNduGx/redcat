@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Logo } from "./Logo";
 import FooterTrack from "./FooterTrack";
-import { CONTACT, FEATURES, NAV } from "@/lib/site";
+import { CONTACT, FEATURES, FRANCHISE_APPLICATION_LINKS, NAV } from "@/lib/site";
 
 // Rendered at build time: the static export bakes in the year it was built
 function Year() {
@@ -32,12 +32,17 @@ export default function Footer() {
           <nav aria-label="Footer">
             <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-brand">Explore</h2>
             <ul className="mt-5 space-y-3">
-              {[...NAV, { href: "/about", label: "About" }, { href: "/dealers", label: "Become a dealer" }].map((item) => (
+              {[...NAV, { href: "/about", label: "About" }].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="group inline-flex items-center gap-2 text-lg font-semibold text-white/80 transition hover:text-white">
                     {item.label}
                     <ArrowRight size={18} className="-translate-x-1 opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100" aria-hidden />
                   </Link>
+                </li>
+              ))}
+              {FRANCHISE_APPLICATION_LINKS.map((item) => (
+                <li key={item.href}>
+                  <a href={item.href} className="text-lg font-semibold text-white/80 transition hover:text-white">{item.label}</a>
                 </li>
               ))}
             </ul>

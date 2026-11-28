@@ -64,6 +64,11 @@ function pointScoreCategories(): array
 function pointQualificationSinhala(): array
 {
     return [
+        'Personal and location details' => 'පෞද්ගලික හා ස්ථාන තොරතුරු',
+        'Business experience' => 'ව්‍යාපාරික පළපුරුද්ද',
+        'Financial capability' => 'මූල්‍ය හැකියාව',
+        'Business premises' => 'ව්‍යාපාරික ස්ථානය',
+        'Operational commitment' => 'මෙහෙයුම් සඳහා කැපවීම',
         'whatsapp' => 'WhatsApp අංකය',
         'residentialTown' => 'පදිංචි නගරය',
         'occupationDetails' => 'රැකියාව පිළිබඳ විස්තර',

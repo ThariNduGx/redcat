@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Reveal from "@/components/Reveal";
 import ArrowLink from "@/components/ui/ArrowLink";
+import { HUB_APPLICATION_HREF, POINT_APPLICATION_HREF } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "REDCAT Point Franchise Opportunity",
@@ -255,7 +256,7 @@ export default function PointFranchisePage() {
 
               {/* CTA Buttons */}
               <div className="mt-8 flex flex-wrap items-center gap-3">
-                <ArrowLink href="#apply" variant="light" className="text-base font-bold shadow-xl">
+                <ArrowLink documentHref={POINT_APPLICATION_HREF} variant="light" className="text-base font-bold shadow-xl">
                   Apply for Franchise
                 </ArrowLink>
                 <ArrowLink
@@ -484,10 +485,10 @@ export default function PointFranchisePage() {
                 </p>
               </div>
               <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
-                <ArrowLink href="#apply" variant="light" className="text-center font-bold">
+                <ArrowLink documentHref={POINT_APPLICATION_HREF} variant="light" className="text-center font-bold">
                   Apply for Your Location
                 </ArrowLink>
-                <ArrowLink href="/dealers" variant="outline" className="border-white/30 text-white hover:bg-white hover:text-ink text-center">
+                <ArrowLink documentHref={HUB_APPLICATION_HREF} variant="outline" className="border-white/30 text-white hover:bg-white hover:text-ink text-center">
                   Explore Hub Options
                 </ArrowLink>
               </div>
@@ -622,7 +623,7 @@ export default function PointFranchisePage() {
                   Pharmacies, stationery shops, supermarkets, communication counters, and bookshops can integrate a RedCat Point directly into their premises—monetizing unused floor space and driving hundreds of new foot-traffic customers weekly.
                 </p>
               </div>
-              <ArrowLink href="#apply" className="shrink-0 font-bold">
+              <ArrowLink documentHref={POINT_APPLICATION_HREF} className="shrink-0 font-bold">
                 Apply for Your Shop
               </ArrowLink>
             </div>
@@ -649,7 +650,7 @@ export default function PointFranchisePage() {
           </div>
 
           <div className="mt-8 text-center">
-            <a href="/dealers/point/application" className="press inline-flex min-h-12 items-center rounded-full bg-white px-6 py-3 font-bold text-ink">
+            <a href={POINT_APPLICATION_HREF} className="press inline-flex min-h-12 items-center rounded-full bg-white px-6 py-3 font-bold text-ink">
               Open the RedCat Point application
             </a>
           </div>

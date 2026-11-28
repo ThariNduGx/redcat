@@ -17,6 +17,13 @@ export const STATS = {
 export const FEATURES = { tracking: false };
 
 export const HUB_MAP_HREF = "/#hubs";
+export const FRANCHISE_OPTIONS_HREF = "/dealers#roles";
+export const HUB_APPLICATION_HREF = "/dealers/hub-franchise";
+export const POINT_APPLICATION_HREF = "/dealers/point/application";
+export const FRANCHISE_APPLICATION_LINKS = [
+  { href: HUB_APPLICATION_HREF, label: "Apply for a regional hub" },
+  { href: POINT_APPLICATION_HREF, label: "Apply for a RedCat Point" },
+];
 
 export function hubMapHref(hubId: string) {
   return `/?hub=${encodeURIComponent(hubId)}#hubs`;
@@ -26,5 +33,6 @@ export const NAV = [
   { href: "/", label: "Home" },
   { href: "/#services", label: "Services" },
   { href: "/hr", label: "Careers" },
+  { href: FRANCHISE_OPTIONS_HREF, label: "Franchise" },
   { href: "/social-impact", label: "Social Impact" },
 ];

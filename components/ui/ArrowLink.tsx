@@ -9,23 +9,26 @@ const variants = {
   brand: "bg-brand text-white hover:bg-ink hover:text-white",
 } as const;
 
+type ArrowLinkProps = { variant?: keyof typeof variants } & (
+  | ComponentProps<typeof Link>
+  | (Omit<ComponentProps<"a">, "href"> & { documentHref: string })
+);
+
 /** Pill link with an arrow that slides on hover and a small press-in on click. */
-export default function ArrowLink({
-  variant = "dark",
-  className = "",
-  children,
-  ...props
-}: ComponentProps<typeof Link> & { variant?: keyof typeof variants }) {
-  return (
-    <Link
-      {...props}
-      className={`press group inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-bold transition-colors duration-200 ${variants[variant]} ${className}`}
-    >
+export default function ArrowLink({ variant = "dark", className = "", children, ...props }: ArrowLinkProps) {
+  const classes = `press group inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-bold transition-colors duration-200 ${variants[variant]} ${className}`;
+  const content = (
+    <>
       {children}
       <span className="relative inline-block h-[18px] w-[18px] overflow-hidden" aria-hidden>
         <ArrowRight size={18} strokeWidth={2.5} className="absolute inset-0 transition-transform duration-300 ease-out group-hover:translate-x-full" />
         <ArrowRight size={18} strokeWidth={2.5} className="absolute inset-0 -translate-x-full transition-transform duration-300 ease-out group-hover:translate-x-0" />
       </span>
-    </Link>
+    </>
   );
+  if ("documentHref" in props) {
+    const { documentHref, ...anchor } = props;
+    return <a {...anchor} href={documentHref} className={classes}>{content}</a>;
+  }
+  return <Link {...props} className={classes}>{content}</Link>;
 }

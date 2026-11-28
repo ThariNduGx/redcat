@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { ArrowUpRight, MapPin, Package, Store } from "lucide-react";
 import EnquiryForm from "@/components/EnquiryForm";
 import CatLoader from "@/components/ui/CatLoader";
-import { CONTACT, FEATURES, HUB_MAP_HREF } from "@/lib/site";
+import { CONTACT, FEATURES, FRANCHISE_OPTIONS_HREF, HUB_MAP_HREF } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 const shortcuts = [
   ...(FEATURES.tracking ? [{ href: "/track", icon: Package, title: "Track a parcel", body: "Live status and route" }] : []),
   { href: HUB_MAP_HREF, icon: MapPin, title: "Find a hub", body: "57 hubs on the map" },
-  { href: "/dealers", icon: Store, title: "Become a dealer", body: "Run RedCat in your town" },
+  { href: FRANCHISE_OPTIONS_HREF, icon: Store, title: "Become a dealer", body: "Run RedCat in your town" },
 ];
 
 export default function ContactPage() {

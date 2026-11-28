@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CornerDownLeft, MapPin, Package, Search } from "lucide-react";
 import { searchHubs } from "@/lib/geo";
-import { FEATURES, NAV, hubMapHref } from "@/lib/site";
+import { FEATURES, FRANCHISE_APPLICATION_LINKS, FRANCHISE_OPTIONS_HREF, NAV, hubMapHref } from "@/lib/site";
 
 export const openPalette = () => window.dispatchEvent(new Event("rc:palette"));
 
@@ -51,15 +51,30 @@ export default function CommandPalette() {
     for (const h of searchHubs(query, 6)) {
       out.push({ key: h.id, label: h.name, hint: `${h.district} District`, icon: "hub", href: hubMapHref(h.id) });
     }
-    const pages = [...NAV, { href: "/about", label: "About" }, { href: "/dealers", label: "Become a dealer" }, { href: "/contact", label: "Contact" }].filter((p) => !query || p.label.toLowerCase().includes(query.toLowerCase()));
-    for (const p of pages) out.push({ key: p.href, label: p.label, hint: "Page", icon: "page", href: p.href });
+    const pages: { href: string; label: string; keywords?: string }[] = [
+      ...NAV.map((item) => item.href === FRANCHISE_OPTIONS_HREF ? { ...item, keywords: "become a dealer" } : item),
+      ...FRANCHISE_APPLICATION_LINKS.map((item) => ({ ...item, keywords: "franchise application" })),
+      { href: "/about", label: "About" },
+      { href: "/contact", label: "Contact" },
+    ];
+    const words = query.toLowerCase().split(/\s+/);
+    for (const page of pages) {
+      const searchable = `${page.label.toLowerCase()} ${page.keywords ?? ""}`;
+      if (words.every((word) => searchable.includes(word))) {
+        out.push({ key: page.href, label: page.label, hint: "Page", icon: "page", href: page.href });
+      }
+    }
     return out;
   }, [q]);
 
   const go = (item?: Item) => {
     if (!item) return;
     ref.current?.close();
-    router.push(item.href);
+    if (FRANCHISE_APPLICATION_LINKS.some(({ href }) => href === item.href)) {
+      window.location.assign(item.href);
+    } else {
+      router.push(item.href);
+    }
   };
 
   return (

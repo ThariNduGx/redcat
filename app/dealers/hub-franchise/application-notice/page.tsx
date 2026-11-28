@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import FranchiseApplicationNotice, { FranchiseNoticeContent } from "@/components/FranchiseApplicationNotice";
 import schema from "@/infra/cpanel-hub-franchise/application-schema.json";
 
 export const metadata: Metadata = {
@@ -27,22 +29,16 @@ const clauses = [
   },
 ];
 
+const title = {
+  en: "Hub Franchise Privacy Notice and Application Terms",
+  si: "පෞද්ගලිකත්ව නිවේදනය සහ අයදුම්පත් කොන්දේසි",
+};
+
 export default function ApplicationNotice() {
+  const notice = { title, clauses, version: schema.termsVersion };
   return (
-    <article className="mx-auto max-w-3xl space-y-8 px-5 py-12 sm:py-20">
-      <header className="border-b border-ink/20 pb-6">
-        <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">Hub Franchise Privacy Notice and Application Terms</h1>
-        <p lang="si" className="mt-3 text-lg font-bold">පෞද්ගලිකත්ව නිවේදනය සහ අයදුම්පත් කොන්දේසි</p>
-        <p className="mt-3 text-sm text-ink/70">Version {schema.termsVersion}</p>
-      </header>
-      {clauses.map((clause) => (
-        <section key={clause.en} className="space-y-3 leading-relaxed">
-          <h2 className="text-xl font-bold">{clause.en} <span lang="si" className="block text-base text-ink/75">{clause.si}</span></h2>
-          <p>{clause.text}</p>
-          <p lang="si">{clause.translation}</p>
-        </section>
-      ))}
-      <a href="/contact" className="inline-flex min-h-12 items-center font-bold underline underline-offset-4">Contact RedCat <span lang="si" className="ml-2">RedCat අමතන්න</span></a>
-    </article>
+    <Suspense fallback={<FranchiseNoticeContent {...notice} lang="en" />}>
+      <FranchiseApplicationNotice {...notice} />
+    </Suspense>
   );
 }

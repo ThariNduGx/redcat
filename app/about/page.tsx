@@ -1,4 +1,4 @@
-import { HUB_MAP_HREF } from "@/lib/site";
+import { FRANCHISE_OPTIONS_HREF, HUB_MAP_HREF } from "@/lib/site";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
@@ -41,7 +41,7 @@ export default function AboutPage() {
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <ArrowLink href={HUB_MAP_HREF} variant="light">Explore network</ArrowLink>
-              <ArrowLink href="/dealers" variant="outline" className="text-white hover:bg-white hover:text-ink">
+              <ArrowLink href={FRANCHISE_OPTIONS_HREF} variant="outline" className="text-white hover:bg-white hover:text-ink">
                 Become a dealer
               </ArrowLink>
             </div>
@@ -244,7 +244,7 @@ export default function AboutPage() {
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <ArrowLink href={HUB_MAP_HREF}>See the network</ArrowLink>
-                <ArrowLink href="/dealers" variant="brand">Become a dealer</ArrowLink>
+                <ArrowLink href={FRANCHISE_OPTIONS_HREF} variant="brand">Become a dealer</ArrowLink>
               </div>
             </div>
           </div>

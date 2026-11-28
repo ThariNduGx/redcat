@@ -7,7 +7,8 @@ header('X-Frame-Options: DENY');
 header('X-Robots-Tag: noindex, nofollow');
 header('Referrer-Policy: no-referrer');
 $nonce = base64_encode(random_bytes(18));
-header("Content-Security-Policy: default-src 'none'; style-src 'nonce-$nonce'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+$languageScript = ($_GET['type'] ?? null) === 'point' && isset($_GET['id']) ? " script-src 'nonce-$nonce';" : '';
+header("Content-Security-Policy: default-src 'none'; style-src 'nonce-$nonce';$languageScript form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
 
 function fail(int $status, string $message): never
 {
@@ -225,6 +226,7 @@ function displayAnswer(mixed $value): string
     .action,.tabs a,.tabs span,.pager a{min-height:2.75rem;display:inline-flex;align-items:center;justify-content:center}
     .action{border:1px solid var(--line);border-radius:.65rem;background:white;color:var(--ink);padding:.55rem .85rem;font:inherit;font-weight:650;text-decoration:none;cursor:pointer}
     .action:hover{background:#eef2f7}
+    .action[aria-pressed=true]{background:var(--ink);color:white}
     .sign-out{border-color:transparent;color:var(--brand)}
     .tabs{display:flex;flex-wrap:wrap;gap:0 1.25rem;border-top:1px solid var(--line);font-size:.9rem;font-weight:650}
     .tabs a,.tabs span{padding-inline:.1rem;border-bottom:2px solid transparent;color:var(--muted);text-decoration:none}
@@ -345,6 +347,10 @@ function displayAnswer(mixed $value): string
         <input type="hidden" name="revision" value="<?= h($application['revision']) ?>">
         <div class="content-heading">
           <div><h2>Qualification interview</h2><p class="muted">Save a draft at any time. Complete the interview before entering scores.</p></div>
+          <div id="interview-language" role="group" aria-label="Interview language" hidden>
+            <button class="action" type="button" data-language="en" lang="en" aria-pressed="true">English</button>
+            <button class="action" type="button" data-language="si" lang="si" aria-pressed="false">සිංහල</button>
+          </div>
         </div>
         <?php if (($_GET['saved'] ?? null) === '1'): ?><p class="success" role="status">Qualification saved.</p><?php endif; ?>
         <section class="panel">
@@ -363,16 +369,16 @@ function displayAnswer(mixed $value): string
         <?php $sinhala = pointQualificationSinhala(); ?>
         <?php foreach (pointQualificationSections() as $heading => $fields): ?>
           <section class="panel">
-            <h2><?= h($heading) ?></h2>
+            <h2 data-si="<?= h($sinhala[$heading]) ?>"><?= h($heading) ?></h2>
             <div class="fields">
               <?php foreach ($fields as $key => $rule): [$label, $type] = $rule; $value = $qualification[$key] ?? ''; ?>
                 <label>
-                  <span><?= h($label) ?><?= empty($rule[3]) ? '' : ' (optional)' ?><br><span class="muted" lang="si"><?= h($sinhala[$key]) ?></span></span>
+                  <span data-si="<?= h($sinhala[$key] . (empty($rule[3]) ? '' : ' (විකල්ප)')) ?>"><?= h($label) ?><?= empty($rule[3]) ? '' : ' (optional)' ?></span>
                   <?php if ($type === 'select'): ?>
                     <select name="answers[<?= h($key) ?>]">
-                      <option value="">Select an answer</option>
+                      <option value="" data-si="පිළිතුරක් තෝරන්න">Select an answer</option>
                       <?php foreach ($rule[2] as $option): ?>
-                        <option value="<?= h($option) ?>"<?= $value === $option ? ' selected' : '' ?>><?= h($option . (isset($sinhala[$option]) ? ' / ' . $sinhala[$option] : '')) ?></option>
+                        <option value="<?= h($option) ?>"<?= $value === $option ? ' selected' : '' ?> data-si="<?= h($sinhala[$option] ?? $option) ?>"><?= h($option) ?></option>
                       <?php endforeach; ?>
                     </select>
                   <?php else: ?>
@@ -464,5 +470,25 @@ function displayAnswer(mixed $value): string
     </nav>
   <?php endif; ?>
 </main>
+<?php if ($isPoint && $id !== null): ?>
+  <script nonce="<?= h($nonce) ?>">
+    const languageControls = document.getElementById('interview-language');
+    const languageButtons = languageControls.querySelectorAll('[data-language]');
+    const labels = Array.from(document.querySelectorAll('#qualification [data-si]'), element => [element, element.textContent]);
+    for (const button of languageButtons) {
+      button.addEventListener('click', () => {
+        const language = button.dataset.language;
+        for (const [element, english] of labels) {
+          element.textContent = language === 'si' ? element.dataset.si : english;
+          element.lang = language;
+        }
+        for (const toggle of languageButtons) {
+          toggle.setAttribute('aria-pressed', String(toggle === button));
+        }
+      });
+    }
+    languageControls.hidden = false;
+  </script>
+<?php endif; ?>
 </body>
 </html>

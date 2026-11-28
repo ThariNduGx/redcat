@@ -6,6 +6,7 @@ import hubSchema from "@/infra/cpanel-hub-franchise/application-schema.json";
 import pointSchema from "@/infra/cpanel-hub-franchise/point-application-schema.json";
 import catalog from "@/infra/cpanel-hub-franchise/hub-catalog.json";
 import { HUB_FRANCHISE_CPANEL_URL } from "@/lib/hubFranchise";
+import { POINT_FRANCHISE_CPANEL_URL } from "@/lib/pointFranchise";
 
 type Lang = "en" | "si";
 type Copy = { en: string; si: string };
@@ -23,7 +24,6 @@ type FormError = Copy & { key?: string };
 type Section = Copy & { id: number; fields: Field[] };
 const hubSections: Section[] = hubSchema.sections;
 const pointSections: Section[] = pointSchema.sections;
-const pointEndpoint = process.env.NEXT_PUBLIC_POINT_FRANCHISE_CPANEL_URL || "https://apply.bestproducts.lk/point-apply.php";
 const button = "inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-deep disabled:opacity-40";
 const input = "block min-h-12 w-full min-w-0 scroll-mt-24 rounded-xl border border-ink/35 bg-white px-3 py-2.5 text-base text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep aria-invalid:border-brand-deep";
 const links = "font-semibold underline decoration-current underline-offset-4 hover:text-brand-deep";
@@ -179,6 +179,7 @@ export default function FranchiseApplication({
   const [answers, setAnswers] = useState(() => startAnswers(sections));
   const [internalLang, setInternalLang] = useState<Lang>("en");
   const lang = controlledLang ?? internalLang;
+  const noticeHref = `/dealers/${isHub ? "hub-franchise" : "point"}/application-notice?lang=${lang}`;
   const setLang = (next: Lang) => {
     setInternalLang(next);
     onLangChange?.(next);
@@ -196,9 +197,8 @@ export default function FranchiseApplication({
   const section = step === reviewStep ? null : sections[step === declarationStep ? reviewStep - 1 : step - 1];
 
   useEffect(() => {
-    if (isHub) {
-      try { sessionStorage.removeItem("redcat_hub_franchise_draft_v1"); } catch { /* Storage may be unavailable. */ }
-    }
+    const key = isHub ? "redcat_hub_franchise_draft_v1" : "redcat_point_franchise_draft_v1";
+    try { sessionStorage.removeItem(key); } catch { /* Storage may be unavailable. */ }
   }, [isHub]);
 
   useEffect(() => {
@@ -274,7 +274,7 @@ export default function FranchiseApplication({
     try {
       const id = attempt ?? crypto.randomUUID();
       setAttempt(id);
-      const response = await fetch(isHub ? HUB_FRANCHISE_CPANEL_URL : pointEndpoint, {
+      const response = await fetch(isHub ? HUB_FRANCHISE_CPANEL_URL : POINT_FRANCHISE_CPANEL_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, termsVersion: schema.termsVersion, ...answers }),
@@ -349,7 +349,7 @@ export default function FranchiseApplication({
         {!receipt && (
           <>
             <progress aria-label={show(lang, "Application progress", "අයදුම්පතේ ප්‍රගතිය")} value={step} max={declarationStep} className="mt-4 block h-1.5 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:bg-brand [&::-webkit-progress-bar]:bg-ink/10 [&::-webkit-progress-value]:bg-brand" />
-            <div className="mt-3 grid grid-cols-6 gap-1.5 sm:grid-cols-11">
+            <div className={`mt-3 grid gap-1.5 ${isHub ? "grid-cols-6 sm:grid-cols-11" : "grid-cols-5"}`}>
               {Array.from({ length: declarationStep }, (_, i) => i + 1).map((n) => {
                 const active = n === step;
                 const done = n < step;
@@ -358,7 +358,12 @@ export default function FranchiseApplication({
                     key={n}
                     type="button"
                     disabled={n > step}
-                    onClick={() => n < step && go(n)}
+                    onClick={() => {
+                      if (n >= step) return;
+                      setEditing(false);
+                      go(n);
+                    }}
+                    aria-current={active ? "step" : undefined}
                     className={`rounded-lg py-1.5 text-[11px] font-extrabold transition ${
                       active
                         ? "bg-brand text-white shadow-sm"
@@ -393,7 +398,7 @@ export default function FranchiseApplication({
           {step === declarationStep && (
             <div className="space-y-3 rounded-xl bg-mist p-4 text-sm leading-relaxed">
               <p><Text lang={lang} en="I confirm that the information is accurate to the best of my knowledge. Submission does not guarantee approval or reservation." si="මා ලබා දුන් තොරතුරු මාගේ දැනුම අනුව නිවැරදි බව තහවුරු කරමි. අයදුම්පත යොමු කිරීමෙන් අනුමැතිය හෝ වෙන් කිරීම සහතික නොවේ." /></p>
-              <a href={isHub ? "/dealers/hub-franchise/application-notice" : "/dealers/point/application-notice"} target="_blank" rel="noopener" className={links}><Text lang={lang} en="Read the privacy notice and application terms (opens in a new tab)" si="පෞද්ගලිකත්ව නිවේදනය සහ අයදුම්පත් කොන්දේසි කියවන්න (නව ටැබයක විවෘත වේ)" /></a>
+              <a href={noticeHref} target="_blank" rel="noopener" className={links}><Text lang={lang} en="Read the privacy notice and application terms (opens in a new tab)" si="පෞද්ගලිකත්ව නිවේදනය සහ අයදුම්පත් කොන්දේසි කියවන්න (නව ටැබයක විවෘත වේ)" /></a>
             </div>
           )}
           {section ? (

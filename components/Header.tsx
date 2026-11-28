@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useScroll, useSpring } from "motion/react";
 import { ArrowRight, Search } from "lucide-react";
 import { Logo } from "./Logo";
-import { NAV } from "@/lib/site";
+import { FRANCHISE_OPTIONS_HREF, NAV } from "@/lib/site";
 import { openPalette } from "./CommandPalette";
 
 export default function Header() {
@@ -46,7 +46,9 @@ export default function Header() {
 
         <nav aria-label="Main" className="hidden items-center gap-0.5 xl:flex">
           {NAV.map((item) => {
-            const active = pathname === item.href;
+            const active = item.href === FRANCHISE_OPTIONS_HREF
+              ? pathname === "/dealers" || pathname.startsWith("/dealers/")
+              : pathname === item.href;
             return (
               <Link
                 key={item.href}

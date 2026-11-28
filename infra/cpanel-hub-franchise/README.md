@@ -18,3 +18,7 @@ The hub catalog is shared by the map, form and server validation. Update the cat
 3. Deploy the Next.js static export with the updated Dealers page, the Point application and its privacy notice. The Point intake endpoint defaults to `https://apply.bestproducts.lk/point-apply.php`. To test another endpoint set `NEXT_PUBLIC_POINT_FRANCHISE_CPANEL_URL` at frontend build time. The browser's website origin must be in the private franchise config's `allowed_origins` list.
 4. Approve the Point privacy notice and terms before opening registrations. Applicants enter a preferred town or area. Staff confirm location availability and can record manual mobile confirmation in the interview. SMS verification and an availability catalog require service credentials and approved Point data. Staff can record the selection stage, enter scores and store premises photos and verification PDFs behind the existing sign-in. Point CSV exports omit documents and photos.
 5. In staging, submit a synthetic Point registration, open it from the Point Franchise tab, save a qualification and verify the CSV. Test a regional Hub submission through its existing form as well.
+
+The public Point form issues a receipt only after the cPanel API confirms a database save. Qualification happens in the staff dashboard.
+
+If you previously imported the SQL from the removed `infra/cpanel-point-franchise` directory, check the existing Point table before importing this one. The earlier schema used `rc_ref` and `stage_mode`. Preserve and migrate those records before switching to the shared backend.

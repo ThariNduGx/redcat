@@ -19,25 +19,25 @@ type Lang = "en" | "si";
 const HIGHLIGHTS = [
   {
     icon: Wallet,
-    title: "LKR 2–2.5M",
+    value: { en: "LKR 2–2.5M", si: "රු. මිලියන 2–2.5" },
     en: "Proposed franchise fee",
     si: "යෝජිත ගාස්තුව (රු. මිලියන)",
   },
   {
     icon: Building2,
-    title: "1,500+ sq. ft.",
+    value: { en: "1,500+ sq. ft.", si: "වර්ග අඩි 1,500+" },
     en: "Minimum Hub space",
     si: "අවම ඉඩකඩ (වර්ග අඩි)",
   },
   {
     icon: Clock,
-    title: "5–10 AM · 5–9 PM",
+    value: { en: "5–10 AM · 5–9 PM", si: "පෙ.ව. 5–10 · ප.ව. 5–9" },
     en: "Morning & evening shifts",
     si: "උදෑසන හා සවස මෙහෙයුම්",
   },
   {
     icon: GraduationCap,
-    title: "10–20 Points",
+    value: { en: "10–20 Points", si: "සේවා ස්ථාන 10–20" },
     en: "Per regional hub",
     si: "එක් ප්‍රාදේශීය Hub එකකට",
   },
@@ -48,19 +48,18 @@ export default function HubFranchisePageView() {
   const t = (en: string, si: string) => (lang === "si" ? si : en);
 
   return (
-    <>
+    <div lang={lang}>
       {/* Hero */}
       <section className="rc-grain relative isolate overflow-clip bg-brand pb-16 pt-10 text-white sm:pb-24 sm:pt-14">
         <div className="mx-auto max-w-6xl px-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-white">
               <span className="h-2 w-2 rounded-full bg-brand" />
-              YOUR BUSINESS. OUR TECHNOLOGY. OUR EQUIPMENT. OUR NETWORK.
+              {t("Your business. Our technology. Our equipment. Our network.", "ඔබේ ව්‍යාපාරය. අපේ තාක්ෂණය. අපේ උපකරණ. අපේ ජාලය.")}
             </p>
 
-            {/* Single-language switcher controlling the entire page */}
-            <div className="flex items-center gap-2 rounded-2xl bg-black/20 p-1.5 backdrop-blur-sm">
-              <Languages size={15} className="ml-1.5 text-white/80" />
+            <div role="group" aria-label={t("Application language", "අයදුම්පතේ භාෂාව")} className="flex items-center gap-2 rounded-2xl bg-black/20 p-1.5 backdrop-blur-sm">
+              <Languages aria-hidden size={15} className="ml-1.5 text-white/80" />
               {(
                 [
                   { id: "en", label: "English" },
@@ -70,6 +69,8 @@ export default function HubFranchisePageView() {
                 <button
                   key={m.id}
                   type="button"
+                  lang={m.id}
+                  aria-pressed={lang === m.id}
                   onClick={() => setLang(m.id)}
                   className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${
                     lang === m.id
@@ -105,7 +106,7 @@ export default function HubFranchisePageView() {
               <ArrowRight size={16} />
             </a>
             <Link
-              href="/dealers/hub-franchise/application-notice"
+              href={`/dealers/hub-franchise/application-notice?lang=${lang}`}
               className="text-sm font-semibold text-white/90 underline underline-offset-4 hover:text-white"
             >
               {t("Privacy notice and terms", "පෞද්ගලිකත්ව නිවේදනය සහ කොන්දේසි")}
@@ -115,7 +116,7 @@ export default function HubFranchisePageView() {
           <dl className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {HIGHLIGHTS.map((item) => (
               <div
-                key={item.title}
+                key={item.en}
                 className="rounded-2xl border border-white/15 bg-black/15 p-4 backdrop-blur-sm"
               >
                 <div className="flex items-center gap-2 text-brand-soft">
@@ -125,7 +126,7 @@ export default function HubFranchisePageView() {
                   </dt>
                 </div>
                 <dd className="mt-1 text-xl font-extrabold tracking-tight text-white sm:text-2xl">
-                  {item.title}
+                  {item.value[lang]}
                 </dd>
               </div>
             ))}
@@ -199,6 +200,6 @@ export default function HubFranchisePageView() {
           </ol>
         </div>
       </section>
-    </>
+    </div>
   );
 }
