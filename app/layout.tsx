@@ -27,7 +27,14 @@ export const metadata: Metadata = {
   },
   description:
     "RedCat is Sri Lanka's next day delivery network: 57 regional hubs across 25 districts and 930+ express points.",
-  icons: { icon: "/brand/mascot-peek.svg" },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/brand/favicon.svg", type: "image/svg+xml" },
+      { url: "/brand/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   openGraph: {
     type: "website",
     locale: "en_LK",
